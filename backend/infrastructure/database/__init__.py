@@ -1,0 +1,1 @@
+# Database infrastructure - Django models and repository implementations 

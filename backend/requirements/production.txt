@@ -1,0 +1,15 @@
+-r base.txt
+
+# Production Server
+gunicorn==21.2.0
+gevent==23.9.1
+
+# Production Database
+psycopg2-binary==2.9.7
+
+# Production Monitoring
+sentry-sdk==1.38.0
+newrelic==9.1.0
+
+# Security
+django-secure==1.0.2 
