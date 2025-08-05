@@ -6,13 +6,15 @@ Defines business logic and orchestration for receipt operations.
 import uuid
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from decimal import Decimal
 
 from domain.receipts.entities import (
     Receipt, ReceiptStatus, ReceiptType, FileInfo, OCRData, ReceiptMetadata
 )
 from domain.receipts.repositories import ReceiptRepository
 from domain.receipts.services import (
-    FileValidationService, ReceiptValidationService, ReceiptBusinessService
+    FileValidationService, ReceiptValidationService, ReceiptBusinessService,
+    ReceiptDataEnrichmentService
 )
 from domain.accounts.entities import User
 from infrastructure.storage.services import FileStorageService
@@ -50,6 +52,7 @@ class ReceiptUploadUseCase:
             filename: Name of the file
             mime_type: MIME type of the file
             receipt_type: Type of receipt
+            ocr_method: OCR method to use
             
         Returns:
             Dictionary with result information
@@ -196,6 +199,394 @@ class ReceiptUploadUseCase:
             return {
                 'success': False,
                 'error': f"OCR processing error: {str(e)}"
+            }
+
+
+class ReceiptReprocessUseCase:
+    """Use case for reprocessing receipts with different OCR methods."""
+    
+    def __init__(self,
+                 receipt_repository: ReceiptRepository,
+                 ocr_service: OCRService,
+                 receipt_business_service: ReceiptBusinessService,
+                 receipt_validation_service: ReceiptValidationService):
+        self.receipt_repository = receipt_repository
+        self.ocr_service = ocr_service
+        self.receipt_business_service = receipt_business_service
+        self.receipt_validation_service = receipt_validation_service
+    
+    def execute(self, 
+                receipt_id: str, 
+                user: User, 
+                ocr_method: OCRMethod) -> Dict[str, Any]:
+        """
+        Reprocess receipt with different OCR method.
+        
+        Args:
+            receipt_id: ID of the receipt to reprocess
+            user: The user requesting reprocessing
+            ocr_method: OCR method to use
+            
+        Returns:
+            Dictionary with reprocessing result
+        """
+        try:
+            # Get receipt by ID
+            receipt = self.receipt_repository.find_by_id(receipt_id)
+            
+            if not receipt:
+                return {
+                    'success': False,
+                    'error': 'Receipt not found'
+                }
+            
+            # Check if user owns the receipt
+            if receipt.user.id != user.id:
+                return {
+                    'success': False,
+                    'error': 'Access denied'
+                }
+            
+            # Update status to processing
+            receipt.status = ReceiptStatus.PROCESSING
+            self.receipt_repository.save(receipt)
+            
+            # Extract OCR data with specified method
+            ocr_success, ocr_data, ocr_error = self.ocr_service.extract_receipt_data_from_url(
+                receipt.file_info.file_url, ocr_method
+            )
+            
+            if ocr_success and ocr_data:
+                # Validate OCR data
+                is_valid, validation_errors = self.receipt_validation_service.validate_ocr_data(ocr_data)
+                
+                if is_valid:
+                    # Process OCR data and update receipt
+                    receipt.process_ocr_data(ocr_data)
+                    
+                    # Suggest category based on business rules
+                    suggested_category = self.receipt_business_service.suggest_category(receipt)
+                    if suggested_category:
+                        receipt.metadata.category = suggested_category
+                    
+                    # Determine if it's a business expense
+                    is_business_expense = self.receipt_business_service.is_business_expense(receipt)
+                    receipt.metadata.is_business_expense = is_business_expense
+                    
+                    # Save updated receipt
+                    self.receipt_repository.save(receipt)
+                    
+                    return {
+                        'success': True,
+                        'receipt_id': receipt_id,
+                        'ocr_method': ocr_method.value,
+                        'ocr_data': {
+                            'merchant_name': ocr_data.merchant_name,
+                            'total_amount': str(ocr_data.total_amount) if ocr_data.total_amount else None,
+                            'currency': ocr_data.currency,
+                            'date': ocr_data.date.isoformat() if ocr_data.date else None,
+                            'confidence_score': ocr_data.confidence_score
+                        }
+                    }
+                else:
+                    # OCR data validation failed
+                    receipt.mark_as_failed(f"OCR data validation failed: {', '.join(validation_errors)}")
+                    self.receipt_repository.save(receipt)
+                    
+                    return {
+                        'success': False,
+                        'error': f"OCR data validation failed: {', '.join(validation_errors)}"
+                    }
+            else:
+                # OCR processing failed
+                receipt.mark_as_failed(f"OCR processing failed: {ocr_error}")
+                self.receipt_repository.save(receipt)
+                
+                return {
+                    'success': False,
+                    'error': f"OCR processing failed: {ocr_error}"
+                }
+                
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Receipt reprocessing failed: {str(e)}'
+            }
+
+
+class ReceiptValidateUseCase:
+    """Use case for validating and correcting receipt data."""
+    
+    def __init__(self,
+                 receipt_repository: ReceiptRepository,
+                 receipt_validation_service: ReceiptValidationService,
+                 receipt_enrichment_service: ReceiptDataEnrichmentService):
+        self.receipt_repository = receipt_repository
+        self.receipt_validation_service = receipt_validation_service
+        self.receipt_enrichment_service = receipt_enrichment_service
+    
+    def execute(self, 
+                receipt_id: str, 
+                user: User, 
+                corrections: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Validate and correct receipt data.
+        
+        Args:
+            receipt_id: ID of the receipt to validate
+            user: The user requesting validation
+            corrections: Dictionary of corrections to apply
+            
+        Returns:
+            Dictionary with validation result
+        """
+        try:
+            # Get receipt by ID
+            receipt = self.receipt_repository.find_by_id(receipt_id)
+            
+            if not receipt:
+                return {
+                    'success': False,
+                    'error': 'Receipt not found'
+                }
+            
+            # Check if user owns the receipt
+            if receipt.user.id != user.id:
+                return {
+                    'success': False,
+                    'error': 'Access denied'
+                }
+            
+            if not receipt.ocr_data:
+                return {
+                    'success': False,
+                    'error': 'No OCR data available for validation'
+                }
+            
+            # Apply corrections to OCR data
+            if 'merchant_name' in corrections:
+                receipt.ocr_data.merchant_name = corrections['merchant_name']
+            
+            if 'total_amount' in corrections:
+                try:
+                    receipt.ocr_data.total_amount = Decimal(str(corrections['total_amount']))
+                except (ValueError, TypeError):
+                    return {
+                        'success': False,
+                        'error': 'Invalid total amount format'
+                    }
+            
+            if 'date' in corrections:
+                try:
+                    if isinstance(corrections['date'], str):
+                        parsed_date, error = self.receipt_enrichment_service.extract_and_validate_date(corrections['date'])
+                        if parsed_date:
+                            receipt.ocr_data.date = parsed_date
+                        else:
+                            return {
+                                'success': False,
+                                'error': f'Invalid date format: {error}'
+                            }
+                    else:
+                        receipt.ocr_data.date = corrections['date']
+                except Exception as e:
+                    return {
+                        'success': False,
+                        'error': f'Invalid date format: {str(e)}'
+                    }
+            
+            # Validate corrected OCR data
+            is_valid, validation_errors = self.receipt_validation_service.validate_ocr_data(receipt.ocr_data)
+            
+            if is_valid:
+                # Get suggestions for further improvements
+                suggestions = self.receipt_validation_service.suggest_corrections(receipt.ocr_data)
+                
+                # Calculate data quality score
+                quality_score = self.receipt_validation_service.calculate_data_quality_score(receipt.ocr_data)
+                
+                # Save updated receipt
+                self.receipt_repository.save(receipt)
+                
+                return {
+                    'success': True,
+                    'receipt_id': receipt_id,
+                    'validation_errors': [],
+                    'suggestions': suggestions,
+                    'quality_score': quality_score,
+                    'message': 'Receipt data validated and corrected successfully'
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': 'Validation failed',
+                    'validation_errors': validation_errors
+                }
+                
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Receipt validation failed: {str(e)}'
+            }
+
+
+class ReceiptCategorizeUseCase:
+    """Use case for auto-categorizing receipts."""
+    
+    def __init__(self,
+                 receipt_repository: ReceiptRepository,
+                 receipt_business_service: ReceiptBusinessService,
+                 receipt_enrichment_service: ReceiptDataEnrichmentService):
+        self.receipt_repository = receipt_repository
+        self.receipt_business_service = receipt_business_service
+        self.receipt_enrichment_service = receipt_enrichment_service
+    
+    def execute(self, 
+                receipt_id: str, 
+                user: User) -> Dict[str, Any]:
+        """
+        Auto-categorize receipt.
+        
+        Args:
+            receipt_id: ID of the receipt to categorize
+            user: The user requesting categorization
+            
+        Returns:
+            Dictionary with categorization result
+        """
+        try:
+            # Get receipt by ID
+            receipt = self.receipt_repository.find_by_id(receipt_id)
+            
+            if not receipt:
+                return {
+                    'success': False,
+                    'error': 'Receipt not found'
+                }
+            
+            # Check if user owns the receipt
+            if receipt.user.id != user.id:
+                return {
+                    'success': False,
+                    'error': 'Access denied'
+                }
+            
+            if not receipt.ocr_data:
+                return {
+                    'success': False,
+                    'error': 'No OCR data available for categorization'
+                }
+            
+            # Suggest category
+            suggested_category = self.receipt_business_service.suggest_category(receipt)
+            
+            # Classify expense type
+            expense_type = self.receipt_enrichment_service.classify_expense_type(receipt)
+            
+            # Calculate tax deductible amount
+            tax_deductible_amount = self.receipt_business_service.calculate_tax_deductible_amount(receipt)
+            
+            # Update receipt metadata
+            if suggested_category:
+                receipt.metadata.category = suggested_category
+            
+            receipt.metadata.is_business_expense = expense_type.value == 'business'
+            receipt.metadata.tax_deductible = tax_deductible_amount is not None
+            
+            # Save updated receipt
+            self.receipt_repository.save(receipt)
+            
+            return {
+                'success': True,
+                'receipt_id': receipt_id,
+                'suggested_category': suggested_category,
+                'expense_type': expense_type.value,
+                'is_business_expense': receipt.metadata.is_business_expense,
+                'tax_deductible_amount': str(tax_deductible_amount) if tax_deductible_amount else None,
+                'message': 'Receipt categorized successfully'
+            }
+            
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Receipt categorization failed: {str(e)}'
+            }
+
+
+class ReceiptStatisticsUseCase:
+    """Use case for getting receipt processing statistics."""
+    
+    def __init__(self, receipt_repository: ReceiptRepository):
+        self.receipt_repository = receipt_repository
+    
+    def execute(self, user: User) -> Dict[str, Any]:
+        """
+        Get receipt processing statistics for user.
+        
+        Args:
+            user: The user requesting statistics
+            
+        Returns:
+            Dictionary with statistics
+        """
+        try:
+            # Get all user receipts
+            receipts = self.receipt_repository.find_by_user(user, limit=1000, offset=0)
+            
+            # Calculate statistics
+            total_receipts = len(receipts)
+            processed_receipts = len([r for r in receipts if r.status == ReceiptStatus.PROCESSED])
+            failed_receipts = len([r for r in receipts if r.status == ReceiptStatus.FAILED])
+            processing_receipts = len([r for r in receipts if r.status == ReceiptStatus.PROCESSING])
+            
+            # Calculate total amounts
+            total_amount = Decimal('0.00')
+            business_amount = Decimal('0.00')
+            personal_amount = Decimal('0.00')
+            
+            for receipt in receipts:
+                if receipt.ocr_data and receipt.ocr_data.total_amount:
+                    total_amount += receipt.ocr_data.total_amount
+                    if receipt.metadata and receipt.metadata.is_business_expense:
+                        business_amount += receipt.ocr_data.total_amount
+                    else:
+                        personal_amount += receipt.ocr_data.total_amount
+            
+            # Calculate category distribution
+            category_counts = {}
+            for receipt in receipts:
+                if receipt.metadata and receipt.metadata.category:
+                    category = receipt.metadata.category
+                    category_counts[category] = category_counts.get(category, 0) + 1
+            
+            # Calculate average confidence scores
+            confidence_scores = []
+            for receipt in receipts:
+                if receipt.ocr_data and receipt.ocr_data.confidence_score:
+                    confidence_scores.append(receipt.ocr_data.confidence_score)
+            
+            avg_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0.0
+            
+            return {
+                'success': True,
+                'statistics': {
+                    'total_receipts': total_receipts,
+                    'processed_receipts': processed_receipts,
+                    'failed_receipts': failed_receipts,
+                    'processing_receipts': processing_receipts,
+                    'success_rate': (processed_receipts / total_receipts * 100) if total_receipts > 0 else 0,
+                    'total_amount': str(total_amount),
+                    'business_amount': str(business_amount),
+                    'personal_amount': str(personal_amount),
+                    'average_confidence': round(avg_confidence, 2),
+                    'category_distribution': category_counts
+                }
+            }
+            
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Failed to get statistics: {str(e)}'
             }
 
 

@@ -3,7 +3,7 @@ Domain entities for receipt management.
 Defines the Receipt aggregate root and related value objects.
 """
 
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Set, Union
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
@@ -114,13 +114,19 @@ class ReceiptMetadata(ValueObject):
     
     def __init__(self,
                  category: Optional[str] = None,
-                 tags: Optional[List[str]] = None,
+                 tags: Optional[Union[List[str], Set[str]]] = None,
                  notes: Optional[str] = None,
                  is_business_expense: bool = False,
                  tax_deductible: bool = False,
                  custom_fields: Optional[Dict[str, Any]] = None):
         self.category = category
-        self.tags = tags or []
+        # Convert tags to set if provided as list
+        if tags is None:
+            self.tags = set()
+        elif isinstance(tags, list):
+            self.tags = set(tags)
+        else:
+            self.tags = tags
         self.notes = notes
         self.is_business_expense = is_business_expense
         self.tax_deductible = tax_deductible
@@ -182,8 +188,6 @@ class Receipt(AggregateRoot):
                  receipt_type: ReceiptType = ReceiptType.PURCHASE,
                  ocr_data: Optional[OCRData] = None,
                  metadata: Optional[ReceiptMetadata] = None,
-                 created_at: Optional[datetime] = None,
-                 updated_at: Optional[datetime] = None,
                  processed_at: Optional[datetime] = None):
         super().__init__(id)
         self.user = user
@@ -192,9 +196,7 @@ class Receipt(AggregateRoot):
         self.receipt_type = receipt_type
         self.ocr_data = ocr_data
         self.metadata = metadata or ReceiptMetadata()
-        self.created_at = created_at or datetime.utcnow()
-        self.updated_at = updated_at or datetime.utcnow()
-        self.processed_at = processed_at
+        self._processed_at = processed_at
         
         # Add domain event for receipt creation
         self.add_domain_event(ReceiptUploadedEvent(
@@ -203,12 +205,22 @@ class Receipt(AggregateRoot):
             file_info=self.file_info
         ))
     
+    @property
+    def processed_at(self) -> Optional[datetime]:
+        """Get the processed timestamp."""
+        return self._processed_at
+    
+    @processed_at.setter
+    def processed_at(self, value: Optional[datetime]) -> None:
+        """Set the processed timestamp."""
+        self._processed_at = value
+    
     def process_ocr_data(self, ocr_data: OCRData) -> None:
         """Process OCR data and update receipt status."""
         self.ocr_data = ocr_data
         self.status = ReceiptStatus.PROCESSED
         self.processed_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
+        self._update_timestamp()
         
         # Add domain event for processing completion
         self.add_domain_event(ReceiptProcessedEvent(
@@ -220,18 +232,30 @@ class Receipt(AggregateRoot):
     def update_metadata(self, metadata: ReceiptMetadata) -> None:
         """Update receipt metadata."""
         self.metadata = metadata
-        self.updated_at = datetime.utcnow()
+        self._update_timestamp()
     
     def mark_as_failed(self, error_message: str) -> None:
         """Mark receipt processing as failed."""
         self.status = ReceiptStatus.FAILED
-        self.updated_at = datetime.utcnow()
+        self._update_timestamp()
         # Could add error_message to metadata or create separate field
     
     def archive(self) -> None:
         """Archive the receipt."""
         self.status = ReceiptStatus.ARCHIVED
-        self.updated_at = datetime.utcnow()
+        self._update_timestamp()
+    
+    def get_merchant_name(self) -> Optional[str]:
+        """Get merchant name from OCR data."""
+        return self.ocr_data.merchant_name if self.ocr_data else None
+    
+    def get_total_amount(self) -> Optional[Decimal]:
+        """Get total amount from OCR data."""
+        return self.ocr_data.total_amount if self.ocr_data else None
+    
+    def get_receipt_date(self) -> Optional[datetime]:
+        """Get receipt date from OCR data."""
+        return self.ocr_data.date if self.ocr_data else None
     
     def is_processed(self) -> bool:
         """Check if receipt has been processed."""

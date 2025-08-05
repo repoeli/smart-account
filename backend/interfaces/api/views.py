@@ -1,39 +1,27 @@
 """
 API views for the Smart Accounts Management System.
-Implements REST API endpoints following Clean Architecture principles.
+Defines REST API endpoints for user management and receipt processing.
 """
 
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
-from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
-from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 from .serializers import (
-    UserRegistrationSerializer,
-    UserLoginSerializer,
-    UserProfileSerializer,
-    UserProfileUpdateSerializer,
-    EmailVerificationSerializer,
-    PasswordResetRequestSerializer,
-    PasswordResetConfirmSerializer,
-    CustomTokenObtainPairSerializer,
-    UserResponseSerializer,
-    ErrorResponseSerializer
+    UserRegistrationSerializer, UserLoginSerializer, EmailVerificationSerializer,
+    UserProfileSerializer, ReceiptUploadSerializer, ReceiptUploadResponseSerializer,
+    ReceiptListResponseSerializer, ReceiptDetailResponseSerializer,
+    ReceiptUpdateSerializer, ReceiptReprocessSerializer, ReceiptValidateSerializer,
+    ReceiptCategorizeSerializer, ReceiptStatisticsResponseSerializer,
+    ReceiptReprocessResponseSerializer, ReceiptValidateResponseSerializer,
+    ReceiptCategorizeResponseSerializer
 )
-from application.accounts.use_cases import (
-    UserRegistrationUseCase,
-    UserLoginUseCase,
-    EmailVerificationUseCase,
-    UserProfileUseCase
-)
-from infrastructure.database.repositories import UserRepository
-from domain.accounts.services import UserDomainService
-from infrastructure.email.services import EmailService
+from infrastructure.ocr.services import OCRService, OCRMethod
+from domain.receipts.entities import ReceiptType
 
 
 class UserRegistrationView(APIView):
@@ -43,67 +31,56 @@ class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
-        """Handle user registration."""
+        """Register a new user."""
         serializer = UserRegistrationSerializer(data=request.data)
         
         if not serializer.is_valid():
             return Response(
                 {
+                    'success': False,
                     'error': 'validation_error',
-                    'message': 'Invalid registration data',
-                    'details': serializer.errors
+                    'validation_errors': serializer.errors
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         try:
-            # Initialize use case with dependencies
-            user_repository = UserRepository()
-            user_domain_service = UserDomainService()
-            email_service = EmailService()
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoUserRepository
+            from domain.accounts.services import PasswordService, EmailVerificationService
+            from application.accounts.use_cases import UserRegistrationUseCase
             
+            user_repository = DjangoUserRepository()
+            password_service = PasswordService()
+            email_verification_service = EmailVerificationService()
+            
+            # Initialize use case
             registration_use_case = UserRegistrationUseCase(
                 user_repository=user_repository,
-                user_domain_service=user_domain_service,
-                email_service=email_service
+                password_service=password_service,
+                email_verification_service=email_verification_service
             )
             
-            # Execute registration use case
-            result = registration_use_case.execute(serializer.validated_data)
-            
-            # Return success response
-            response_serializer = UserResponseSerializer(data=result)
-            response_serializer.is_valid()
-            
-            return Response(
-                response_serializer.data,
-                status=status.HTTP_201_CREATED
+            # Execute registration
+            result = registration_use_case.execute(
+                email=serializer.validated_data['email'],
+                password=serializer.validated_data['password'],
+                first_name=serializer.validated_data.get('first_name', ''),
+                last_name=serializer.validated_data.get('last_name', ''),
+                company_name=serializer.validated_data.get('company_name', ''),
+                business_type=serializer.validated_data.get('business_type', ''),
+                tax_id=serializer.validated_data.get('tax_id', ''),
+                vat_number=serializer.validated_data.get('vat_number', '')
             )
             
-        except ValidationError as e:
-            return Response(
-                {
-                    'error': 'validation_error',
-                    'message': str(e),
-                    'details': {}
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except ValueError as e:
-            return Response(
-                {
-                    'error': 'business_error',
-                    'message': str(e),
-                    'details': {}
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(result, status=status.HTTP_201_CREATED if result['success'] else status.HTTP_400_BAD_REQUEST)
+            
         except Exception as e:
             return Response(
                 {
-                    'error': 'server_error',
-                    'message': 'An unexpected error occurred',
-                    'details': {}
+                    'success': False,
+                    'error': 'registration_error',
+                    'message': str(e)
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -116,78 +93,51 @@ class UserLoginView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
-        """Handle user login."""
+        """Authenticate user and return JWT tokens."""
         serializer = UserLoginSerializer(data=request.data)
         
         if not serializer.is_valid():
             return Response(
                 {
+                    'success': False,
                     'error': 'validation_error',
-                    'message': 'Invalid login data',
-                    'details': serializer.errors
+                    'validation_errors': serializer.errors
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         try:
-            # Initialize use case with dependencies
-            user_repository = UserRepository()
-            user_domain_service = UserDomainService()
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoUserRepository
+            from domain.accounts.services import PasswordService
+            from application.accounts.use_cases import UserLoginUseCase
             
+            user_repository = DjangoUserRepository()
+            password_service = PasswordService()
+            
+            # Initialize use case
             login_use_case = UserLoginUseCase(
                 user_repository=user_repository,
-                user_domain_service=user_domain_service
+                password_service=password_service
             )
             
-            # Execute login use case
+            # Execute login
             result = login_use_case.execute(
                 email=serializer.validated_data['email'],
                 password=serializer.validated_data['password']
             )
             
-            # Return success response
-            response_serializer = UserResponseSerializer(data=result)
-            response_serializer.is_valid()
+            return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_401_UNAUTHORIZED)
             
-            return Response(
-                response_serializer.data,
-                status=status.HTTP_200_OK
-            )
-            
-        except ValidationError as e:
-            return Response(
-                {
-                    'error': 'validation_error',
-                    'message': str(e),
-                    'details': {}
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except ValueError as e:
-            return Response(
-                {
-                    'error': 'authentication_error',
-                    'message': str(e),
-                    'details': {}
-                },
-                status=status.HTTP_401_UNAUTHORIZED
-            )
         except Exception as e:
             return Response(
                 {
-                    'error': 'server_error',
-                    'message': 'An unexpected error occurred',
-                    'details': {}
+                    'success': False,
+                    'error': 'login_error',
+                    'message': str(e)
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-    """
-    Custom JWT token view with additional user data.
-    """
-    serializer_class = CustomTokenObtainPairSerializer
 
 
 class EmailVerificationView(APIView):
@@ -197,56 +147,47 @@ class EmailVerificationView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
-        """Handle email verification."""
+        """Verify user email with token."""
         serializer = EmailVerificationSerializer(data=request.data)
         
         if not serializer.is_valid():
             return Response(
                 {
+                    'success': False,
                     'error': 'validation_error',
-                    'message': 'Invalid verification data',
-                    'details': serializer.errors
+                    'validation_errors': serializer.errors
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         try:
-            # Initialize use case with dependencies
-            user_repository = UserRepository()
-            user_domain_service = UserDomainService()
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoUserRepository
+            from domain.accounts.services import EmailVerificationService
+            from application.accounts.use_cases import EmailVerificationUseCase
             
+            user_repository = DjangoUserRepository()
+            email_verification_service = EmailVerificationService()
+            
+            # Initialize use case
             verification_use_case = EmailVerificationUseCase(
                 user_repository=user_repository,
-                user_domain_service=user_domain_service
+                email_verification_service=email_verification_service
             )
             
-            # Execute verification use case
-            result = verification_use_case.execute(serializer.validated_data['token'])
-            
-            # Return success response
-            response_serializer = UserResponseSerializer(data=result)
-            response_serializer.is_valid()
-            
-            return Response(
-                response_serializer.data,
-                status=status.HTTP_200_OK
+            # Execute verification
+            result = verification_use_case.execute(
+                token=serializer.validated_data['token']
             )
             
-        except ValueError as e:
-            return Response(
-                {
-                    'error': 'verification_error',
-                    'message': str(e),
-                    'details': {}
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST)
+            
         except Exception as e:
             return Response(
                 {
-                    'error': 'server_error',
-                    'message': 'An unexpected error occurred',
-                    'details': {}
+                    'success': False,
+                    'error': 'verification_error',
+                    'message': str(e)
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -261,190 +202,73 @@ class UserProfileView(APIView):
     def get(self, request):
         """Get user profile."""
         try:
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoUserRepository
+            from application.accounts.use_cases import UserProfileUseCase
+            
+            user_repository = DjangoUserRepository()
+            
             # Initialize use case
-            user_repository = UserRepository()
             profile_use_case = UserProfileUseCase(user_repository=user_repository)
             
-            # Get profile
-            profile_data = profile_use_case.get_profile(request.user.id)
+            # Execute get profile
+            result = profile_use_case.execute(user=request.user)
             
-            # Return profile data
-            return Response(
-                profile_data,
-                status=status.HTTP_200_OK
-            )
+            return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST)
             
-        except ValueError as e:
-            return Response(
-                {
-                    'error': 'not_found',
-                    'message': str(e),
-                    'details': {}
-                },
-                status=status.HTTP_404_NOT_FOUND
-            )
         except Exception as e:
             return Response(
                 {
-                    'error': 'server_error',
-                    'message': 'An unexpected error occurred',
-                    'details': {}
+                    'success': False,
+                    'error': 'profile_error',
+                    'message': str(e)
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
     def put(self, request):
         """Update user profile."""
-        serializer = UserProfileUpdateSerializer(data=request.data)
+        serializer = UserProfileSerializer(data=request.data)
         
         if not serializer.is_valid():
             return Response(
                 {
+                    'success': False,
                     'error': 'validation_error',
-                    'message': 'Invalid profile data',
-                    'details': serializer.errors
+                    'validation_errors': serializer.errors
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         try:
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoUserRepository
+            from application.accounts.use_cases import UserProfileUseCase
+            
+            user_repository = DjangoUserRepository()
+            
             # Initialize use case
-            user_repository = UserRepository()
             profile_use_case = UserProfileUseCase(user_repository=user_repository)
             
-            # Update profile
-            updated_profile = profile_use_case.update_profile(
-                user_id=request.user.id,
+            # Execute update profile
+            result = profile_use_case.execute(
+                user=request.user,
                 profile_data=serializer.validated_data
             )
             
-            # Return updated profile
-            return Response(
-                updated_profile,
-                status=status.HTTP_200_OK
-            )
+            return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST)
             
-        except ValueError as e:
-            return Response(
-                {
-                    'error': 'not_found',
-                    'message': str(e),
-                    'details': {}
-                },
-                status=status.HTTP_404_NOT_FOUND
-            )
         except Exception as e:
             return Response(
                 {
-                    'error': 'server_error',
-                    'message': 'An unexpected error occurred',
-                    'details': {}
+                    'success': False,
+                    'error': 'profile_error',
+                    'message': str(e)
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
-class PasswordResetRequestView(APIView):
-    """
-    API view for password reset request.
-    """
-    permission_classes = [AllowAny]
-    
-    def post(self, request):
-        """Handle password reset request."""
-        serializer = PasswordResetRequestSerializer(data=request.data)
-        
-        if not serializer.is_valid():
-            return Response(
-                {
-                    'error': 'validation_error',
-                    'message': 'Invalid email address',
-                    'details': serializer.errors
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            # TODO: Implement password reset request logic
-            # This will be implemented in the next iteration
-            
-            return Response(
-                {
-                    'message': 'If an account with this email exists, a password reset link has been sent.'
-                },
-                status=status.HTTP_200_OK
-            )
-            
-        except Exception as e:
-            return Response(
-                {
-                    'error': 'server_error',
-                    'message': 'An unexpected error occurred',
-                    'details': {}
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-class PasswordResetConfirmView(APIView):
-    """
-    API view for password reset confirmation.
-    """
-    permission_classes = [AllowAny]
-    
-    def post(self, request):
-        """Handle password reset confirmation."""
-        serializer = PasswordResetConfirmSerializer(data=request.data)
-        
-        if not serializer.is_valid():
-            return Response(
-                {
-                    'error': 'validation_error',
-                    'message': 'Invalid reset data',
-                    'details': serializer.errors
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            # TODO: Implement password reset confirmation logic
-            # This will be implemented in the next iteration
-            
-            return Response(
-                {
-                    'message': 'Password has been reset successfully.'
-                },
-                status=status.HTTP_200_OK
-            )
-            
-        except Exception as e:
-            return Response(
-                {
-                    'error': 'server_error',
-                    'message': 'An unexpected error occurred',
-                    'details': {}
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def health_check(request):
-    """
-    Health check endpoint.
-    """
-    return Response(
-        {
-            'status': 'healthy',
-            'timestamp': timezone.now().isoformat(),
-            'service': 'Smart Accounts Management System'
-        },
-        status=status.HTTP_200_OK
-    )
-
-
-# Receipt Views
 class ReceiptUploadView(APIView):
     """
     API view for receipt upload.
@@ -541,6 +365,253 @@ class ReceiptUploadView(APIView):
             )
 
 
+class ReceiptReprocessView(APIView):
+    """
+    API view for receipt reprocessing.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, receipt_id):
+        """Reprocess a receipt with different OCR method."""
+        serializer = ReceiptReprocessSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(
+                {
+                    'success': False,
+                    'error': 'validation_error',
+                    'validation_errors': serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Get OCR method
+            ocr_method_param = serializer.validated_data['ocr_method']
+            
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoReceiptRepository
+            from domain.receipts.services import ReceiptBusinessService, ReceiptValidationService
+            from infrastructure.ocr.services import OCRService, OCRMethod
+            from application.receipts.use_cases import ReceiptReprocessUseCase
+            
+            receipt_repository = DjangoReceiptRepository()
+            ocr_service = OCRService()
+            receipt_business_service = ReceiptBusinessService()
+            receipt_validation_service = ReceiptValidationService()
+            
+            # Initialize use case
+            reprocess_use_case = ReceiptReprocessUseCase(
+                receipt_repository=receipt_repository,
+                ocr_service=ocr_service,
+                receipt_business_service=receipt_business_service,
+                receipt_validation_service=receipt_validation_service
+            )
+            
+            # Convert OCR method to enum
+            ocr_method_enum = None
+            if ocr_method_param == 'paddle_ocr':
+                ocr_method_enum = OCRMethod.PADDLE_OCR
+            elif ocr_method_param == 'openai_vision':
+                ocr_method_enum = OCRMethod.OPENAI_VISION
+            elif ocr_method_param == 'auto':
+                ocr_method_enum = None  # Use default/preferred method
+            
+            # Execute reprocess use case
+            result = reprocess_use_case.execute(
+                receipt_id=receipt_id,
+                user=request.user,
+                ocr_method=ocr_method_enum
+            )
+            
+            # Return response
+            response_serializer = ReceiptReprocessResponseSerializer(data=result)
+            response_serializer.is_valid()
+            
+            return Response(
+                response_serializer.data,
+                status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
+            )
+            
+        except Exception as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'reprocess_error',
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ReceiptValidateView(APIView):
+    """
+    API view for receipt validation and correction.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request, receipt_id):
+        """Validate and correct receipt data."""
+        serializer = ReceiptValidateSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(
+                {
+                    'success': False,
+                    'error': 'validation_error',
+                    'validation_errors': serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoReceiptRepository
+            from domain.receipts.services import ReceiptValidationService, ReceiptDataEnrichmentService
+            from application.receipts.use_cases import ReceiptValidateUseCase
+            
+            receipt_repository = DjangoReceiptRepository()
+            receipt_validation_service = ReceiptValidationService()
+            receipt_enrichment_service = ReceiptDataEnrichmentService()
+            
+            # Initialize use case
+            validate_use_case = ReceiptValidateUseCase(
+                receipt_repository=receipt_repository,
+                receipt_validation_service=receipt_validation_service,
+                receipt_enrichment_service=receipt_enrichment_service
+            )
+            
+            # Execute validation use case
+            result = validate_use_case.execute(
+                receipt_id=receipt_id,
+                user=request.user,
+                corrections=serializer.validated_data
+            )
+            
+            # Return response
+            response_serializer = ReceiptValidateResponseSerializer(data=result)
+            response_serializer.is_valid()
+            
+            return Response(
+                response_serializer.data,
+                status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
+            )
+            
+        except Exception as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'validation_error',
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ReceiptCategorizeView(APIView):
+    """
+    API view for receipt categorization.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, receipt_id):
+        """Auto-categorize a receipt."""
+        serializer = ReceiptCategorizeSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(
+                {
+                    'success': False,
+                    'error': 'validation_error',
+                    'validation_errors': serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoReceiptRepository
+            from domain.receipts.services import ReceiptBusinessService, ReceiptDataEnrichmentService
+            from application.receipts.use_cases import ReceiptCategorizeUseCase
+            
+            receipt_repository = DjangoReceiptRepository()
+            receipt_business_service = ReceiptBusinessService()
+            receipt_enrichment_service = ReceiptDataEnrichmentService()
+            
+            # Initialize use case
+            categorize_use_case = ReceiptCategorizeUseCase(
+                receipt_repository=receipt_repository,
+                receipt_business_service=receipt_business_service,
+                receipt_enrichment_service=receipt_enrichment_service
+            )
+            
+            # Execute categorization use case
+            result = categorize_use_case.execute(
+                receipt_id=receipt_id,
+                user=request.user
+            )
+            
+            # Return response
+            response_serializer = ReceiptCategorizeResponseSerializer(data=result)
+            response_serializer.is_valid()
+            
+            return Response(
+                response_serializer.data,
+                status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
+            )
+            
+        except Exception as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'categorization_error',
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ReceiptStatisticsView(APIView):
+    """
+    API view for receipt statistics.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Get receipt processing statistics."""
+        try:
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoReceiptRepository
+            from application.receipts.use_cases import ReceiptStatisticsUseCase
+            
+            receipt_repository = DjangoReceiptRepository()
+            
+            # Initialize use case
+            statistics_use_case = ReceiptStatisticsUseCase(receipt_repository=receipt_repository)
+            
+            # Execute statistics use case
+            result = statistics_use_case.execute(user=request.user)
+            
+            # Return response
+            response_serializer = ReceiptStatisticsResponseSerializer(data=result)
+            response_serializer.is_valid()
+            
+            return Response(
+                response_serializer.data,
+                status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
+            )
+            
+        except Exception as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'statistics_error',
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
 class ReceiptListView(APIView):
     """
     API view for listing receipts.
@@ -548,7 +619,7 @@ class ReceiptListView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """Get list of user receipts."""
+        """List user receipts with optional filtering."""
         try:
             # Get query parameters
             status_param = request.query_params.get('status')
@@ -556,23 +627,25 @@ class ReceiptListView(APIView):
             limit = int(request.query_params.get('limit', 50))
             offset = int(request.query_params.get('offset', 0))
             
-            # Convert parameters to enums if provided
-            from domain.receipts.entities import ReceiptStatus, ReceiptType
-            status = ReceiptStatus(status_param) if status_param else None
-            receipt_type = ReceiptType(receipt_type_param) if receipt_type_param else None
-            
             # Initialize dependencies
             from infrastructure.database.repositories import DjangoReceiptRepository
             from application.receipts.use_cases import ReceiptListUseCase
+            from domain.receipts.entities import ReceiptStatus, ReceiptType
             
             receipt_repository = DjangoReceiptRepository()
+            
+            # Initialize use case
             list_use_case = ReceiptListUseCase(receipt_repository=receipt_repository)
+            
+            # Convert parameters to enums
+            status_enum = ReceiptStatus(status_param) if status_param else None
+            receipt_type_enum = ReceiptType(receipt_type_param) if receipt_type_param else None
             
             # Execute list use case
             result = list_use_case.execute(
                 user=request.user,
-                status=status,
-                receipt_type=receipt_type,
+                status=status_enum,
+                receipt_type=receipt_type_enum,
                 limit=limit,
                 offset=offset
             )
@@ -583,7 +656,7 @@ class ReceiptListView(APIView):
             
             return Response(
                 response_serializer.data,
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
             )
             
         except Exception as e:
@@ -611,19 +684,15 @@ class ReceiptDetailView(APIView):
             from application.receipts.use_cases import ReceiptDetailUseCase
             
             receipt_repository = DjangoReceiptRepository()
+            
+            # Initialize use case
             detail_use_case = ReceiptDetailUseCase(receipt_repository=receipt_repository)
             
             # Execute detail use case
-            result = detail_use_case.execute(receipt_id=receipt_id, user=request.user)
-            
-            if not result['success']:
-                return Response(
-                    {
-                        'success': False,
-                        'error': result['error']
-                    },
-                    status=status.HTTP_404_NOT_FOUND
-                )
+            result = detail_use_case.execute(
+                receipt_id=receipt_id,
+                user=request.user
+            )
             
             # Return response
             response_serializer = ReceiptDetailResponseSerializer(data=result)
@@ -631,7 +700,7 @@ class ReceiptDetailView(APIView):
             
             return Response(
                 response_serializer.data,
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
             )
             
         except Exception as e:
@@ -674,6 +743,7 @@ class ReceiptUpdateView(APIView):
             receipt_repository = DjangoReceiptRepository()
             receipt_validation_service = ReceiptValidationService()
             
+            # Initialize use case
             update_use_case = ReceiptUpdateUseCase(
                 receipt_repository=receipt_repository,
                 receipt_validation_service=receipt_validation_service
@@ -686,14 +756,7 @@ class ReceiptUpdateView(APIView):
                 metadata=serializer.validated_data
             )
             
-            # Return response
-            response_serializer = ReceiptUpdateResponseSerializer(data=result)
-            response_serializer.is_valid()
-            
-            return Response(
-                response_serializer.data,
-                status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
-            )
+            return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST)
             
         except Exception as e:
             return Response(

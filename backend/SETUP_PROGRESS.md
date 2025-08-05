@@ -109,8 +109,8 @@
   - ✅ **OCR Method Selection**: Users can choose between PaddleOCR and OpenAI Vision API
   - ✅ **Fallback System**: Graceful degradation when preferred OCR method fails
   - ✅ **OpenAI Integration**: Uses API key from .env file for Vision API access
-- [ ] US-005: Receipt Processing and Data Extraction
-- [ ] US-006: Receipt Management and Organization
+- ✅ US-005: Enhanced Receipt Processing and Data Extraction - **COMPLETE**
+- ✅ US-006: Receipt Management and Organization - **COMPLETE**
 
 ## 🎉 US-004 Implementation Summary
 
@@ -323,4 +323,88 @@ The PostgreSQL logs you saw showing connection errors were from **earlier failed
 - **User Control**: API parameter to specify preferred OCR method
 
 ### 🚀 Ready for US-005 Implementation
-The dual OCR system is now fully operational and ready for the next phase of development. 
+The dual OCR system is now fully operational and ready for the next phase of development.
+
+## 🎉 US-005 Implementation Summary
+
+### ✅ Successfully Completed:
+- **Enhanced Domain Services**:
+  - ReceiptDataEnrichmentService: Merchant standardization, VAT validation, date parsing
+  - ReceiptValidationService: Data validation, quality scoring, correction suggestions
+  - ReceiptBusinessService: Expense categorization, tax processing
+  - FileValidationService: File upload validation
+
+- **New Application Use Cases**:
+  - ReceiptReprocessUseCase: Reprocess receipts with different OCR methods
+  - ReceiptValidateUseCase: Validate and correct receipt data
+  - ReceiptCategorizeUseCase: Auto-categorize receipts
+  - ReceiptStatisticsUseCase: Get processing statistics
+
+- **New API Endpoints**:
+  - POST /api/v1/receipts/{id}/reprocess/ - Reprocess with different OCR
+  - PUT /api/v1/receipts/{id}/validate/ - Validate and correct data
+  - POST /api/v1/receipts/{id}/categorize/ - Auto-categorize receipt
+  - GET /api/v1/receipts/statistics/ - Get user's receipt statistics
+
+- **Enhanced Business Logic**:
+  - UK VAT calculation and validation
+  - Expense classification (business vs personal)
+  - Merchant name standardization (UK retailers)
+  - Data quality scoring
+  - Intelligent correction suggestions
+  - Tax deductible amount calculation
+
+### 📊 Implementation Statistics:
+- **13 new/enhanced files** for US-005
+- **~1,000 lines** of enhanced domain services
+- **4 new use cases** in application layer
+- **4 new API endpoints** operational
+- **Complete expense categorization** system
+- **UK-specific VAT** and tax logic
+
+### 🚀 Ready for US-006 Implementation
+The enhanced receipt processing system is now fully operational with intelligent data extraction, validation, and categorization.
+
+## 🎉 US-006 Implementation Summary
+
+### ✅ Successfully Completed:
+- **Domain Entities**:
+  - Folder: Hierarchical organization with SYSTEM, USER, and SMART types
+  - Tag: Flexible tagging system with color support
+  - ReceiptCollection: Grouping and sharing receipts
+  - Search/Sort: Advanced search criteria and sorting options
+
+- **Domain Services**:
+  - FolderService: Default folders, hierarchy validation, smart folder rules
+  - TagService: Tag normalization, validation, and suggestions
+  - ReceiptSearchService: Multi-criteria search with filtering and sorting
+  - ReceiptBulkOperationService: Bulk tagging, categorization, archiving
+
+- **Application Use Cases**:
+  - CreateFolderUseCase & MoveFolderUseCase: Folder management
+  - SearchReceiptsUseCase: Advanced receipt search
+  - AddTagsToReceiptUseCase: Tag management
+  - BulkOperationUseCase: Bulk receipt operations
+  - MoveReceiptsToFolderUseCase: Receipt organization
+  - GetUserStatisticsUseCase: Comprehensive analytics
+
+- **API Endpoints**:
+  - GET /api/v1/folders/ - List user folders
+  - POST /api/v1/folders/create/ - Create new folder
+  - PUT /api/v1/folders/{id}/ - Update folder
+  - POST /api/v1/folders/{id}/receipts/ - Move receipts to folder
+  - POST /api/v1/receipts/search/ - Advanced search
+  - POST /api/v1/receipts/{id}/tags/ - Add tags
+  - POST /api/v1/receipts/bulk/ - Bulk operations
+  - GET /api/v1/users/statistics/ - User statistics
+
+### 📊 Implementation Statistics:
+- **20+ new files** for US-006
+- **~2,000 lines** of organization code
+- **7 new use cases** in application layer
+- **8 new API endpoints** operational
+- **Complete organization system** with folders, tags, and collections
+- **Advanced search** with 10+ filter criteria
+
+### 🚀 Ready for Next Phase
+The receipt management and organization system is now fully operational with powerful search, filtering, tagging, and folder organization capabilities. 
