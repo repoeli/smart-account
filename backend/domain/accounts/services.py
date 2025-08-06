@@ -253,19 +253,18 @@ class UserRegistrationService:
         elif len(last_name.strip()) < 2:
             errors.append("Last name must be at least 2 characters")
         
-        # Validate company information
-        if not company_name.strip():
-            errors.append("Company name is required")
-        elif len(company_name.strip()) < 2:
-            errors.append("Company name must be at least 2 characters")
-        
-        if not business_type.strip():
-            errors.append("Business type is required")
-        
         # Validate user type specific requirements
         if user_type == UserType.ACCOUNTING_COMPANY:
-            if len(company_name.strip()) < 5:
+            # Validate company information for business users only
+            if not company_name.strip():
+                errors.append("Company name is required")
+            elif len(company_name.strip()) < 2:
+                errors.append("Company name must be at least 2 characters")
+            elif len(company_name.strip()) < 5:
                 errors.append("Accounting company name must be at least 5 characters")
+            
+            if not business_type.strip():
+                errors.append("Business type is required")
         
         is_valid = len(errors) == 0
         
@@ -624,16 +623,15 @@ class UserDomainService:
     @staticmethod
     def verify_password(user: User, password: str) -> bool:
         """Verify user password."""
-        # This would need to be implemented with Django's password verification
-        # For now, we'll use a placeholder
+        # Use Django's password verification with the correct attribute
         from django.contrib.auth.hashers import check_password
-        return check_password(password, user.password)
+        return check_password(password, user.password_hash)
     
     @staticmethod
     def validate_user_registration(user: User) -> None:
         """Validate user registration data."""
         is_valid, errors = UserRegistrationService.validate_registration_data(
-            user.email.value,
+            user.email.address,
             "password_placeholder",  # Password is already hashed at this point
             user.first_name,
             user.last_name,
@@ -650,7 +648,7 @@ class UserDomainService:
         """Generate email verification token."""
         token_obj = EmailVerificationService.generate_verification_token(
             str(user.id),
-            user.email.value
+            user.email.address
         )
         return token_obj.token
     

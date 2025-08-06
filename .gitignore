@@ -19,3 +19,6 @@ __pycache__
 
 venv/
 venv/
+TestDocumentation
+backend/EMAIL_CONFIGURATION.md
+backend/ENVIRONMENT_VARIABLES_GUIDE.md

@@ -82,6 +82,31 @@ class NotificationPreferences(ValueObject):
             self.payment_reminders,
             self.tax_deadline_reminders
         )
+    
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSON serialization."""
+        return {
+            'email_notifications': self.email_notifications,
+            'sms_notifications': self.sms_notifications,
+            'push_notifications': self.push_notifications,
+            'marketing_emails': self.marketing_emails,
+            'receipt_processing_alerts': self.receipt_processing_alerts,
+            'payment_reminders': self.payment_reminders,
+            'tax_deadline_reminders': self.tax_deadline_reminders
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'NotificationPreferences':
+        """Create from dictionary."""
+        return cls(
+            email_notifications=data.get('email_notifications', True),
+            sms_notifications=data.get('sms_notifications', False),
+            push_notifications=data.get('push_notifications', True),
+            marketing_emails=data.get('marketing_emails', False),
+            receipt_processing_alerts=data.get('receipt_processing_alerts', True),
+            payment_reminders=data.get('payment_reminders', True),
+            tax_deadline_reminders=data.get('tax_deadline_reminders', True)
+        )
 
 
 class UserCreatedEvent(DomainEvent):
@@ -233,6 +258,12 @@ class User(AggregateRoot):
         """Get user status."""
         return self._status
     
+    @status.setter
+    def status(self, value: UserStatus) -> None:
+        """Set user status."""
+        self._status = value
+        self._update_timestamp()
+    
     @property
     def subscription_tier(self) -> SubscriptionTier:
         """Get subscription tier."""
@@ -258,15 +289,31 @@ class User(AggregateRoot):
         """Check if user is verified."""
         return self._is_verified
     
+    @is_verified.setter
+    def is_verified(self, value: bool) -> None:
+        """Set verification status."""
+        self._is_verified = value
+        self._update_timestamp()
+    
     @property
     def verified_at(self) -> Optional[datetime]:
         """Get verification timestamp."""
         return self._verified_at
     
+    @verified_at.setter
+    def verified_at(self, value: Optional[datetime]) -> None:
+        """Set verification timestamp."""
+        self._verified_at = value
+    
     @property
     def last_login(self) -> Optional[datetime]:
         """Get last login timestamp."""
         return self._last_login
+    
+    @last_login.setter
+    def last_login(self, value: Optional[datetime]) -> None:
+        """Set last login timestamp."""
+        self._last_login = value
     
     # Business methods
     def verify(self) -> None:

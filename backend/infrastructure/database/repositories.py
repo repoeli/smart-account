@@ -12,7 +12,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
-from domain.accounts.entities import User as DomainUser, BusinessProfile, UserType, UserStatus, SubscriptionTier
+from domain.accounts.entities import User as DomainUser, BusinessProfile, UserType, UserStatus, SubscriptionTier, NotificationPreferences
 from domain.accounts.repositories import UserRepository
 from domain.receipts.entities import (
     Receipt as DomainReceipt, ReceiptStatus, ReceiptType, 
@@ -49,7 +49,7 @@ class DjangoUserRepository(UserRepository):
                 django_user.last_login = user.last_login
                 django_user.timezone = user.timezone
                 django_user.language = user.language
-                django_user.notification_preferences = user.notification_preferences
+                django_user.notification_preferences = user.notification_preferences.to_dict()
                 
                 # Update address if available
                 if user.business_profile.address:
@@ -79,7 +79,7 @@ class DjangoUserRepository(UserRepository):
                     last_login=user.last_login,
                     timezone=user.timezone,
                     language=user.language,
-                    notification_preferences=user.notification_preferences,
+                    notification_preferences=user.notification_preferences.to_dict(),
                     address_street=user.business_profile.address.street if user.business_profile.address else None,
                     address_city=user.business_profile.address.city if user.business_profile.address else None,
                     address_postal_code=user.business_profile.address.postal_code if user.business_profile.address else None,
@@ -150,13 +150,15 @@ class DjangoUserRepository(UserRepository):
             user_type=UserType(django_user.user_type),
             business_profile=business_profile,
             phone=phone,
-            subscription_tier=django_user.subscription_tier,
+            subscription_tier=SubscriptionTier(django_user.subscription_tier),
             is_verified=django_user.is_verified,
             verified_at=django_user.verified_at,
             last_login=django_user.last_login,
             timezone=django_user.timezone,
             language=django_user.language,
-            notification_preferences=django_user.notification_preferences
+            notification_preferences=NotificationPreferences.from_dict(
+                django_user.notification_preferences or {}
+            )
         )
     
     # Additional abstract method implementations

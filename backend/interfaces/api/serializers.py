@@ -16,18 +16,36 @@ class UserRegistrationSerializer(serializers.Serializer):
     """
     email = serializers.EmailField(max_length=255)
     password = serializers.CharField(min_length=8, max_length=128, write_only=True)
+    password_confirm = serializers.CharField(max_length=128, write_only=True)
     first_name = serializers.CharField(max_length=100, required=False)
     last_name = serializers.CharField(max_length=100, required=False)
+    user_type = serializers.ChoiceField(choices=['individual', 'business'], default='individual')
     company_name = serializers.CharField(max_length=255, required=False)
     business_type = serializers.CharField(max_length=100, required=False)
     tax_id = serializers.CharField(max_length=50, required=False)
     vat_number = serializers.CharField(max_length=50, required=False)
+    phone = serializers.CharField(max_length=20, required=False)
     
     def validate_email(self, value):
         """Validate email uniqueness."""
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("A user with this email already exists.")
         return value
+    
+    def validate(self, data):
+        """Validate password confirmation and business fields."""
+        # Validate password confirmation
+        if data.get('password') != data.get('password_confirm'):
+            raise serializers.ValidationError("Passwords do not match.")
+        
+        # Validate business fields if user_type is business
+        if data.get('user_type') == 'business':
+            if not data.get('company_name', '').strip():
+                raise serializers.ValidationError("Company name is required for business accounts.")
+            if not data.get('business_type', '').strip():
+                raise serializers.ValidationError("Business type is required for business accounts.")
+        
+        return data
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -43,6 +61,28 @@ class EmailVerificationSerializer(serializers.Serializer):
     Serializer for email verification.
     """
     token = serializers.CharField(max_length=255)
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """
+    Serializer for password reset request.
+    """
+    email = serializers.EmailField(max_length=255)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """
+    Serializer for password reset confirmation.
+    """
+    token = serializers.CharField(max_length=255)
+    password = serializers.CharField(min_length=8, max_length=128, write_only=True)
+    password_confirm = serializers.CharField(max_length=128, write_only=True)
+    
+    def validate(self, data):
+        """Validate password confirmation."""
+        if data.get('password') != data.get('password_confirm'):
+            raise serializers.ValidationError("Passwords do not match.")
+        return data
 
 
 class UserProfileSerializer(serializers.Serializer):

@@ -174,16 +174,24 @@ class PhoneNumber(ValueObject):
     def __post_init__(self):
         if not self.number:
             raise ValueError("Phone number cannot be empty")
-        # Basic UK phone number validation
-        if self.country_code == "+44":
+        
+        # Handle full international format (e.g., +447846080990)
+        if self.number.startswith('+'):
+            cleaned = ''.join(filter(str.isdigit, self.number))
+            if len(cleaned) < 10 or len(cleaned) > 15:
+                raise ValueError("Invalid international phone number format")
+        else:
+            # Handle local format with country code
             cleaned = ''.join(filter(str.isdigit, self.number))
             if len(cleaned) < 10 or len(cleaned) > 11:
-                raise ValueError("Invalid UK phone number format")
+                raise ValueError("Invalid phone number format")
     
     def _get_equality_components(self) -> tuple:
         return (self.number, self.country_code)
     
     def __str__(self) -> str:
+        if self.number.startswith('+'):
+            return self.number
         return f"{self.country_code} {self.number}"
 
 

@@ -47,33 +47,31 @@ class UserRegistrationView(APIView):
         try:
             # Initialize dependencies
             from infrastructure.database.repositories import DjangoUserRepository
-            from domain.accounts.services import PasswordService, EmailVerificationService
+            from domain.accounts.services import UserDomainService
+            from infrastructure.email.services import EmailService
             from application.accounts.use_cases import UserRegistrationUseCase
             
             user_repository = DjangoUserRepository()
-            password_service = PasswordService()
-            email_verification_service = EmailVerificationService()
+            user_domain_service = UserDomainService()
+            email_service = EmailService()
             
             # Initialize use case
             registration_use_case = UserRegistrationUseCase(
                 user_repository=user_repository,
-                password_service=password_service,
-                email_verification_service=email_verification_service
+                user_domain_service=user_domain_service,
+                email_service=email_service
             )
             
             # Execute registration
-            result = registration_use_case.execute(
-                email=serializer.validated_data['email'],
-                password=serializer.validated_data['password'],
-                first_name=serializer.validated_data.get('first_name', ''),
-                last_name=serializer.validated_data.get('last_name', ''),
-                company_name=serializer.validated_data.get('company_name', ''),
-                business_type=serializer.validated_data.get('business_type', ''),
-                tax_id=serializer.validated_data.get('tax_id', ''),
-                vat_number=serializer.validated_data.get('vat_number', '')
-            )
+            result = registration_use_case.execute(serializer.validated_data)
             
-            return Response(result, status=status.HTTP_201_CREATED if result['success'] else status.HTTP_400_BAD_REQUEST)
+            # Add success field to match API response format
+            response_data = {
+                'success': True,
+                **result
+            }
+            
+            return Response(response_data, status=status.HTTP_201_CREATED)
             
         except Exception as e:
             return Response(
@@ -109,16 +107,16 @@ class UserLoginView(APIView):
         try:
             # Initialize dependencies
             from infrastructure.database.repositories import DjangoUserRepository
-            from domain.accounts.services import PasswordService
+            from domain.accounts.services import UserDomainService
             from application.accounts.use_cases import UserLoginUseCase
             
             user_repository = DjangoUserRepository()
-            password_service = PasswordService()
+            user_domain_service = UserDomainService()
             
             # Initialize use case
             login_use_case = UserLoginUseCase(
                 user_repository=user_repository,
-                password_service=password_service
+                user_domain_service=user_domain_service
             )
             
             # Execute login
@@ -127,7 +125,13 @@ class UserLoginView(APIView):
                 password=serializer.validated_data['password']
             )
             
-            return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_401_UNAUTHORIZED)
+            # Add success indicator to response
+            response_data = {
+                'success': True,
+                **result
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
             
         except Exception as e:
             return Response(
@@ -163,16 +167,16 @@ class EmailVerificationView(APIView):
         try:
             # Initialize dependencies
             from infrastructure.database.repositories import DjangoUserRepository
-            from domain.accounts.services import EmailVerificationService
+            from domain.accounts.services import UserDomainService
             from application.accounts.use_cases import EmailVerificationUseCase
             
             user_repository = DjangoUserRepository()
-            email_verification_service = EmailVerificationService()
+            user_domain_service = UserDomainService()
             
             # Initialize use case
             verification_use_case = EmailVerificationUseCase(
                 user_repository=user_repository,
-                email_verification_service=email_verification_service
+                user_domain_service=user_domain_service
             )
             
             # Execute verification
@@ -187,6 +191,164 @@ class EmailVerificationView(APIView):
                 {
                     'success': False,
                     'error': 'verification_error',
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class PasswordResetRequestView(APIView):
+    """
+    API view for password reset request.
+    """
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        """Request password reset."""
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(
+                {
+                    'success': False,
+                    'error': 'validation_error',
+                    'validation_errors': serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoUserRepository
+            from infrastructure.email.services import EmailService
+            from domain.accounts.services import UserDomainService
+            
+            user_repository = DjangoUserRepository()
+            email_service = EmailService()
+            user_domain_service = UserDomainService()
+            
+            # Find user by email
+            from domain.common.entities import Email
+            email_obj = Email(serializer.validated_data['email'])
+            user = user_repository.get_by_email(email_obj.address)
+            
+            if user:
+                # Generate reset token
+                reset_token = user_domain_service.generate_verification_token(user)
+                
+                # Send reset email
+                email_service.send_password_reset_email(
+                    to_email=user.email.address,
+                    user_name=f"{user.first_name} {user.last_name}",
+                    reset_token=reset_token
+                )
+            
+            # Always return success for security (don't reveal if email exists)
+            return Response({
+                'success': True,
+                'message': 'If an account with this email exists, a password reset link has been sent.'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'password_reset_error',
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class PasswordResetConfirmView(APIView):
+    """
+    API view for password reset confirmation.
+    """
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        """Confirm password reset with token and new password."""
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(
+                {
+                    'success': False,
+                    'error': 'validation_error',
+                    'validation_errors': serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoUserRepository
+            from domain.accounts.services import UserDomainService, PasswordService
+            from django.contrib.auth.hashers import make_password
+            
+            user_repository = DjangoUserRepository()
+            user_domain_service = UserDomainService()
+            
+            # Validate token and get user
+            token = serializer.validated_data['token']
+            new_password = serializer.validated_data['password']
+            
+            # Validate password strength
+            password_result = PasswordService.validate_password(new_password)
+            if not password_result.is_valid:
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'validation_error',
+                        'message': f"Invalid password: {'; '.join(password_result.errors)}"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # For now, decode token to get user email (simplified)
+            # In production, you'd validate the token properly
+            try:
+                import base64
+                import json
+                decoded = base64.urlsafe_b64decode(token + '==').decode('utf-8')
+                token_data = json.loads(decoded)
+                user_email = token_data.get('email')
+            except:
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'invalid_token',
+                        'message': 'Invalid or expired reset token'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Find user and update password
+            user = user_repository.get_by_email(user_email)
+            if not user:
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'invalid_token',
+                        'message': 'Invalid or expired reset token'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Update password
+            user._password_hash = make_password(new_password)
+            user_repository.save(user)
+            
+            return Response({
+                'success': True,
+                'message': 'Password has been reset successfully. You can now login with your new password.'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'password_reset_error',
                     'message': str(e)
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

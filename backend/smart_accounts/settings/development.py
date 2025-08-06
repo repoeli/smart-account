@@ -26,7 +26,31 @@ INTERNAL_IPS = [
 ]
 
 # Email Configuration for Development
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+import os
+
+# AWS SES Configuration
+AWS_SES_ACCESS_KEY_ID = os.environ.get('AWS_SES_ACCESS_KEY_ID')
+AWS_SES_SECRET_ACCESS_KEY = os.environ.get('AWS_SES_SECRET_ACCESS_KEY')
+AWS_SES_REGION = os.environ.get('AWS_SES_REGION', 'us-east-1')
+
+# Email Backend Configuration
+# You can change this to control email delivery:
+# 'infrastructure.email.aws_ses_backend.DevelopmentAWSSESBackend' - AWS SES with dev logging
+# 'infrastructure.email.aws_ses_backend.AWSSESBackend' - AWS SES production
+# 'django.core.mail.backends.console.EmailBackend' - Console output (default)
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+
+# Email Settings
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@smartaccounts.com')
+SITE_NAME = os.environ.get('SITE_NAME', 'Smart Accounts')
+SITE_URL = os.environ.get('SITE_URL', 'http://localhost:3000')
+
+# Email Verification Control - YOU CONTROL THESE
+BYPASS_EMAIL_VERIFICATION = os.environ.get('BYPASS_EMAIL_VERIFICATION', 'False').lower() == 'true'
+# For development, auto-verify users to speed up testing
+AUTO_VERIFY_DEVELOPMENT_USERS = True  # Set to True for development convenience
+
+# Legacy email settings (for other backends)
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 1025
 EMAIL_USE_TLS = False

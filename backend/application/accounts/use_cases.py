@@ -11,7 +11,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from domain.accounts.entities import User, UserType, UserStatus
+from domain.accounts.entities import User, UserType, UserStatus, SubscriptionTier
 from domain.accounts.repositories import UserRepository
 from domain.accounts.services import UserDomainService
 from infrastructure.email.services import EmailService
@@ -57,9 +57,6 @@ class UserRegistrationUseCase:
         # Create user entity
         user = self._create_user_entity(registration_data)
         
-        # Validate user using domain service
-        self.user_domain_service.validate_user_registration(user)
-        
         # Save user to repository
         saved_user = self.user_repository.save(user)
         
@@ -68,62 +65,117 @@ class UserRegistrationUseCase:
         
         return {
             'user_id': str(saved_user.id),
-            'email': saved_user.email,
+            'email': saved_user.email.address,
             'message': 'Registration successful. Please check your email for verification.',
             'requires_verification': True
         }
     
     def _validate_registration_data(self, data: Dict[str, Any]) -> None:
         """Validate registration data."""
-        required_fields = [
-            'email', 'password', 'first_name', 'last_name',
-            'company_name', 'business_type', 'phone'
-        ]
+        # Basic required fields for all users
+        required_fields = ['email', 'password', 'first_name', 'last_name']
         
         for field in required_fields:
             if not data.get(field):
                 raise ValidationError(f"{field} is required")
         
+        # Validate user type specific fields
+        user_type = data.get('user_type', 'individual')
+        if user_type == 'business':
+            business_required_fields = ['company_name', 'business_type']
+            for field in business_required_fields:
+                if not data.get(field):
+                    raise ValidationError(f"{field} is required for business accounts")
+        
         # Validate email format
         if not self.user_domain_service.is_valid_email(data['email']):
             raise ValidationError("Invalid email format")
         
-        # Validate password strength
-        if not self.user_domain_service.is_valid_password(data['password']):
-            raise ValidationError("Password does not meet security requirements")
+        # Validate password strength using domain service
+        from domain.accounts.services import PasswordService
+        password_result = PasswordService.validate_password(data['password'])
+        if not password_result.is_valid:
+            raise ValidationError(f"Invalid password: {'; '.join(password_result.errors)}")
     
     def _create_user_entity(self, data: Dict[str, Any]) -> User:
         """Create User entity from registration data."""
+        from domain.accounts.entities import BusinessProfile, NotificationPreferences
+        from domain.common.entities import Email, PhoneNumber
+        
+        # Determine user type
+        user_type_str = data.get('user_type', 'individual')
+        user_type = UserType.ACCOUNTING_COMPANY if user_type_str == 'business' else UserType.INDIVIDUAL
+        
+        # Create email value object
+        email = Email(data['email'])
+        
+        # Create phone value object if provided
+        phone = None
+        if data.get('phone'):
+            phone = PhoneNumber(data['phone'])
+        
+        # Create business profile 
+        if user_type == UserType.ACCOUNTING_COMPANY:
+            business_profile = BusinessProfile(
+                company_name=data.get('company_name', ''),
+                business_type=data.get('business_type', ''),
+                tax_id=data.get('tax_id', ''),
+                vat_number=data.get('vat_number', '')
+            )
+        else:
+            # For individual users, create an empty business profile with placeholder values
+            business_profile = BusinessProfile(
+                company_name='-',  # Placeholder for individual users
+                business_type='-',  # Placeholder for individual users
+                tax_id=data.get('tax_id', ''),
+                vat_number=data.get('vat_number', '')
+            )
+        
+        # Create notification preferences
+        notification_preferences = NotificationPreferences(
+            email_notifications=True,
+            sms_notifications=False,
+            push_notifications=True,
+            marketing_emails=False,
+            receipt_processing_alerts=True,
+            payment_reminders=True,
+            tax_deadline_reminders=True
+        )
+        
         return User(
-            id=uuid.uuid4(),
-            email=data['email'],
-            password=make_password(data['password']),
+            email=email,
+            password_hash=make_password(data['password']),
             first_name=data['first_name'],
             last_name=data['last_name'],
-            company_name=data['company_name'],
-            business_type=data['business_type'],
-            phone=data['phone'],
-            user_type=UserType.INDIVIDUAL,
+            user_type=user_type,
+            business_profile=business_profile,
+            phone=phone,
             status=UserStatus.PENDING_VERIFICATION,
-            address_country=data.get('address_country', 'GB'),
+            subscription_tier=SubscriptionTier.BASIC,
+            notification_preferences=notification_preferences,
             timezone=data.get('timezone', 'Europe/London'),
-            language=data.get('language', 'en'),
-            subscription_tier=data.get('subscription_tier', 'basic'),
-            notification_preferences={
-                'email_notifications': True,
-                'sms_notifications': False,
-                'receipt_reminders': True
-            },
-            created_at=timezone.now(),
-            updated_at=timezone.now()
+            language=data.get('language', 'en')
         )
     
     def _send_verification_email(self, user: User) -> None:
-        """Send verification email to user."""
+        """Send verification email to user.""" 
+        from django.conf import settings
+        from django.utils import timezone
+        
+        # Check if auto-verification is enabled for development
+        if getattr(settings, 'AUTO_VERIFY_DEVELOPMENT_USERS', False):
+            # Auto-verify the user immediately
+            user.status = UserStatus.ACTIVE
+            user.is_verified = True
+            user.verified_at = timezone.now()
+            self.user_repository.save(user)
+            print(f"🚀 Auto-verified user: {user.email.address} (AUTO_VERIFY_DEVELOPMENT_USERS=True)")
+            return
+        
         verification_token = self.user_domain_service.generate_verification_token(user)
         
         self.email_service.send_verification_email(
-            to_email=user.email,
+            to_email=user.email.address,
             user_name=f"{user.first_name} {user.last_name}",
             verification_token=verification_token
         )
@@ -181,6 +233,7 @@ class UserLoginUseCase:
         self.user_domain_service.reset_failed_login_attempts(user)
         
         # Update last login
+        from django.utils import timezone
         user.last_login = timezone.now()
         self.user_repository.save(user)
         
@@ -189,7 +242,7 @@ class UserLoginUseCase:
         
         return {
             'user_id': str(user.id),
-            'email': user.email,
+            'email': user.email.address,
             'first_name': user.first_name,
             'last_name': user.last_name,
             'user_type': user.user_type.value,
@@ -237,17 +290,18 @@ class EmailVerificationUseCase:
             raise ValueError("User not found")
         
         # Verify user
+        from django.utils import timezone
         user.is_verified = True
         user.verified_at = timezone.now()
         user.status = UserStatus.ACTIVE
-        user.updated_at = timezone.now()
         
         # Save user
         self.user_repository.save(user)
         
         return {
+            'success': True,
             'user_id': str(user.id),
-            'email': user.email,
+            'email': user.email.address,
             'message': 'Email verified successfully. You can now log in to your account.',
             'verified': True
         }

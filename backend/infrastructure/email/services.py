@@ -8,6 +8,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EmailService:
@@ -19,6 +22,10 @@ class EmailService:
         self.from_email = settings.DEFAULT_FROM_EMAIL
         self.site_name = getattr(settings, 'SITE_NAME', 'Smart Accounts')
         self.site_url = getattr(settings, 'SITE_URL', 'http://localhost:8000')
+        
+        # Email bypass settings - gives you control over email verification
+        self.bypass_email_verification = getattr(settings, 'BYPASS_EMAIL_VERIFICATION', False)
+        self.auto_verify_development_users = getattr(settings, 'AUTO_VERIFY_DEVELOPMENT_USERS', False)
     
     def send_verification_email(
         self,
@@ -37,6 +44,15 @@ class EmailService:
         Returns:
             True if email sent successfully, False otherwise
         """
+        # Check if email verification is bypassed
+        if self.bypass_email_verification:
+            logger.info(f"📧 Email verification bypassed for {to_email} (BYPASS_EMAIL_VERIFICATION=True)")
+            logger.info(f"🔗 Verification URL would be: {self.site_url}/verify-email?token={verification_token}")
+            return True
+            
+        # Log email sending attempt
+        logger.info(f"📧 Sending verification email to {to_email}")
+        logger.info(f"📧 Using email backend: {settings.EMAIL_BACKEND}")
         subject = f"Verify your {self.site_name} account"
         
         # Create verification URL
@@ -70,10 +86,19 @@ class EmailService:
                 html_message=html_content,
                 fail_silently=False
             )
+            logger.info(f"✅ Verification email sent successfully to {to_email}")
             return True
         except Exception as e:
-            # Log the error (in production, use proper logging)
-            print(f"Failed to send verification email to {to_email}: {e}")
+            logger.error(f"❌ Failed to send verification email to {to_email}: {e}")
+            logger.error(f"📧 Email backend: {settings.EMAIL_BACKEND}")
+            logger.error(f"📧 From email: {self.from_email}")
+            
+            # Check if this is a SES sandbox limitation
+            if 'Email address not verified' in str(e):
+                logger.error("🚨 SES SANDBOX MODE: The recipient email must be verified in AWS SES console!")
+                logger.error(f"🔧 To fix: Go to AWS SES Console → Verified identities → Add {to_email}")
+                logger.error("🔧 Or move SES out of sandbox mode to send to any email address")
+                
             return False
     
     def send_password_reset_email(
