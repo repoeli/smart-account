@@ -58,7 +58,6 @@ class OCRService:
             from paddleocr import PaddleOCR
             
             self.paddle_ocr_engine = PaddleOCR(
-                use_angle_cls=True,
                 lang='en'
             )
             logger.info("PaddleOCR initialized successfully")
@@ -148,7 +147,7 @@ class OCRService:
     
     def _extract_with_paddle_ocr(self, image_path: str) -> Tuple[bool, Optional[str], Optional[str]]:
         """
-        Extract text using PaddleOCR.
+        Extract text using Enhanced PaddleOCR.
         
         Args:
             image_path: Path to the image file
@@ -156,32 +155,50 @@ class OCRService:
         Returns:
             Tuple of (success, extracted_text, error_message)
         """
-        if not self.paddle_ocr_engine:
-            return False, None, "PaddleOCR not available"
-        
         try:
-            # Perform OCR on the image
-            result = self.paddle_ocr_engine.ocr(image_path, cls=True)
+            from .enhanced_paddle_ocr import EnhancedPaddleOCRService
             
-            if not result or not result[0]:
-                return False, None, "No text detected in image"
+            # Use enhanced PaddleOCR service
+            enhanced_service = EnhancedPaddleOCRService()
+            result = enhanced_service.process_receipt_image(image_path)
             
-            # Extract text from OCR result
-            extracted_text = []
-            for line in result[0]:
-                if line and len(line) >= 2:
-                    text = line[1][0]  # Get the text from the OCR result
-                    confidence = line[1][1]  # Get confidence score
-                    if confidence > 0.5:  # Only include text with confidence > 50%
-                        extracted_text.append(text)
+            if result["success"]:
+                # Return structured data with raw text
+                return True, result["raw_text"], None
+            else:
+                return False, None, result.get("message", "Enhanced PaddleOCR failed")
+                
+        except ImportError:
+            # Fallback to original PaddleOCR if enhanced version not available
+            if not self.paddle_ocr_engine:
+                return False, None, "PaddleOCR not available"
             
-            full_text = '\n'.join(extracted_text)
-            return True, full_text, None
-            
+            try:
+                # Perform OCR on the image
+                result = self.paddle_ocr_engine.ocr(image_path)
+                
+                if not result or not result[0]:
+                    return False, None, "No text detected in image"
+                
+                # Extract text from OCR result
+                extracted_text = []
+                for line in result[0]:
+                    if line and len(line) >= 2:
+                        text = line[1][0]  # Get the text from the OCR result
+                        confidence = line[1][1]  # Get confidence score
+                        if confidence > 0.5:  # Only include text with confidence > 50%
+                            extracted_text.append(text)
+                
+                full_text = '\n'.join(extracted_text)
+                return True, full_text, None
+                
+            except Exception as e:
+                error_msg = f"PaddleOCR processing failed: {e}"
+                logger.error(error_msg)
+                return False, None, error_msg
         except Exception as e:
-            error_msg = f"PaddleOCR processing failed: {e}"
-            logger.error(error_msg)
-            return False, None, error_msg
+            logger.error(f"Enhanced PaddleOCR processing failed: {e}")
+            return False, None, f"Enhanced PaddleOCR processing failed: {e}"
     
     def _fallback_ocr(self, image_path: str) -> Tuple[bool, Optional[str], Optional[str]]:
         """Fallback OCR method when other engines are not available."""
@@ -293,7 +310,49 @@ class OCRService:
             Tuple of (success, ocr_data, error_message)
         """
         try:
-            # Extract raw text first
+            # Try enhanced PaddleOCR for structured data first
+            if method is None or method == OCRMethod.PADDLE_OCR:
+                try:
+                    from .enhanced_paddle_ocr import EnhancedPaddleOCRService
+                    
+                    enhanced_service = EnhancedPaddleOCRService()
+                    result = enhanced_service.process_receipt_image(image_path)
+                    
+                    if result["success"]:
+                        # Convert enhanced result to OCRData format
+                        ocr_data = OCRData(
+                            merchant_name=result.get("merchant", ""),
+                            total_amount=str(result.get("total", "")) if result.get("total") else None,
+                            date=result.get("date", ""),
+                            receipt_number=result.get("invoice_number", ""),
+                            vat_amount=str(result.get("vat", "")) if result.get("vat") else None,
+                            vat_number="",  # Enhanced service doesn't extract this yet
+                            currency=result.get("currency", "£"),
+                            category=result.get("category", ""),
+                            payment_method=result.get("payment_method", ""),
+                            confidence_score=result.get("ocr_confidence", 0.0),
+                            raw_text=result.get("raw_text", ""),
+                            items=result.get("items", []),
+                            additional_data={
+                                "subtotal": result.get("subtotal"),
+                                "vat_rate": result.get("vat_rate"),
+                                "receipt_type": result.get("receipt_type"),
+                                "layout_type": result.get("layout_type"),
+                                "is_thermal": result.get("is_thermal"),
+                                "needs_review": result.get("needs_review"),
+                                "processing_time": result.get("processing_time"),
+                                "field_confidence": result.get("field_confidence", {}),
+                                "vat_details": result.get("vat_details", {})
+                            }
+                        )
+                        return True, ocr_data, None
+                        
+                except ImportError:
+                    logger.info("Enhanced PaddleOCR not available, falling back to standard OCR")
+                except Exception as e:
+                    logger.warning(f"Enhanced PaddleOCR failed: {e}, falling back to standard OCR")
+            
+            # Fallback to standard OCR methods
             success, raw_text, error = self.extract_text_from_image(image_path, method)
             if not success:
                 return False, None, error

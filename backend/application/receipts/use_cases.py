@@ -35,6 +35,7 @@ class ReceiptUploadUseCase:
         self.file_storage_service = file_storage_service
         self.ocr_service = ocr_service
         self.receipt_business_service = receipt_business_service
+        self.receipt_validation_service = ReceiptValidationService()
     
     def execute(self, 
                 user: User,

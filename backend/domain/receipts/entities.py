@@ -64,7 +64,8 @@ class OCRData(ValueObject):
                  receipt_number: Optional[str] = None,
                  items: Optional[List[Dict[str, Any]]] = None,
                  confidence_score: Optional[float] = None,
-                 raw_text: Optional[str] = None):
+                 raw_text: Optional[str] = None,
+                 additional_data: Optional[Dict[str, Any]] = None):
         self.merchant_name = merchant_name
         self.total_amount = total_amount
         self.currency = currency
@@ -75,6 +76,7 @@ class OCRData(ValueObject):
         self.items = items or []
         self.confidence_score = confidence_score
         self.raw_text = raw_text
+        self.additional_data = additional_data or {}
     
     def __eq__(self, other):
         if not isinstance(other, OCRData):
@@ -88,7 +90,8 @@ class OCRData(ValueObject):
                 self.receipt_number == other.receipt_number and
                 self.items == other.items and
                 self.confidence_score == other.confidence_score and
-                self.raw_text == other.raw_text)
+                self.raw_text == other.raw_text and
+                self.additional_data == other.additional_data)
     
     def _get_equality_components(self) -> tuple:
         """Return components used for equality comparison."""
@@ -102,7 +105,8 @@ class OCRData(ValueObject):
             self.receipt_number,
             tuple(self.items) if self.items else None,
             self.confidence_score,
-            self.raw_text
+            self.raw_text,
+            tuple(sorted(self.additional_data.items())) if self.additional_data else None
         )
     
     def __hash__(self):

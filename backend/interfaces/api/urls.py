@@ -7,7 +7,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .views import (
-    UserRegistrationView, UserLoginView, EmailVerificationView, UserProfileView,
+    HealthCheckView, UserRegistrationView, UserLoginView, EmailVerificationView, UserProfileView,
     PasswordResetRequestView, PasswordResetConfirmView,
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView
@@ -20,6 +20,9 @@ from .management_views import (
 app_name = 'api'
 
 urlpatterns = [
+    # Health check endpoint
+    path('health/', HealthCheckView.as_view(), name='health-check'),
+    
     # Authentication endpoints
     path('auth/register/', UserRegistrationView.as_view(), name='user-register'),
     path('auth/login/', UserLoginView.as_view(), name='user-login'),

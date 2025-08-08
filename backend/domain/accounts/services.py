@@ -684,10 +684,17 @@ class UserDomainService:
     @staticmethod
     def generate_jwt_token(user: User) -> dict[str, any]:
         """Generate JWT token for user."""
-        # This would need to be implemented with JWT token generation
-        # For now, we'll use a placeholder
+        from rest_framework_simplejwt.tokens import RefreshToken
+        from django.conf import settings
+        
+        # Create refresh token
+        refresh = RefreshToken.for_user(user)
+        
+        # Get access token from refresh token
+        access_token = refresh.access_token
+        
         return {
-            'access_token': 'placeholder_access_token',
-            'refresh_token': 'placeholder_refresh_token',
-            'expires_in': 3600
+            'access_token': str(access_token),
+            'refresh_token': str(refresh),
+            'expires_in': settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
         } 

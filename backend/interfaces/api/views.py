@@ -7,21 +7,36 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+import logging
 
 from .serializers import (
     UserRegistrationSerializer, UserLoginSerializer, EmailVerificationSerializer,
-    UserProfileSerializer, ReceiptUploadSerializer, ReceiptUploadResponseSerializer,
-    ReceiptListResponseSerializer, ReceiptDetailResponseSerializer,
-    ReceiptUpdateSerializer, ReceiptReprocessSerializer, ReceiptValidateSerializer,
-    ReceiptCategorizeSerializer, ReceiptStatisticsResponseSerializer,
-    ReceiptReprocessResponseSerializer, ReceiptValidateResponseSerializer,
-    ReceiptCategorizeResponseSerializer
+    PasswordResetRequestSerializer, PasswordResetConfirmSerializer, UserProfileSerializer,
+    ReceiptUploadSerializer, ReceiptUploadResponseSerializer, ReceiptReprocessSerializer,
+    ReceiptValidateSerializer, ReceiptCategorizeSerializer, ReceiptUpdateSerializer
 )
 from infrastructure.ocr.services import OCRService, OCRMethod
 from domain.receipts.entities import ReceiptType
+
+logger = logging.getLogger(__name__)
+
+class HealthCheckView(APIView):
+    """
+    Health check endpoint for monitoring.
+    """
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        """Return health status."""
+        return Response({
+            'status': 'healthy',
+            'message': 'Backend is running',
+            'timestamp': timezone.now().isoformat()
+        }, status=status.HTTP_200_OK)
 
 
 class UserRegistrationView(APIView):
@@ -439,7 +454,7 @@ class ReceiptUploadView(APIView):
     
     def post(self, request):
         """Upload a receipt."""
-        serializer = ReceiptUploadSerializer(data=request.data, files=request.FILES)
+        serializer = ReceiptUploadSerializer(data=request.data)
         
         if not serializer.is_valid():
             return Response(

@@ -112,9 +112,9 @@ class ApiClient {
   // Authentication endpoints
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await this.client.post<LoginResponse>('/auth/login/', credentials);
-    if (response.data.access && response.data.refresh) {
-      this.setTokens(response.data.access, response.data.refresh);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+    if (response.data.access_token && response.data.refresh_token) {
+      this.setTokens(response.data.access_token, response.data.refresh_token);
+      localStorage.setItem('user', JSON.stringify(response.data));
     }
     return response.data;
   }

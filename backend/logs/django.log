@@ -414,3 +414,484 @@ INFO 2025-08-06 22:13:36,520 basehttp 3160 20128 "POST /api/v1/auth/register/ HT
 INFO 2025-08-06 22:13:45,479 basehttp 3160 20128 "POST /api/v1/auth/login/ HTTP/1.1" 200 273
 INFO 2025-08-06 22:14:25,237 basehttp 3160 20128 "POST /api/v1/auth/register/ HTTP/1.1" 201 202
 INFO 2025-08-06 22:14:28,479 basehttp 3160 20128 "POST /api/v1/auth/login/ HTTP/1.1" 200 261
+INFO 2025-08-06 23:12:53,915 basehttp 3160 1988 "POST /api/v1/auth/login/ HTTP/1.1" 200 261
+INFO 2025-08-06 23:13:07,852 basehttp 3160 1988 "POST /api/v1/auth/login/ HTTP/1.1" 200 273
+INFO 2025-08-06 23:46:18,046 basehttp 3160 11520 "POST /api/v1/auth/login/ HTTP/1.1" 200 273
+INFO 2025-08-06 23:46:32,937 basehttp 3160 11520 "POST /api/v1/auth/login/ HTTP/1.1" 200 261
+ERROR 2025-08-06 23:47:50,490 log 3160 22984 Internal Server Error: /api/v1/auth/login/
+ERROR 2025-08-06 23:47:50,491 basehttp 3160 22984 "POST /api/v1/auth/login/ HTTP/1.1" 500 80
+ERROR 2025-08-06 23:53:08,073 log 3160 49488 Internal Server Error: /api/v1/auth/login/
+ERROR 2025-08-06 23:53:08,073 basehttp 3160 49488 "POST /api/v1/auth/login/ HTTP/1.1" 500 80
+INFO 2025-08-06 23:55:54,175 basehttp 3160 47676 "POST /api/v1/auth/login/ HTTP/1.1" 200 268
+INFO 2025-08-06 23:56:12,163 basehttp 3160 19412 "POST /api/v1/auth/login/ HTTP/1.1" 200 268
+INFO 2025-08-06 23:56:23,510 basehttp 3160 48872 "POST /api/v1/auth/login/ HTTP/1.1" 200 268
+INFO 2025-08-06 23:56:57,381 basehttp 3160 46360 "POST /api/v1/auth/login/ HTTP/1.1" 200 268
+INFO 2025-08-06 23:59:14,002 basehttp 3160 51880 "POST /api/v1/auth/login/ HTTP/1.1" 200 268
+WARNING 2025-08-06 23:59:16,991 log 3160 45320 Unauthorized: /api/v1/receipts/upload/
+WARNING 2025-08-06 23:59:16,992 basehttp 3160 45320 "POST /api/v1/receipts/upload/ HTTP/1.1" 401 183
+INFO 2025-08-07 00:04:41,876 basehttp 3160 34536 "POST /api/v1/auth/login/ HTTP/1.1" 200 268
+WARNING 2025-08-07 00:05:27,043 log 3160 19172 Unauthorized: /api/v1/receipts/upload/
+WARNING 2025-08-07 00:05:27,044 basehttp 3160 19172 "POST /api/v1/receipts/upload/ HTTP/1.1" 401 183
+INFO 2025-08-07 00:11:50,261 basehttp 3160 17944 "POST /api/v1/auth/login/ HTTP/1.1" 200 268
+WARNING 2025-08-07 00:12:24,433 log 3160 48072 Unauthorized: /api/v1/receipts/upload/
+WARNING 2025-08-07 00:12:24,435 basehttp 3160 48072 "POST /api/v1/receipts/upload/ HTTP/1.1" 401 183
+INFO 2025-08-07 00:14:00,532 autoreload 3160 21452 C:\cursor\smart-account\backend\domain\accounts\services.py changed, reloading.
+INFO 2025-08-07 00:14:03,233 autoreload 32684 16492 Watching for file changes with StatReloader
+INFO 2025-08-07 00:16:40,147 autoreload 32684 16492 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 00:16:44,790 autoreload 26892 20892 Watching for file changes with StatReloader
+INFO 2025-08-07 00:19:17,918 autoreload 26892 20892 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 00:19:20,497 autoreload 18880 31596 Watching for file changes with StatReloader
+INFO 2025-08-07 00:22:01,053 autoreload 18880 31596 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 00:22:03,623 autoreload 50420 26544 Watching for file changes with StatReloader
+WARNING 2025-08-07 00:26:19,992 log 50420 39760 Not Found: /api/auth/login/
+WARNING 2025-08-07 00:26:19,993 basehttp 50420 39760 "POST /api/auth/login/ HTTP/1.1" 404 12469
+INFO 2025-08-07 00:29:17,582 basehttp 50420 52168 "POST /api/v1/auth/login/ HTTP/1.1" 200 776
+INFO 2025-08-07 00:32:25,258 basehttp 50420 25952 "OPTIONS /api/v1/auth/login/ HTTP/1.1" 200 0
+INFO 2025-08-07 00:32:27,233 basehttp 50420 25952 "POST /api/v1/auth/login/ HTTP/1.1" 200 770
+WARNING 2025-08-07 00:34:55,387 log 50420 30984 Not Found: /api/v1/api/v1/auth/login/
+WARNING 2025-08-07 00:34:55,388 basehttp 50420 30984 "POST /api/v1/api/v1/auth/login/ HTTP/1.1" 404 17210
+INFO 2025-08-07 00:37:50,771 autoreload 50420 26544 C:\cursor\smart-account\backend\domain\accounts\services.py changed, reloading.
+INFO 2025-08-07 00:37:53,343 autoreload 42092 46400 Watching for file changes with StatReloader
+INFO 2025-08-07 00:41:37,068 basehttp 42092 45792 "POST /api/v1/auth/login/ HTTP/1.1" 200 777
+ERROR 2025-08-07 00:43:08,695 log 42092 43356 Internal Server Error: /api/v1/receipts/upload/
+Traceback (most recent call last):
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\backend\interfaces\api\views.py", line 442, in post
+    serializer = ReceiptUploadSerializer(data=request.data, files=request.FILES)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\serializers.py", line 116, in __init__
+    super().__init__(**kwargs)
+TypeError: Field.__init__() got an unexpected keyword argument 'files'
+ERROR 2025-08-07 00:43:08,741 basehttp 42092 43356 "POST /api/v1/receipts/upload/ HTTP/1.1" 500 126144
+INFO 2025-08-07 00:43:33,696 basehttp 42092 26492 "POST /api/v1/auth/login/ HTTP/1.1" 200 777
+ERROR 2025-08-07 00:45:23,570 log 42092 22044 Internal Server Error: /api/v1/receipts/upload/
+Traceback (most recent call last):
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\backend\interfaces\api\views.py", line 442, in post
+    serializer = ReceiptUploadSerializer(data=request.data, files=request.FILES)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\serializers.py", line 116, in __init__
+    super().__init__(**kwargs)
+TypeError: Field.__init__() got an unexpected keyword argument 'files'
+ERROR 2025-08-07 00:45:23,626 basehttp 42092 22044 "POST /api/v1/receipts/upload/ HTTP/1.1" 500 126144
+INFO 2025-08-07 00:49:33,759 basehttp 42092 47080 "POST /api/v1/auth/login/ HTTP/1.1" 200 778
+INFO 2025-08-07 00:59:07,820 autoreload 4348 54832 Watching for file changes with StatReloader
+INFO 2025-08-07 00:59:57,697 basehttp 4348 52480 "POST /api/v1/auth/login/ HTTP/1.1" 200 770
+INFO 2025-08-07 01:01:39,882 basehttp 4348 53612 "OPTIONS /api/v1/auth/register/ HTTP/1.1" 200 19808
+INFO 2025-08-07 01:01:40,103 basehttp 4348 53612 "GET /__debug__/history_sidebar/?store_id=1002977ab6da4a02a053d8fd67640686 HTTP/1.1" 200 9112
+INFO 2025-08-07 01:01:42,125 basehttp 4348 53612 "OPTIONS /api/v1/auth/register/ HTTP/1.1" 200 19807
+INFO 2025-08-07 01:01:42,344 basehttp 4348 53612 "GET /__debug__/history_sidebar/?store_id=0576cb176097496c9c4ffd34623ea7fd HTTP/1.1" 200 9111
+WARNING 2025-08-07 01:01:45,301 log 4348 53612 Method Not Allowed: /api/v1/auth/register/
+WARNING 2025-08-07 01:01:45,302 basehttp 4348 53612 "GET /api/v1/auth/register/ HTTP/1.1" 405 19499
+WARNING 2025-08-07 01:01:45,434 log 4348 53612 Not Found: /favicon.ico
+WARNING 2025-08-07 01:01:45,435 basehttp 4348 53612 "GET /favicon.ico HTTP/1.1" 404 12451
+WARNING 2025-08-07 01:43:43,657 log 4348 20676 Not Found: /api/v1/health/
+WARNING 2025-08-07 01:43:43,658 basehttp 4348 20676 "GET /api/v1/health/ HTTP/1.1" 404 17165
+INFO 2025-08-07 01:45:26,019 autoreload 4348 54832 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-07 01:45:29,968 autoreload 44524 180 Watching for file changes with StatReloader
+INFO 2025-08-07 01:48:16,902 autoreload 44524 180 C:\cursor\smart-account\backend\interfaces\api\urls.py changed, reloading.
+INFO 2025-08-07 01:48:20,105 autoreload 42632 1960 Watching for file changes with StatReloader
+INFO 2025-08-07 01:49:41,706 basehttp 42632 25620 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 01:49:47,048 basehttp 42632 27516 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 01:49:49,129 log 42632 27308 Unauthorized: /api/v1/receipts/upload/
+WARNING 2025-08-07 01:49:49,130 basehttp 42632 27308 "OPTIONS /api/v1/receipts/upload/ HTTP/1.1" 401 58
+ERROR 2025-08-07 01:49:51,427 log 42632 46188 Internal Server Error: /api/v1/receipts/upload/
+Traceback (most recent call last):
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\backend\interfaces\api\views.py", line 457, in post
+    serializer = ReceiptUploadSerializer(data=request.data, files=request.FILES)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\serializers.py", line 116, in __init__
+    super().__init__(**kwargs)
+TypeError: Field.__init__() got an unexpected keyword argument 'files'
+ERROR 2025-08-07 01:49:51,458 basehttp 42632 46188 "POST /api/v1/receipts/upload/ HTTP/1.1" 500 126369
+INFO 2025-08-07 01:59:39,103 basehttp 42632 51300 "GET / HTTP/1.1" 200 48
+INFO 2025-08-07 01:59:41,171 basehttp 42632 44840 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 01:59:44,246 basehttp 42632 35200 "POST /api/v1/auth/register/ HTTP/1.1" 201 200
+INFO 2025-08-07 01:59:47,806 basehttp 42632 42536 "POST /api/v1/auth/login/ HTTP/1.1" 200 778
+ERROR 2025-08-07 01:59:49,950 log 42632 20944 Internal Server Error: /api/v1/receipts/upload/
+Traceback (most recent call last):
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\backend\interfaces\api\views.py", line 457, in post
+    serializer = ReceiptUploadSerializer(data=request.data, files=request.FILES)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\serializers.py", line 116, in __init__
+    super().__init__(**kwargs)
+TypeError: Field.__init__() got an unexpected keyword argument 'files'
+ERROR 2025-08-07 01:59:49,975 basehttp 42632 20944 "POST /api/v1/receipts/upload/ HTTP/1.1" 500 126365
+INFO 2025-08-07 02:06:23,340 basehttp 42632 22272 "POST /api/v1/auth/login/ HTTP/1.1" 200 780
+ERROR 2025-08-07 02:06:25,565 log 42632 30368 Internal Server Error: /api/v1/receipts/upload/
+Traceback (most recent call last):
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\backend\interfaces\api\views.py", line 457, in post
+    serializer = ReceiptUploadSerializer(data=request.data, files=request.FILES)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\serializers.py", line 116, in __init__
+    super().__init__(**kwargs)
+TypeError: Field.__init__() got an unexpected keyword argument 'files'
+ERROR 2025-08-07 02:06:25,593 basehttp 42632 30368 "POST /api/v1/receipts/upload/ HTTP/1.1" 500 126369
+INFO 2025-08-07 02:06:48,869 autoreload 42632 1960 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-07 02:06:51,781 autoreload 48668 53556 Watching for file changes with StatReloader
+INFO 2025-08-07 02:25:10,056 basehttp 48668 29124 "POST /api/v1/auth/login/ HTTP/1.1" 200 778
+INFO 2025-08-07 02:34:44,326 autoreload 50160 3820 Watching for file changes with StatReloader
+INFO 2025-08-07 02:36:16,155 basehttp 50160 48948 "OPTIONS /api/v1/auth/login/ HTTP/1.1" 200 0
+INFO 2025-08-07 02:36:17,595 basehttp 50160 48948 "POST /api/v1/auth/login/ HTTP/1.1" 200 770
+INFO 2025-08-07 02:36:37,603 basehttp 50160 48948 "POST /api/v1/auth/login/ HTTP/1.1" 200 770
+INFO 2025-08-07 02:46:25,854 basehttp 50160 13736 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 02:50:20,166 basehttp 50160 24668 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 02:50:33,598 basehttp 50160 19840 "POST /api/v1/auth/login/ HTTP/1.1" 200 778
+ERROR 2025-08-07 02:50:37,567 log 50160 11628 Internal Server Error: /api/v1/receipts/upload/
+Traceback (most recent call last):
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\decorators\csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\backend\interfaces\api\views.py", line 457, in post
+    serializer = ReceiptUploadSerializer(data=request.data, files=request.FILES)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cursor\smart-account\venv\Lib\site-packages\rest_framework\serializers.py", line 116, in __init__
+    super().__init__(**kwargs)
+TypeError: Field.__init__() got an unexpected keyword argument 'files'
+ERROR 2025-08-07 02:50:38,229 basehttp 50160 11628 "POST /api/v1/receipts/upload/ HTTP/1.1" 500 126367
+INFO 2025-08-07 02:51:08,514 basehttp 50160 20768 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+INFO 2025-08-07 02:51:34,335 basehttp 50160 22952 "POST /api/v1/auth/login/ HTTP/1.1" 200 778
+INFO 2025-08-07 02:52:49,080 basehttp 50160 20768 "GET /api/v1/health/ HTTP/1.1" 200 98
+WARNING 2025-08-07 02:52:49,157 log 50160 20768 Unauthorized: /api/v1/receipts/upload/
+WARNING 2025-08-07 02:52:49,158 basehttp 50160 20768 "POST /api/v1/receipts/upload/ HTTP/1.1" 401 58
+INFO 2025-08-07 03:02:23,371 autoreload 50160 3820 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-07 03:02:26,544 autoreload 35428 52496 Watching for file changes with StatReloader
+INFO 2025-08-07 03:09:50,297 basehttp 35428 25424 "POST /api/v1/auth/login/ HTTP/1.1" 200 778
+INFO 2025-08-07 03:10:05,938 autoreload 35428 52496 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-07 03:10:09,436 autoreload 14540 47148 Watching for file changes with StatReloader
+INFO 2025-08-07 03:14:17,637 autoreload 16116 40752 Watching for file changes with StatReloader
+INFO 2025-08-07 03:20:48,701 basehttp 16116 22324 "POST /api/v1/auth/login/ HTTP/1.1" 200 772
+WARNING 2025-08-07 03:21:16,729 log 16116 27500 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:21:16,729 basehttp 16116 27500 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:21:31,753 log 16116 19864 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:21:31,753 basehttp 16116 19864 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:21:47,188 log 16116 31104 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:21:47,189 basehttp 16116 31104 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:22:06,575 log 16116 49872 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:22:06,576 basehttp 16116 49872 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:22:23,961 log 16116 33672 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:22:23,961 basehttp 16116 33672 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:22:37,739 log 16116 28976 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:22:37,740 basehttp 16116 28976 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:22:52,383 log 16116 30808 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:22:52,384 basehttp 16116 30808 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:23:08,612 log 16116 6456 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:23:08,613 basehttp 16116 6456 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:23:23,299 log 16116 18520 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:23:23,300 basehttp 16116 18520 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:23:40,773 log 16116 40820 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:23:40,775 basehttp 16116 40820 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:24:01,311 log 16116 984 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:24:01,312 basehttp 16116 984 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:24:27,170 log 16116 14944 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:24:27,171 basehttp 16116 14944 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:24:45,864 log 16116 21100 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:24:45,865 basehttp 16116 21100 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:25:04,385 log 16116 41276 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:25:04,386 basehttp 16116 41276 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:25:28,361 log 16116 35772 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:25:28,362 basehttp 16116 35772 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+WARNING 2025-08-07 03:25:46,679 log 16116 38048 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 03:25:46,680 basehttp 16116 38048 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 15:26:04,671 autoreload 25076 31288 Watching for file changes with StatReloader
+INFO 2025-08-07 15:27:26,711 basehttp 25076 28116 "OPTIONS /api/v1/auth/login/ HTTP/1.1" 200 0
+INFO 2025-08-07 15:27:29,860 basehttp 25076 28116 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+INFO 2025-08-07 15:27:49,672 basehttp 25076 28116 "OPTIONS /api/v1/health/ HTTP/1.1" 200 0
+INFO 2025-08-07 15:27:49,778 basehttp 25076 28116 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 15:27:49,783 basehttp 25076 28116 "OPTIONS /api/v1/receipts/upload/ HTTP/1.1" 200 0
+WARNING 2025-08-07 15:28:18,126 log 25076 28116 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 15:28:18,127 basehttp 25076 28116 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 15:33:58,292 autoreload 25076 31288 C:\cursor\smart-account\venv\Lib\site-packages\pytz\lazy.py changed, reloading.
+INFO 2025-08-07 15:34:03,614 autoreload 54060 6556 Watching for file changes with StatReloader
+INFO 2025-08-07 15:37:17,760 autoreload 54060 6556 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 15:37:24,419 autoreload 51420 25448 Watching for file changes with StatReloader
+INFO 2025-08-07 15:40:19,028 autoreload 51420 25448 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 15:40:22,306 autoreload 28480 47584 Watching for file changes with StatReloader
+INFO 2025-08-07 15:43:46,782 autoreload 28480 47584 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 15:43:53,677 autoreload 52496 35020 Watching for file changes with StatReloader
+INFO 2025-08-07 16:12:19,036 autoreload 52496 35020 C:\cursor\smart-account\backend\domain\receipts\entities.py changed, reloading.
+INFO 2025-08-07 16:12:21,958 autoreload 35620 34464 Watching for file changes with StatReloader
+INFO 2025-08-07 16:15:19,769 autoreload 35620 34464 C:\cursor\smart-account\backend\domain\receipts\entities.py changed, reloading.
+INFO 2025-08-07 16:15:22,641 autoreload 40484 23428 Watching for file changes with StatReloader
+INFO 2025-08-07 16:18:24,988 autoreload 40484 23428 C:\cursor\smart-account\backend\domain\receipts\entities.py changed, reloading.
+INFO 2025-08-07 16:18:27,834 autoreload 32512 13028 Watching for file changes with StatReloader
+INFO 2025-08-07 16:34:54,760 autoreload 32512 13028 C:\cursor\smart-account\backend\domain\receipts\entities.py changed, reloading.
+INFO 2025-08-07 16:34:57,249 autoreload 15776 20032 Watching for file changes with StatReloader
+INFO 2025-08-07 18:03:02,904 autoreload 32092 2240 Watching for file changes with StatReloader
+INFO 2025-08-07 18:11:00,411 autoreload 32092 2240 C:\cursor\smart-account\backend\application\receipts\use_cases.py changed, reloading.
+INFO 2025-08-07 18:11:05,901 autoreload 10024 20004 Watching for file changes with StatReloader
+INFO 2025-08-07 18:13:54,206 autoreload 10024 20004 C:\cursor\smart-account\backend\application\receipts\use_cases.py changed, reloading.
+INFO 2025-08-07 18:13:57,551 autoreload 34952 1740 Watching for file changes with StatReloader
+INFO 2025-08-07 19:17:36,652 autoreload 34952 1740 C:\cursor\smart-account\backend\application\receipts\use_cases.py changed, reloading.
+INFO 2025-08-07 19:17:39,207 autoreload 49204 36672 Watching for file changes with StatReloader
+INFO 2025-08-07 19:24:12,415 basehttp 49204 47408 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 19:24:45,072 basehttp 49204 30240 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 19:25:09,155 log 49204 41232 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 19:25:09,156 basehttp 49204 41232 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 19:34:35,851 basehttp 49204 49828 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 19:35:08,250 basehttp 49204 29432 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 19:35:32,650 log 49204 21796 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 19:35:32,652 basehttp 49204 21796 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 19:37:33,062 autoreload 52312 12312 Watching for file changes with StatReloader
+INFO 2025-08-07 19:38:25,568 basehttp 52312 30364 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 19:38:56,749 basehttp 52312 40520 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 19:39:25,284 log 52312 14464 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 19:39:25,286 basehttp 52312 14464 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 19:39:53,167 basehttp 52312 42632 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 19:40:22,373 basehttp 52312 13456 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 19:40:39,037 log 52312 10332 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 19:40:39,038 basehttp 52312 10332 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 19:45:28,569 autoreload 49856 15936 Watching for file changes with StatReloader
+INFO 2025-08-07 19:46:12,504 basehttp 49856 36756 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 19:47:06,254 basehttp 49856 16920 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 19:47:57,200 log 49856 26980 Bad Request: /api/v1/receipts/upload/
+INFO 2025-08-07 19:47:57,201 basehttp 49856 26980 - Broken pipe from ('127.0.0.1', 55333)
+INFO 2025-08-07 19:49:57,195 basehttp 49856 14852 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 19:50:43,712 basehttp 49856 26388 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 19:51:06,801 log 49856 26340 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 19:51:06,802 basehttp 49856 26340 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 19:54:35,749 basehttp 49856 16860 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 20:05:09,718 basehttp 49856 21796 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 20:05:34,746 log 49856 51148 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 20:05:34,748 basehttp 49856 51148 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 20:06:07,158 basehttp 49856 52668 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 20:15:35,074 basehttp 49856 16688 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 20:15:53,358 log 49856 4288 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 20:15:53,359 basehttp 49856 4288 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 20:31:52,653 autoreload 31344 35664 Watching for file changes with StatReloader
+INFO 2025-08-07 20:32:39,039 basehttp 31344 41972 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 20:43:58,433 basehttp 31344 25852 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 20:44:23,708 log 31344 22000 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 20:44:23,709 basehttp 31344 22000 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 20:58:28,399 autoreload 31344 35664 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 20:58:31,355 autoreload 3908 32984 Watching for file changes with StatReloader
+INFO 2025-08-07 20:58:58,113 autoreload 3908 32984 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 20:59:00,678 autoreload 34840 50352 Watching for file changes with StatReloader
+INFO 2025-08-07 20:59:48,510 autoreload 49796 11668 Watching for file changes with StatReloader
+INFO 2025-08-07 21:00:28,879 basehttp 49796 39140 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 21:07:04,130 basehttp 49796 47196 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 21:07:47,147 log 49796 26388 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 21:07:47,161 basehttp 49796 26388 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 22:42:39,317 autoreload 49796 11668 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 22:42:42,555 autoreload 18420 27564 Watching for file changes with StatReloader
+INFO 2025-08-07 22:46:10,158 autoreload 18420 27564 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 22:46:12,856 autoreload 13268 20128 Watching for file changes with StatReloader
+INFO 2025-08-07 22:46:59,427 autoreload 13268 20128 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 22:47:01,879 autoreload 23372 43120 Watching for file changes with StatReloader
+INFO 2025-08-07 22:48:24,371 autoreload 31060 19664 Watching for file changes with StatReloader
+INFO 2025-08-07 23:01:28,970 autoreload 31060 19664 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 23:01:32,641 autoreload 3600 19384 Watching for file changes with StatReloader
+INFO 2025-08-07 23:02:13,106 autoreload 27972 19184 Watching for file changes with StatReloader
+INFO 2025-08-07 23:14:28,898 autoreload 27972 19184 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-07 23:14:31,505 autoreload 53348 44684 Watching for file changes with StatReloader
+INFO 2025-08-07 23:14:53,713 autoreload 32832 16692 Watching for file changes with StatReloader
+INFO 2025-08-07 23:15:24,863 basehttp 32832 41048 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 23:21:19,129 basehttp 32832 20756 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 23:21:37,366 log 32832 16440 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 23:21:37,367 basehttp 32832 16440 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-07 23:29:00,253 autoreload 17752 26168 Watching for file changes with StatReloader
+INFO 2025-08-07 23:30:06,013 basehttp 17752 34904 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 23:42:35,963 autoreload 19592 33376 Watching for file changes with StatReloader
+INFO 2025-08-07 23:42:52,345 basehttp 19592 29276 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-07 23:55:08,006 basehttp 19592 13772 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-07 23:55:20,380 log 19592 17040 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-07 23:55:20,381 basehttp 19592 17040 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-08 00:24:00,787 autoreload 19592 33376 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-08 00:24:04,195 autoreload 25988 12104 Watching for file changes with StatReloader
+INFO 2025-08-08 00:24:41,332 autoreload 46540 38316 Watching for file changes with StatReloader
+INFO 2025-08-08 00:25:23,660 basehttp 46540 44004 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 00:39:53,188 autoreload 13244 15532 Watching for file changes with StatReloader
+INFO 2025-08-08 00:50:51,557 autoreload 13244 15532 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-08 00:51:23,224 autoreload 45156 7876 Watching for file changes with StatReloader
+INFO 2025-08-08 01:07:36,423 basehttp 45156 53332 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 01:10:15,848 basehttp 45156 41016 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 01:20:35,203 autoreload 45156 7876 C:\cursor\smart-account\backend\infrastructure\ocr\enhanced_paddle_ocr.py changed, reloading.
+INFO 2025-08-08 01:21:01,607 autoreload 21012 29272 Watching for file changes with StatReloader
+INFO 2025-08-08 01:21:16,041 autoreload 21012 29272 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-08 01:21:19,133 autoreload 35796 35612 Watching for file changes with StatReloader
+INFO 2025-08-08 01:22:04,453 autoreload 39076 51028 Watching for file changes with StatReloader
+INFO 2025-08-08 02:48:59,875 autoreload 39076 51028 C:\cursor\smart-account\backend\infrastructure\ocr\services.py changed, reloading.
+INFO 2025-08-08 02:49:02,992 autoreload 44284 15924 Watching for file changes with StatReloader
+INFO 2025-08-08 02:49:18,013 autoreload 26080 41232 Watching for file changes with StatReloader
+INFO 2025-08-08 03:04:07,113 autoreload 4272 15676 Watching for file changes with StatReloader
+INFO 2025-08-08 03:04:54,192 basehttp 4272 16456 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 03:05:35,203 basehttp 4272 46076 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 03:05:57,914 log 4272 7220 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-08 03:05:57,915 basehttp 4272 7220 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-08 03:28:26,432 autoreload 45896 23504 Watching for file changes with StatReloader
+INFO 2025-08-08 03:28:59,527 basehttp 45896 24860 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 03:30:14,544 basehttp 45896 42396 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 03:31:00,422 log 45896 22476 Bad Request: /api/v1/receipts/upload/
+INFO 2025-08-08 03:31:00,426 basehttp 45896 22476 - Broken pipe from ('127.0.0.1', 53171)
+INFO 2025-08-08 03:42:46,895 autoreload 31712 42224 Watching for file changes with StatReloader
+INFO 2025-08-08 03:44:16,747 basehttp 31712 25484 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 03:44:48,287 basehttp 31712 9556 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 03:45:14,273 log 31712 27464 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-08 03:45:14,274 basehttp 31712 27464 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-08 03:50:15,511 autoreload 40860 38916 Watching for file changes with StatReloader
+INFO 2025-08-08 03:50:54,542 basehttp 40860 35432 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 03:51:37,186 basehttp 40860 32144 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 03:52:01,323 log 40860 26748 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-08 03:52:01,324 basehttp 40860 26748 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-08 04:42:07,867 autoreload 17332 35916 Watching for file changes with StatReloader
+INFO 2025-08-08 04:42:58,550 basehttp 17332 10540 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 04:43:40,052 basehttp 17332 27984 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 04:44:08,285 log 17332 8976 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-08 04:44:08,286 basehttp 17332 8976 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-08 04:52:28,011 autoreload 30440 32224 Watching for file changes with StatReloader
+INFO 2025-08-08 04:53:10,963 basehttp 30440 23048 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 04:53:53,899 basehttp 30440 50400 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 04:54:18,879 log 30440 15520 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-08 04:54:18,880 basehttp 30440 15520 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-08 05:04:50,354 autoreload 9192 50752 Watching for file changes with StatReloader
+INFO 2025-08-08 05:05:47,265 basehttp 9192 37884 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 05:06:30,559 basehttp 9192 40336 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 05:06:54,405 log 9192 53900 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-08 05:06:54,406 basehttp 9192 53900 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-08 05:26:07,246 autoreload 41364 43668 Watching for file changes with StatReloader
+INFO 2025-08-08 05:26:37,276 basehttp 41364 26360 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 05:27:11,063 basehttp 41364 41412 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 05:27:35,195 log 41364 22124 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-08 05:27:35,196 basehttp 41364 22124 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-08 05:31:57,841 basehttp 41364 55256 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 05:32:41,905 basehttp 41364 39140 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 05:33:12,623 log 41364 34888 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-08 05:33:12,626 basehttp 41364 34888 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-08 05:40:21,754 autoreload 3360 29032 Watching for file changes with StatReloader
+INFO 2025-08-08 05:40:39,707 basehttp 3360 15924 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 05:43:55,216 basehttp 3360 10940 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 05:44:26,157 log 3360 6000 Bad Request: /api/v1/receipts/upload/
+WARNING 2025-08-08 05:44:26,158 basehttp 3360 6000 "POST /api/v1/receipts/upload/ HTTP/1.1" 400 46
+INFO 2025-08-08 05:47:05,494 autoreload 12492 7160 Watching for file changes with StatReloader
+INFO 2025-08-08 05:48:48,813 basehttp 12492 33860 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-08 05:52:02,378 basehttp 12492 28264 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+WARNING 2025-08-08 05:52:36,182 log 12492 17904 Bad Request: /api/v1/receipts/upload/
+INFO 2025-08-08 05:52:36,184 basehttp 12492 17904 - Broken pipe from ('127.0.0.1', 63171)
+INFO 2025-08-08 12:54:35,839 autoreload 22384 44172 Watching for file changes with StatReloader

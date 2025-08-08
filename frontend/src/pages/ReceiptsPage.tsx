@@ -1,4 +1,13 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
 const ReceiptsPage = () => {
+  const navigate = useNavigate();
+
+  const handleUploadClick = () => {
+    navigate('/receipts/upload');
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Receipts</h1>
@@ -11,7 +20,10 @@ const ReceiptsPage = () => {
         <p className="text-gray-500 mb-6">
           Upload your first receipt to get started with smart organization and OCR processing.
         </p>
-        <button className="btn-primary">
+        <button 
+          className="btn-primary"
+          onClick={handleUploadClick}
+        >
           📤 Upload Your First Receipt
         </button>
       </div>
