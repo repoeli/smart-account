@@ -73,6 +73,7 @@ const ReceiptDetailPage: React.FC = () => {
             <div><span className="text-gray-500">Total:</span> {receipt.currency || 'GBP'} {receipt.total_amount || '-'}</div>
             <div><span className="text-gray-500">Date:</span> {receipt.date ? new Date(receipt.date).toLocaleDateString() : '-'}</div>
             <div><span className="text-gray-500">Confidence:</span> {receipt.confidence_score ? `${Math.round(receipt.confidence_score * 100)}%` : '-'}</div>
+            <div><span className="text-gray-500">OCR Latency:</span> {typeof receipt.ocr_latency_ms === 'number' ? `${receipt.ocr_latency_ms} ms` : '-'}</div>
             <div><span className="text-gray-500">Storage:</span> {receipt.storage_provider || '-'}</div>
             <div>
               <span className="text-gray-500">Cloudinary ID:</span> {receipt.cloudinary_public_id || '-'}

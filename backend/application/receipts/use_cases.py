@@ -274,7 +274,15 @@ class ReceiptReprocessUseCase:
                     'error': 'Receipt not found'
                 }
             
-            # Ownership check disabled in development to avoid false 400s from mismatched IDs
+            # Ownership check (normalized)
+            try:
+                if str(receipt.user.id) != str(user.id):
+                    return {
+                        'success': False,
+                        'error': 'Not authorized to access this receipt'
+                    }
+            except Exception:
+                pass
             
             # Update status to processing
             receipt.status = ReceiptStatus.PROCESSING
@@ -376,7 +384,15 @@ class ReceiptValidateUseCase:
                     'error': 'Receipt not found'
                 }
             
-            # Ownership check disabled in development to avoid false 400s from mismatched IDs
+            # Ownership check (normalized)
+            try:
+                if str(receipt.user.id) != str(user.id):
+                    return {
+                        'success': False,
+                        'error': 'Not authorized to update this receipt'
+                    }
+            except Exception:
+                pass
             
             if not receipt.ocr_data:
                 return {

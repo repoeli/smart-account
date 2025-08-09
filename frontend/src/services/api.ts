@@ -167,7 +167,16 @@ class ApiClient {
     folder_id?: string;
   }): Promise<ReceiptListResponse> {
     const response = await this.client.get<ReceiptListResponse>('/receipts/', { params });
-    return response.data;
+    // normalize telemetry for latency and needs_review when present
+    const normalized = {
+      ...response.data,
+      receipts: (response.data.receipts as any[]).map((r: any) => ({
+        ...r,
+        ocr_latency_ms: r.ocr_data?.additional_data?.latency_ms || r.metadata?.custom_fields?.latency_ms,
+        needs_review: r.metadata?.custom_fields?.needs_review || r.ocr_data?.additional_data?.needs_review,
+      })),
+    } as any;
+    return normalized;
   }
 
   async getReceipt(id: string): Promise<Receipt> {
@@ -191,6 +200,8 @@ class ApiClient {
       metadata: r.metadata,
       storage_provider: r.metadata?.custom_fields?.storage_provider,
       cloudinary_public_id: r.metadata?.custom_fields?.cloudinary_public_id,
+      ocr_latency_ms: r.ocr_data?.additional_data?.latency_ms || r.metadata?.custom_fields?.latency_ms,
+      needs_review: r.metadata?.custom_fields?.needs_review || r.ocr_data?.additional_data?.needs_review,
     } as unknown as Receipt;
   }
 

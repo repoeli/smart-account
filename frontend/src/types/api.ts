@@ -108,6 +108,9 @@ export interface Receipt {
   // telemetry (optional)
   storage_provider?: 'cloudinary' | 'local' | string;
   cloudinary_public_id?: string;
+  // OCR telemetry
+  ocr_latency_ms?: number;
+  needs_review?: boolean;
 }
 
 export interface ReceiptUploadRequest {

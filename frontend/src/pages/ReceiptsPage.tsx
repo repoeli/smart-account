@@ -90,11 +90,11 @@ const ReceiptsPage = () => {
                   <div className="text-sm text-gray-500">{r.date ? new Date(r.date).toLocaleDateString() : ''}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-gray-600">{r.currency || 'GBP'} {r.total_amount || ''}</div>
+          <div className="text-sm text-gray-600">{r.currency || 'GBP'} {r.total_amount || ''}</div>
                   <div className={`text-xs ${r.status === 'failed' ? 'text-red-600' : 'text-gray-400'}`}>{r.status}</div>
                 </div>
               </div>
-              <div className="mt-2 flex items-center justify-between text-xs">
+      <div className="mt-2 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   {r.status && (
                     <span className={`px-2 py-0.5 rounded border ${
@@ -106,6 +106,12 @@ const ReceiptsPage = () => {
                   {r.confidence_score !== undefined && (
                     <span className="text-gray-500">{`conf: ${Math.round((r.confidence_score as number) * 100)}%`}</span>
                   )}
+          {r.needs_review && (
+            <span className="px-2 py-0.5 rounded border bg-yellow-50 text-yellow-700 border-yellow-200">needs review</span>
+          )}
+          {typeof (r as any).ocr_latency_ms === 'number' && (
+            <span className="text-gray-400">{`${(r as any).ocr_latency_ms} ms`}</span>
+          )}
                 </div>
                 {r.storage_provider && (
                   <span className="px-2 py-0.5 rounded bg-gray-50 border text-gray-600">
