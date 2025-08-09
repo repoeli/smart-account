@@ -94,10 +94,21 @@ const ReceiptsPage = () => {
                   <div className={`text-xs ${r.status === 'failed' ? 'text-red-600' : 'text-gray-400'}`}>{r.status}</div>
                 </div>
               </div>
-              <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
-                <span>{r.confidence_score ? `conf: ${Math.round((r.confidence_score as number) * 100)}%` : ''}</span>
+              <div className="mt-2 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  {r.status && (
+                    <span className={`px-2 py-0.5 rounded border ${
+                      r.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
+                      r.status === 'processed' ? 'bg-green-50 text-green-700 border-green-200' :
+                      r.status === 'needs_review' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-gray-50 text-gray-600 border-gray-200'
+                    }`}>{r.status}</span>
+                  )}
+                  {r.confidence_score !== undefined && (
+                    <span className="text-gray-500">{`conf: ${Math.round((r.confidence_score as number) * 100)}%`}</span>
+                  )}
+                </div>
                 {r.storage_provider && (
-                  <span className="px-2 py-0.5 rounded bg-gray-50 border">
+                  <span className="px-2 py-0.5 rounded bg-gray-50 border text-gray-600">
                     {r.storage_provider}
                   </span>
                 )}
