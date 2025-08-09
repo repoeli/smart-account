@@ -71,7 +71,21 @@ function scheduleRelease() {
   }
 }
 
-export function useUserMedia(constraints: MediaStreamConstraints): UseUserMediaResult {
+export function releaseAllUserMedia(): void {
+  const cache = getCache();
+  if (cache.stopTimer) {
+    clearTimeout(cache.stopTimer);
+    cache.stopTimer = null;
+  }
+  if (cache.stream) {
+    try { cache.stream.getTracks().forEach((t) => t.stop()); } catch {}
+  }
+  cache.stream = null;
+  cache.promise = null;
+  cache.consumers = 0;
+}
+
+export function useUserMedia(constraints: MediaStreamConstraints, restartKey = 0): UseUserMediaResult {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [isPending, setIsPending] = useState<boolean>(true);
@@ -102,7 +116,7 @@ export function useUserMedia(constraints: MediaStreamConstraints): UseUserMediaR
       scheduleRelease();
       setStream(null);
     };
-  }, [JSON.stringify(constraints)]);
+  }, [JSON.stringify(constraints), restartKey]);
 
   const release = () => scheduleRelease();
 

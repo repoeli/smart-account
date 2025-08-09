@@ -8,7 +8,7 @@ import UploadProgress from '../../components/receipts/UploadProgress';
 import ReceiptPreview from '../../components/receipts/ReceiptPreview';
 import Button from '../../components/forms/Button';
 import { apiClient } from '../../services/api';
-import { useUserMedia } from '../../hooks/useUserMedia';
+import { useUserMedia, releaseAllUserMedia } from '../../hooks/useUserMedia';
 
 interface CameraCaptureProps {
   onCapture: (file: File) => void;
@@ -21,14 +21,17 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose, varia
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string | ''>('');
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | ''>(
+    localStorage.getItem('cameraDeviceId') || ''
+  );
   const [hasFrame, setHasFrame] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const constraints: MediaStreamConstraints = {
     video: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : { facingMode: { ideal: 'environment' } },
     audio: false,
   };
-  const { stream } = useUserMedia(constraints);
+  const [restartKey, setRestartKey] = useState(0);
+  const { stream } = useUserMedia(constraints, restartKey);
 
   // (legacy) global stream stopper kept for reference; not used with cached hook
 
@@ -189,7 +192,13 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose, varia
           <select
             className="w-full border rounded px-2 py-1 text-sm"
             value={selectedDeviceId}
-            onChange={(e) => setSelectedDeviceId(e.target.value)}
+            onChange={(e) => {
+              const id = e.target.value;
+              setSelectedDeviceId(id);
+              if (id) localStorage.setItem('cameraDeviceId', id); else localStorage.removeItem('cameraDeviceId');
+              releaseAllUserMedia();
+              setRestartKey((k) => k + 1);
+            }}
           >
             <option value="">Auto (rear preferred)</option>
             {devices.map((d) => (
@@ -200,6 +209,23 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose, varia
           </select>
         </div>
       )}
+      {/* Diagnostics panel */}
+      <details className="mb-3">
+        <summary className="text-xs text-gray-600 cursor-pointer">Diagnostics</summary>
+        <pre className="text-[10px] bg-gray-50 p-2 rounded border overflow-auto max-h-40">
+{JSON.stringify({
+  selectedDeviceId,
+  devices: devices.map(d => ({ id: d.deviceId, label: d.label })),
+  hasFrame,
+  streamTracks: stream ? stream.getTracks().map(t => ({ kind: t.kind, readyState: t.readyState })) : [],
+}, null, 2)}
+        </pre>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => { releaseAllUserMedia(); setRestartKey(k => k + 1); }}>
+            Restart Stream
+          </Button>
+        </div>
+      </details>
       {!hasFrame && (
         <div className="mb-3">
           <input
