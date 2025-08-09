@@ -20,6 +20,7 @@ from domain.accounts.entities import User
 from infrastructure.storage.services import FileStorageService
 from infrastructure.ocr.services import OCRService, OCRMethod
 from django.conf import settings
+import requests
 
 
 class ReceiptUploadUseCase:
@@ -248,6 +249,65 @@ class ReceiptReprocessUseCase:
         self.ocr_service = ocr_service
         self.receipt_business_service = receipt_business_service
         self.receipt_validation_service = receipt_validation_service
+
+    def _ensure_cloudinary_metadata(self, receipt: Receipt) -> None:
+        """If Cloudinary is configured and the receipt lacks storage telemetry,
+        attempt to infer or upload to Cloudinary and populate metadata.
+
+        - If `file_url` is already a Cloudinary URL, derive public_id from the URL path
+        - Otherwise, download bytes from `file_url` and upload via CloudinaryStorageAdapter
+        """
+        try:
+            cloud_name = getattr(settings, 'CLOUDINARY_CLOUD_NAME', None)
+            api_key = getattr(settings, 'CLOUDINARY_API_KEY', None)
+            api_secret = getattr(settings, 'CLOUDINARY_API_SECRET', None)
+            if not (cloud_name and api_key and api_secret):
+                return
+
+            storage_provider = receipt.metadata.custom_fields.get('storage_provider') if receipt.metadata and receipt.metadata.custom_fields else None
+            public_id = receipt.metadata.custom_fields.get('cloudinary_public_id') if receipt.metadata and receipt.metadata.custom_fields else None
+
+            file_url = receipt.file_info.file_url
+            is_cloudinary = isinstance(file_url, str) and 'res.cloudinary.com' in file_url
+
+            # Derive public_id from existing Cloudinary URL
+            if is_cloudinary and (storage_provider != 'cloudinary' or not public_id):
+                try:
+                    # Example: https://res.cloudinary.com/<cloud>/image/upload/v1700000000/receipts/abcd1234.jpg
+                    # public_id: receipts/abcd1234
+                    path = file_url.split('/upload/')[1]
+                    path = path.split('?')[0]  # strip query
+                    parts = path.split('/')
+                    # drop version segment if present (starts with 'v' and digits)
+                    if parts and parts[0].startswith('v') and parts[0][1:].isdigit():
+                        parts = parts[1:]
+                    last = parts[-1]
+                    folder = '/'.join(parts[:-1])
+                    name_no_ext = last.rsplit('.', 1)[0]
+                    inferred_public_id = f"{folder}/{name_no_ext}" if folder else name_no_ext
+                    receipt.metadata.custom_fields['storage_provider'] = 'cloudinary'
+                    receipt.metadata.custom_fields['cloudinary_public_id'] = inferred_public_id
+                except Exception:
+                    pass
+
+            # If not on Cloudinary, upload bytes and switch URL
+            if not is_cloudinary and (storage_provider != 'cloudinary' or not public_id):
+                try:
+                    resp = requests.get(file_url, timeout=30)
+                    resp.raise_for_status()
+                    from infrastructure.storage.adapters.cloudinary_store import CloudinaryStorageAdapter
+                    cloud = CloudinaryStorageAdapter()
+                    asset = cloud.upload(file_bytes=resp.content, filename=receipt.file_info.filename, mime=receipt.file_info.mime_type)
+                    # Update file URL to Cloudinary and set telemetry
+                    receipt.file_info.file_url = asset.secure_url
+                    receipt.metadata.custom_fields['storage_provider'] = 'cloudinary'
+                    if asset.public_id:
+                        receipt.metadata.custom_fields['cloudinary_public_id'] = asset.public_id
+                except Exception:
+                    # Do not fail reprocess if Cloudinary migration fails
+                    pass
+        except Exception:
+            pass
     
     def execute(self, 
                 receipt_id: str, 
@@ -286,6 +346,10 @@ class ReceiptReprocessUseCase:
             
             # Update status to processing
             receipt.status = ReceiptStatus.PROCESSING
+            self.receipt_repository.save(receipt)
+
+            # Ensure Cloudinary telemetry if missing (and possibly migrate URL)
+            self._ensure_cloudinary_metadata(receipt)
             self.receipt_repository.save(receipt)
             
             # Extract OCR data with specified method

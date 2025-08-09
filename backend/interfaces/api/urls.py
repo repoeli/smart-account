@@ -9,7 +9,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views import (
     HealthCheckView, FileInfoView, UserRegistrationView, UserLoginView, EmailVerificationView, UserProfileView,
     PasswordResetRequestView, PasswordResetConfirmView,
-    ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView,
+    ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView, ReceiptManualCreateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
     ReceiptParseView,
 )
@@ -39,6 +39,7 @@ urlpatterns = [
     
     # Receipt management endpoints
     path('receipts/upload/', ReceiptUploadView.as_view(), name='receipt-upload'),
+    path('receipts/manual/', ReceiptManualCreateView.as_view(), name='receipt-manual-create'),
     path('receipts/parse/', ReceiptParseView.as_view(), name='receipt-parse'),
     path('receipts/', ReceiptListView.as_view(), name='receipt-list'),
     path('receipts/<str:receipt_id>/', ReceiptDetailView.as_view(), name='receipt-detail'),

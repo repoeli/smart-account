@@ -12,6 +12,9 @@ const ReceiptsPage = () => {
   const handleUploadClick = () => {
     navigate('/receipts/upload');
   };
+  const handleManualClick = () => {
+    navigate('/receipts/new');
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -52,6 +55,7 @@ const ReceiptsPage = () => {
         <div className="space-x-3">
           <button className="btn-secondary" onClick={handleUploadClick}>📷 Capture / Upload</button>
           <button className="btn-primary" onClick={handleUploadClick}>📤 Upload Receipt</button>
+          <button className="btn-outline" onClick={handleManualClick}>➕ New (Manual)</button>
         </div>
       </div>
       {isLoading ? (

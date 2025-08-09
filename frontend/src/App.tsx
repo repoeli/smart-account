@@ -12,6 +12,7 @@ import DashboardPage from './pages/DashboardPage';
 import ReceiptsPage from './pages/ReceiptsPage';
 import ReceiptDetailPage from './pages/ReceiptDetailPage';
 import ReceiptUploadPage from './pages/receipts/ReceiptUploadPage';
+import ReceiptManualCreatePage from './pages/receipts/ReceiptManualCreatePage';
 import OCRResultsPage from './pages/receipts/OCRResultsPage';
 import ProfilePage from './pages/ProfilePage';
 
@@ -56,6 +57,7 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="receipts" element={<ReceiptsPage />} />
           <Route path="receipts/upload" element={<ReceiptUploadPage />} />
+          <Route path="receipts/new" element={<ReceiptManualCreatePage />} />
           <Route path="receipts/:id/ocr" element={<OCRResultsPage />} />
           <Route path="receipts/:id" element={<ReceiptDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />

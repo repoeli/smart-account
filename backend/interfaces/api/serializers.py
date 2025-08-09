@@ -240,6 +240,22 @@ class ReceiptUpdateSerializer(serializers.Serializer):
     custom_fields = serializers.DictField(required=False)
 
 
+class ReceiptManualCreateSerializer(serializers.Serializer):
+    """Manual receipt creation (without OCR) with optional Cloudinary upload.
+    Aligns with US-006: allow creating receipts by entering data manually.
+    """
+    filename = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    file_url = serializers.URLField(required=False)
+    mime_type = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    receipt_type = serializers.ChoiceField(choices=['purchase', 'expense', 'invoice', 'bill', 'other'], required=False, default='purchase')
+    merchant_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    total_amount = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    currency = serializers.CharField(max_length=10, required=False, allow_blank=True)
+    date = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    notes = serializers.CharField(max_length=1000, required=False, allow_blank=True)
+    upload_to_cloudinary = serializers.BooleanField(required=False)
+
+
 class ReceiptListResponseSerializer(serializers.Serializer):
     """
     Serializer for receipt list response.

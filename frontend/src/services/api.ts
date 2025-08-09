@@ -161,6 +161,16 @@ class ApiClient {
     return response.data;
   }
 
+  async createManualReceipt(payload: FormData | Record<string, any>): Promise<{ success: boolean; receipt_id?: string; file_url?: string; message?: string }>{
+    let data: any = payload;
+    let config: any = {};
+    if (typeof FormData !== 'undefined' && payload instanceof FormData) {
+      config.headers = { 'Content-Type': 'multipart/form-data' };
+    }
+    const response = await this.client.post('/receipts/manual/', data, config);
+    return response.data;
+  }
+
   async getReceipts(params?: {
     limit?: number;
     offset?: number;

@@ -3607,3 +3607,210 @@ INFO 2025-08-09 16:34:33,685 basehttp 14240 4168 "GET /api/v1/receipts/?limit=50
 INFO 2025-08-09 16:34:33,858 basehttp 14240 53664 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 4649
 INFO 2025-08-09 16:36:10,999 autoreload 14240 28492 C:\cursor\smart-account\backend\application\receipts\use_cases.py changed, reloading.
 INFO 2025-08-09 16:36:16,258 autoreload 4888 31408 Watching for file changes with StatReloader
+INFO 2025-08-09 16:56:42,965 basehttp 4888 46384 "OPTIONS /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-09 16:56:42,992 basehttp 4888 7604 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 16:56:42,992 basehttp 4888 33964 "OPTIONS /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-09 16:56:43,007 basehttp 4888 52160 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 16:56:44,546 basehttp 4888 52160 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 16:56:44,557 basehttp 4888 7604 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 16:56:45,039 basehttp 4888 46384 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 4649
+INFO 2025-08-09 16:56:45,327 basehttp 4888 33964 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 4649
+INFO 2025-08-09 16:56:45,901 basehttp 4888 33964 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 4649
+INFO 2025-08-09 16:56:46,490 basehttp 4888 33964 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 4649
+INFO 2025-08-09 16:57:22,863 basehttp 4888 33964 "GET /api/v1/health/ HTTP/1.1" 200 98
+INFO 2025-08-09 16:57:28,931 basehttp 4888 33964 "POST /api/v1/receipts/upload/ HTTP/1.1" 201 349
+INFO 2025-08-09 16:57:33,229 basehttp 4888 33964 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5193
+INFO 2025-08-09 16:57:33,576 basehttp 4888 46384 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5193
+INFO 2025-08-09 16:57:43,253 basehttp 4888 46384 "OPTIONS /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 0
+INFO 2025-08-09 16:57:43,254 basehttp 4888 33964 "OPTIONS /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 0
+INFO 2025-08-09 16:57:43,355 basehttp 4888 33964 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 958
+INFO 2025-08-09 16:57:43,458 basehttp 4888 33964 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 958
+INFO 2025-08-09 16:57:48,747 basehttp 4888 33964 "OPTIONS /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/reprocess/ HTTP/1.1" 200 0
+INFO 2025-08-09 16:57:52,730 basehttp 4888 33964 "POST /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/reprocess/ HTTP/1.1" 200 216
+INFO 2025-08-09 16:57:54,266 basehttp 4888 46384 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 16:57:54,298 basehttp 4888 33964 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 958
+INFO 2025-08-09 16:57:54,551 basehttp 4888 46384 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 16:57:54,651 basehttp 4888 33964 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 958
+INFO 2025-08-09 16:57:55,021 basehttp 4888 33964 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 958
+INFO 2025-08-09 16:57:55,225 basehttp 4888 33964 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 958
+INFO 2025-08-09 16:58:15,728 basehttp 4888 33964 "POST /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/reprocess/ HTTP/1.1" 200 245
+INFO 2025-08-09 16:58:16,435 basehttp 4888 46384 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 16:58:16,532 basehttp 4888 33964 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 1355
+INFO 2025-08-09 16:58:16,710 basehttp 4888 46384 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 16:58:16,774 basehttp 4888 33964 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 1355
+INFO 2025-08-09 16:58:16,958 basehttp 4888 33964 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 1355
+INFO 2025-08-09 16:58:17,101 basehttp 4888 33964 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 1355
+INFO 2025-08-09 17:00:18,597 basehttp 4888 33964 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:00:18,811 basehttp 4888 46384 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:00:28,265 basehttp 4888 46384 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 1355
+INFO 2025-08-09 17:00:28,331 basehttp 4888 46384 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 1355
+INFO 2025-08-09 17:00:39,167 basehttp 4888 46384 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:00:39,288 basehttp 4888 46384 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:18:32,570 basehttp 4888 13340 "OPTIONS /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-09 17:18:32,613 basehttp 4888 54660 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:18:32,651 basehttp 4888 23856 "OPTIONS /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-09 17:18:32,691 basehttp 4888 34192 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:18:33,091 basehttp 4888 54660 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 17:18:33,199 basehttp 4888 34192 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 17:18:33,701 basehttp 4888 23856 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:18:33,727 basehttp 4888 13340 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:18:33,950 basehttp 4888 34192 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:18:34,249 basehttp 4888 55212 "GET /media/receipts/ba4ce35c18e3449396874c0fd504ec39.jpg HTTP/1.1" 304 0
+INFO 2025-08-09 17:18:34,367 basehttp 4888 13340 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:18:36,596 basehttp 4888 13340 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 1355
+INFO 2025-08-09 17:18:36,673 basehttp 4888 13340 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 1355
+INFO 2025-08-09 17:18:59,330 basehttp 4888 13340 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:18:59,481 basehttp 4888 13340 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:19:01,711 basehttp 4888 13340 "OPTIONS /api/v1/receipts/559b53a9-de4c-487e-9bc5-747934baf711/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:19:01,711 basehttp 4888 34192 "OPTIONS /api/v1/receipts/559b53a9-de4c-487e-9bc5-747934baf711/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:19:01,787 basehttp 4888 34192 "GET /api/v1/receipts/559b53a9-de4c-487e-9bc5-747934baf711/ HTTP/1.1" 200 1320
+INFO 2025-08-09 17:19:01,854 basehttp 4888 34192 "GET /api/v1/receipts/559b53a9-de4c-487e-9bc5-747934baf711/ HTTP/1.1" 200 1320
+INFO 2025-08-09 17:19:03,751 basehttp 4888 34192 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:19:03,870 basehttp 4888 13340 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:19:06,082 basehttp 4888 13340 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:19:06,162 basehttp 4888 13340 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:19:08,452 basehttp 4888 13340 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:19:08,631 basehttp 4888 34192 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:19:12,589 basehttp 4888 34192 "OPTIONS /api/v1/receipts/0fdd877e-101b-45db-966f-c87b751c7440/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:19:12,589 basehttp 4888 13340 "OPTIONS /api/v1/receipts/0fdd877e-101b-45db-966f-c87b751c7440/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:19:12,668 basehttp 4888 13340 "GET /api/v1/receipts/0fdd877e-101b-45db-966f-c87b751c7440/ HTTP/1.1" 200 600
+INFO 2025-08-09 17:19:12,739 basehttp 4888 13340 "GET /api/v1/receipts/0fdd877e-101b-45db-966f-c87b751c7440/ HTTP/1.1" 200 600
+INFO 2025-08-09 17:19:19,883 basehttp 4888 13340 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:19:20,016 basehttp 4888 34192 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:19:22,066 basehttp 4888 34192 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:19:22,143 basehttp 4888 34192 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:19:30,162 basehttp 4888 34192 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:19:30,305 basehttp 4888 34192 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5219
+INFO 2025-08-09 17:19:37,197 basehttp 4888 34192 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:19:37,521 basehttp 4888 34192 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:19:38,992 basehttp 4888 34192 "OPTIONS /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/reprocess/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:19:39,139 basehttp 4888 28644 "GET /media/receipts/ba4ce35c18e3449396874c0fd504ec39.jpg HTTP/1.1" 200 64398
+INFO 2025-08-09 17:19:45,590 basehttp 4888 34192 "POST /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/reprocess/ HTTP/1.1" 200 221
+INFO 2025-08-09 17:19:46,960 basehttp 4888 13340 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 17:19:47,022 basehttp 4888 34192 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:19:47,166 basehttp 4888 13340 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 17:19:47,229 basehttp 4888 34192 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:19:47,391 basehttp 4888 34192 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:19:47,513 basehttp 4888 34192 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:25:54,296 autoreload 4888 31408 C:\cursor\smart-account\backend\application\receipts\use_cases.py changed, reloading.
+INFO 2025-08-09 17:26:15,245 autoreload 22208 4340 Watching for file changes with StatReloader
+INFO 2025-08-09 17:26:35,123 autoreload 22208 4340 C:\cursor\smart-account\backend\application\receipts\use_cases.py changed, reloading.
+INFO 2025-08-09 17:26:49,255 autoreload 27448 31468 Watching for file changes with StatReloader
+INFO 2025-08-09 17:29:59,114 basehttp 27448 15224 "OPTIONS /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:29:59,119 basehttp 27448 54188 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:29:59,144 basehttp 27448 35456 "OPTIONS /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:29:59,146 basehttp 27448 13728 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 17:30:01,318 basehttp 27448 13728 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:30:01,338 basehttp 27448 15224 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 17:30:01,342 basehttp 27448 54188 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:30:01,369 basehttp 27448 35456 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 17:30:01,810 basehttp 27448 35456 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:30:02,094 basehttp 27448 35456 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1529
+INFO 2025-08-09 17:30:05,459 basehttp 27448 44660 "GET /media/receipts/ba4ce35c18e3449396874c0fd504ec39.jpg HTTP/1.1" 200 64398
+INFO 2025-08-09 17:30:15,588 basehttp 27448 35456 "POST /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/reprocess/ HTTP/1.1" 200 221
+INFO 2025-08-09 17:30:17,721 basehttp 27448 54188 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 17:30:17,801 basehttp 27448 35456 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1619
+INFO 2025-08-09 17:30:17,967 basehttp 27448 54188 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 17:30:18,096 basehttp 27448 35456 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1619
+INFO 2025-08-09 17:30:18,357 basehttp 27448 35456 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1619
+INFO 2025-08-09 17:30:18,621 basehttp 27448 35456 "GET /api/v1/receipts/2b8e1f44-5d42-475e-9d13-02ae9b4400cb/ HTTP/1.1" 200 1619
+INFO 2025-08-09 17:48:32,355 autoreload 27448 31468 C:\cursor\smart-account\backend\interfaces\api\serializers.py changed, reloading.
+INFO 2025-08-09 17:48:36,474 autoreload 25756 29820 Watching for file changes with StatReloader
+INFO 2025-08-09 17:50:40,237 autoreload 25756 29820 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-09 17:50:45,354 autoreload 48936 28716 Watching for file changes with StatReloader
+INFO 2025-08-09 17:52:43,301 autoreload 48936 28716 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-09 17:52:48,591 autoreload 40356 14804 Watching for file changes with StatReloader
+INFO 2025-08-09 17:54:51,358 autoreload 40356 14804 C:\cursor\smart-account\backend\interfaces\api\urls.py changed, reloading.
+INFO 2025-08-09 17:55:03,232 autoreload 13456 42852 Watching for file changes with StatReloader
+INFO 2025-08-09 17:55:25,347 autoreload 13456 42852 C:\cursor\smart-account\backend\interfaces\api\serializers.py changed, reloading.
+INFO 2025-08-09 17:55:40,786 autoreload 36840 1444 Watching for file changes with StatReloader
+INFO 2025-08-09 18:09:26,025 basehttp 36840 39736 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 18:09:26,026 basehttp 36840 35820 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+WARNING 2025-08-09 18:09:26,437 log 36840 35820 Unauthorized: /api/v1/users/profile/
+WARNING 2025-08-09 18:09:26,442 log 36840 39736 Unauthorized: /api/v1/users/profile/
+WARNING 2025-08-09 18:09:26,443 basehttp 36840 35820 "GET /api/v1/users/profile/ HTTP/1.1" 401 183
+WARNING 2025-08-09 18:09:26,453 basehttp 36840 39736 "GET /api/v1/users/profile/ HTTP/1.1" 401 183
+INFO 2025-08-09 18:09:26,463 basehttp 36840 35820 "OPTIONS /api/v1/auth/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-08-09 18:09:26,471 basehttp 36840 39736 "OPTIONS /api/v1/auth/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-08-09 18:09:26,593 basehttp 36840 39736 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-09 18:09:26,615 basehttp 36840 35820 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-09 18:09:28,708 basehttp 36840 39736 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 18:09:28,854 basehttp 36840 39736 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 18:09:48,019 basehttp 36840 39736 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+INFO 2025-08-09 18:09:48,192 basehttp 36840 39736 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 18:09:59,378 basehttp 36840 39736 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5232
+INFO 2025-08-09 18:09:59,543 basehttp 36840 22708 "GET /media/receipts/3a6ebd2c7e354097a7ef7dc41b631eab.jpg HTTP/1.1" 304 0
+INFO 2025-08-09 18:09:59,645 basehttp 36840 35820 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5232
+INFO 2025-08-09 18:10:10,778 basehttp 36840 35820 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5232
+INFO 2025-08-09 18:10:10,989 basehttp 36840 35820 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5232
+INFO 2025-08-09 19:40:25,993 autoreload 36840 1444 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-09 19:40:57,204 autoreload 28676 28468 Watching for file changes with StatReloader
+INFO 2025-08-09 19:43:00,652 basehttp 28676 27780 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 19:43:00,667 basehttp 28676 28004 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+WARNING 2025-08-09 19:43:02,328 log 28676 28004 Unauthorized: /api/v1/users/profile/
+WARNING 2025-08-09 19:43:02,332 log 28676 27780 Unauthorized: /api/v1/users/profile/
+WARNING 2025-08-09 19:43:02,333 basehttp 28676 28004 "GET /api/v1/users/profile/ HTTP/1.1" 401 183
+WARNING 2025-08-09 19:43:02,335 basehttp 28676 27780 "GET /api/v1/users/profile/ HTTP/1.1" 401 183
+INFO 2025-08-09 19:43:02,421 basehttp 28676 27780 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-09 19:43:02,443 basehttp 28676 28004 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-09 19:43:03,596 basehttp 28676 27780 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 19:43:03,682 basehttp 28676 27780 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 19:43:16,609 basehttp 28676 27780 "OPTIONS /api/v1/auth/login/ HTTP/1.1" 200 0
+INFO 2025-08-09 19:43:17,554 basehttp 28676 27780 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+INFO 2025-08-09 19:43:17,653 basehttp 28676 27780 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 19:43:25,719 basehttp 28676 27780 "OPTIONS /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-09 19:43:25,719 basehttp 28676 28004 "OPTIONS /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-09 19:43:25,951 basehttp 28676 28004 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5232
+INFO 2025-08-09 19:43:26,160 basehttp 28676 26492 "GET /media/receipts/3a6ebd2c7e354097a7ef7dc41b631eab.jpg HTTP/1.1" 304 0
+INFO 2025-08-09 19:43:26,204 basehttp 28676 28004 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5232
+INFO 2025-08-09 19:50:34,397 basehttp 28676 23648 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 19:50:34,973 basehttp 28676 23648 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 19:50:53,420 basehttp 28676 10948 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 19:50:53,441 basehttp 28676 12608 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+WARNING 2025-08-09 19:50:53,596 log 28676 10948 Unauthorized: /api/v1/users/profile/
+WARNING 2025-08-09 19:50:53,599 basehttp 28676 10948 "GET /api/v1/users/profile/ HTTP/1.1" 401 183
+INFO 2025-08-09 19:50:53,679 basehttp 28676 12608 "OPTIONS /api/v1/auth/token/refresh/ HTTP/1.1" 200 0
+WARNING 2025-08-09 19:50:53,831 log 28676 10948 Unauthorized: /api/v1/users/profile/
+WARNING 2025-08-09 19:50:53,837 basehttp 28676 10948 "GET /api/v1/users/profile/ HTTP/1.1" 401 183
+INFO 2025-08-09 19:50:53,954 basehttp 28676 12608 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-09 19:50:59,996 basehttp 28676 12608 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-09 19:51:03,853 basehttp 28676 12608 "GET /api/v1/users/profile/ HTTP/1.1" 200 710
+INFO 2025-08-09 19:51:05,270 basehttp 28676 12608 "GET /api/v1/users/profile/ HTTP/1.1" 200 710
+INFO 2025-08-09 19:55:18,409 basehttp 28676 23648 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 19:55:18,556 basehttp 28676 23648 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 19:55:20,162 basehttp 28676 12608 "GET /api/v1/users/profile/ HTTP/1.1" 200 710
+INFO 2025-08-09 19:55:20,241 basehttp 28676 12608 "GET /api/v1/users/profile/ HTTP/1.1" 200 710
+INFO 2025-08-09 20:18:43,982 basehttp 28676 7944 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 20:18:43,983 basehttp 28676 46128 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 20:18:44,094 basehttp 28676 46128 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 20:18:44,104 basehttp 28676 7944 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 20:22:45,637 basehttp 28676 7944 "OPTIONS /api/v1/receipts/manual/ HTTP/1.1" 200 0
+ERROR 2025-08-09 20:22:48,310 log 28676 7944 Internal Server Error: /api/v1/receipts/manual/
+ERROR 2025-08-09 20:22:48,310 basehttp 28676 7944 "POST /api/v1/receipts/manual/ HTTP/1.1" 500 86
+INFO 2025-08-09 20:26:20,380 autoreload 28676 28468 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-09 20:26:38,670 autoreload 6496 51336 Watching for file changes with StatReloader
+INFO 2025-08-09 20:27:03,946 autoreload 6496 51336 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-09 20:27:16,622 autoreload 29616 32912 Watching for file changes with StatReloader
+INFO 2025-08-09 20:39:03,738 basehttp 29616 15852 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 20:39:03,744 basehttp 29616 51008 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-09 20:39:04,711 basehttp 29616 15852 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 20:39:04,720 basehttp 29616 51008 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 20:41:05,899 basehttp 29616 53104 "POST /api/v1/receipts/manual/ HTTP/1.1" 200 168
+INFO 2025-08-09 20:41:05,975 basehttp 29616 53104 "OPTIONS /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 0
+INFO 2025-08-09 20:41:05,975 basehttp 29616 2548 "OPTIONS /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 0
+INFO 2025-08-09 20:41:06,087 basehttp 29616 2548 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 780
+INFO 2025-08-09 20:41:06,190 basehttp 29616 2548 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 780
+INFO 2025-08-09 20:41:29,241 basehttp 29616 2548 "OPTIONS /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/reprocess/ HTTP/1.1" 200 0
+INFO 2025-08-09 20:41:34,223 basehttp 29616 2548 "POST /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/reprocess/ HTTP/1.1" 200 222
+INFO 2025-08-09 20:41:35,310 basehttp 29616 53104 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 20:41:35,342 basehttp 29616 2548 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 1284
+INFO 2025-08-09 20:41:35,480 basehttp 29616 53104 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-09 20:41:35,515 basehttp 29616 2548 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 1284
+INFO 2025-08-09 20:41:35,651 basehttp 29616 2548 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 1284
+INFO 2025-08-09 20:41:35,785 basehttp 29616 2548 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 1284
+INFO 2025-08-09 20:41:45,614 basehttp 29616 2548 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5767
+INFO 2025-08-09 20:41:45,827 basehttp 29616 2548 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5767
+INFO 2025-08-09 20:42:40,313 basehttp 29616 2548 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5767
+INFO 2025-08-09 20:42:40,520 basehttp 29616 2548 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5767
+INFO 2025-08-09 20:42:44,273 basehttp 29616 2548 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5767
+INFO 2025-08-09 20:42:44,435 basehttp 29616 2548 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 5767

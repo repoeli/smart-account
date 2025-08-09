@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 import requests
 import logging
+import uuid
 
 from .serializers import (
     UserRegistrationSerializer, UserLoginSerializer, EmailVerificationSerializer,
@@ -21,6 +22,7 @@ from .serializers import (
     ReceiptValidateSerializer, ReceiptCategorizeSerializer, ReceiptUpdateSerializer,
     ReceiptReprocessResponseSerializer, ReceiptValidateResponseSerializer, ReceiptCategorizeResponseSerializer,
     ReceiptStatisticsResponseSerializer, ReceiptListResponseSerializer, ReceiptDetailResponseSerializer,
+    ReceiptManualCreateSerializer,
 )
 from infrastructure.ocr.services import OCRService, OCRMethod
 from domain.receipts.entities import ReceiptType
@@ -566,6 +568,105 @@ class ReceiptUploadView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class ReceiptManualCreateView(APIView):
+    """Create a receipt manually without OCR. Optional Cloudinary upload when file_url provided.
+    Aligns with docs US-006 for manual entry.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from infrastructure.database.repositories import DjangoReceiptRepository
+        from domain.receipts.services import FileValidationService
+        from infrastructure.storage.services import FileStorageService
+        from domain.receipts.entities import Receipt as DomainReceipt, ReceiptStatus, OCRData, FileInfo
+        serializer = ReceiptManualCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({'success': False, 'error': 'validation_error', 'validation_errors': serializer.errors}, status=400)
+
+        data = serializer.validated_data
+        upload_to_cloud = bool(data.get('upload_to_cloudinary'))
+        provided_url = data.get('file_url')
+        uploaded_file = request.FILES.get('file')
+        filename = data.get('filename') or (uploaded_file.name if uploaded_file else 'manual.jpg')
+        mime_type = data.get('mime_type') or (uploaded_file.content_type if uploaded_file else 'image/jpeg')
+
+        file_url = provided_url
+        cloudinary_public_id = None
+        storage_provider = None
+
+        try:
+            if uploaded_file:
+                file_bytes = uploaded_file.read()
+                if upload_to_cloud:
+                    from infrastructure.storage.adapters.cloudinary_store import CloudinaryStorageAdapter
+                    cloud = CloudinaryStorageAdapter()
+                    asset = cloud.upload(file_bytes=file_bytes, filename=filename, mime=mime_type)
+                    file_url = asset.secure_url
+                    storage_provider = 'cloudinary'
+                    cloudinary_public_id = asset.public_id
+                else:
+                    # local storage fallback
+                    storage_service = FileStorageService()
+                    ok, url, _err = storage_service.upload_file_from_memory(file_bytes, filename)
+                    if ok:
+                        file_url = url
+                        storage_provider = 'local'
+            elif provided_url and upload_to_cloud and 'res.cloudinary.com' not in provided_url:
+                # migrate external URL to Cloudinary
+                resp = requests.get(provided_url, timeout=30)
+                resp.raise_for_status()
+                from infrastructure.storage.adapters.cloudinary_store import CloudinaryStorageAdapter
+                cloud = CloudinaryStorageAdapter()
+                asset = cloud.upload(file_bytes=resp.content, filename=filename, mime=mime_type)
+                file_url = asset.secure_url
+                storage_provider = 'cloudinary'
+                cloudinary_public_id = asset.public_id
+        except Exception:
+            pass
+
+        # Build receipt directly (no OCR)
+        try:
+            repo = DjangoReceiptRepository()
+            file_validation = FileValidationService()
+            if not file_url:
+                # If no URL is available, create a synthetic local file URL for tracking
+                file_url = getattr(settings, 'PUBLIC_BASE_URL', 'http://127.0.0.1:8000') + '/media/receipts/placeholder.jpg'
+
+            fi: FileInfo = file_validation.get_file_info(filename, 0, mime_type, file_url)
+            receipt = DomainReceipt(
+                id=str(uuid.uuid4()),
+                user=request.user,
+                file_info=fi,
+                status=ReceiptStatus.PROCESSED if any([data.get('merchant_name'), data.get('total_amount'), data.get('date')]) else ReceiptStatus.UPLOADED,
+                receipt_type=ReceiptType(data.get('receipt_type') or 'purchase'),
+            )
+            # telemetry
+            try:
+                if storage_provider:
+                    receipt.metadata.custom_fields['storage_provider'] = storage_provider
+                if cloudinary_public_id:
+                    receipt.metadata.custom_fields['cloudinary_public_id'] = cloudinary_public_id
+            except Exception:
+                pass
+
+            # manual OCR fields
+            if any([data.get('merchant_name'), data.get('total_amount'), data.get('date')]):
+                receipt.ocr_data = OCRData(
+                    merchant_name=data.get('merchant_name') or '',
+                    total_amount=None,
+                    currency=data.get('currency') or 'GBP',
+                    date=None,
+                    confidence_score=1.0,
+                )
+            if receipt.metadata and data.get('notes'):
+                receipt.metadata.notes = data.get('notes')
+
+            saved = repo.save(receipt)
+            return Response({'success': True, 'receipt_id': saved.id, 'file_url': saved.file_info.file_url}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'error': 'manual_create_error', 'message': str(e)}, status=500)
 
 
 class ReceiptParseView(APIView):
