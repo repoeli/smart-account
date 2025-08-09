@@ -171,8 +171,27 @@ class ApiClient {
   }
 
   async getReceipt(id: string): Promise<Receipt> {
-    const response = await this.client.get<Receipt>(`/receipts/${id}/`);
-    return response.data;
+    const response = await this.client.get<{ success: boolean; receipt: any }>(`/receipts/${id}/`);
+    const r = response.data.receipt;
+    return {
+      id: r.id,
+      filename: r.filename,
+      status: r.status,
+      receipt_type: r.receipt_type,
+      created_at: r.created_at,
+      updated_at: r.updated_at,
+      file_url: r.file_url,
+      merchant_name: r.ocr_data?.merchant_name,
+      total_amount: r.ocr_data?.total_amount,
+      date: r.ocr_data?.date,
+      confidence_score: r.ocr_data?.confidence_score,
+      currency: r.ocr_data?.currency,
+      vat_number: r.ocr_data?.vat_number,
+      receipt_number: r.ocr_data?.receipt_number,
+      metadata: r.metadata,
+      storage_provider: r.metadata?.custom_fields?.storage_provider,
+      cloudinary_public_id: r.metadata?.custom_fields?.cloudinary_public_id,
+    } as unknown as Receipt;
   }
 
   async updateReceipt(id: string, data: Partial<Receipt>): Promise<Receipt> {

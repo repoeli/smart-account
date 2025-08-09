@@ -90,7 +90,7 @@ export interface Receipt {
   id: string;
   filename: string;
   status: 'uploaded' | 'processing' | 'processed' | 'failed' | 'archived';
-  receipt_type: 'purchase' | 'sale' | 'refund' | 'expense';
+  receipt_type: 'purchase' | 'expense' | 'invoice' | 'bill' | 'other';
   created_at: string;
   updated_at: string;
   file_url: string;
@@ -105,6 +105,9 @@ export interface Receipt {
   receipt_number?: string;
   currency?: string;
   notes?: string;
+  // telemetry (optional)
+  storage_provider?: 'cloudinary' | 'local' | string;
+  cloudinary_public_id?: string;
 }
 
 export interface ReceiptUploadRequest {

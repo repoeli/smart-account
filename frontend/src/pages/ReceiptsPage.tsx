@@ -32,6 +32,8 @@ const ReceiptsPage = () => {
           date: r.ocr_data?.date,
           confidence_score: r.ocr_data?.confidence_score,
           currency: r.ocr_data?.currency,
+          storage_provider: r.metadata?.custom_fields?.storage_provider,
+          cloudinary_public_id: r.metadata?.custom_fields?.cloudinary_public_id,
         }));
         setReceipts(mapped);
       } catch (e: any) {
@@ -91,6 +93,14 @@ const ReceiptsPage = () => {
                   <div className="text-sm text-gray-600">{r.currency || 'GBP'} {r.total_amount || ''}</div>
                   <div className={`text-xs ${r.status === 'failed' ? 'text-red-600' : 'text-gray-400'}`}>{r.status}</div>
                 </div>
+              </div>
+              <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
+                <span>{r.confidence_score ? `conf: ${Math.round((r.confidence_score as number) * 100)}%` : ''}</span>
+                {r.storage_provider && (
+                  <span className="px-2 py-0.5 rounded bg-gray-50 border">
+                    {r.storage_provider}
+                  </span>
+                )}
               </div>
             </div>
           ))}
