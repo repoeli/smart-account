@@ -75,3 +75,28 @@
 - Follow‑ups proposed
   - Header auth UI hydration: derive visibility from successful `getCurrentUser()` after refresh to keep logout/menu consistent.
   - Optional: “View on Cloudinary” link using `cloudinary_public_id` on detail page; display OCR latency and needs‑review badges.
+
+#### New since last commit (Camera capture stabilization)
+- Frontend – camera capture refactor (durable, race‑free)
+  - Added reusable hook `frontend/src/hooks/useUserMedia.ts`:
+    - Globally caches a single `MediaStream` and uses reference counting to survive React StrictMode double‑mount/unmount.
+    - Prevents repeated permission prompts and avoids play/pause races by returning an already‑active stream to consumers.
+    - Graceful shutdown: when the last consumer releases, all tracks are stopped after a short grace period.
+  - Refactored `frontend/src/pages/receipts/ReceiptUploadPage.tsx`:
+    - Inline camera renders inside the rectangle (no modal). `CameraCapture` uses `useUserMedia` and attaches the stream once.
+    - Device selection: enumerates `videoinput` devices and allows switching via dropdown; prefers back/environment camera by default.
+    - Frame detection: listens for `loadeddata`/`canplay` and surfaces an overlay if frames don’t arrive (some drivers report active camera but deliver black frames).
+    - Native fallback: adds “Use System Camera” button (`<input type="file" accept="image/*" capture="environment">`) that opens the OS camera and returns a captured image when direct stream preview isn’t possible.
+    - Cleanup: on close/unmount, removes listeners, clears `srcObject`, pauses video and stops tracks from the cached stream when no other consumers exist.
+    - Removed auto‑retry loops that caused `AbortError: play() request was interrupted by a new load request` spam; replaced with deterministic attach + single play().
+    - Keeps capture quality reasonable (720p target via device defaults) and relies on browser downscaling; no hard constraints that break embedded webcams.
+
+- UX/QA notes
+  - Expected behavior: camera light turns on; inline preview shows. If a given device (driver/privacy mode) provides no frames, the overlay appears and native capture path is available so users can proceed immediately.
+  - Verified that closing the camera or navigating away releases tracks; no lingering camera indicator after a short grace period.
+
+- Test guidance
+  1. Open Upload Receipts → Open Camera. Confirm live preview or overlay + fallback button.
+  2. Switch devices via dropdown if multiple cameras exist; verify preview updates without permission re‑prompt.
+  3. Click Close Camera; browser camera indicator should turn off shortly. Re‑open to confirm re‑attachment works.
+  4. Use “Use System Camera”, capture, and check that the photo is added to the upload list and can be uploaded end‑to‑end.

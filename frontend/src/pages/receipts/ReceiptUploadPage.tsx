@@ -1,50 +1,107 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { ArrowLeftIcon, CameraIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, CameraIcon } from '@heroicons/react/24/outline';
 
 import FileUploadZone from '../../components/receipts/FileUploadZone';
 import UploadProgress from '../../components/receipts/UploadProgress';
 import ReceiptPreview from '../../components/receipts/ReceiptPreview';
 import Button from '../../components/forms/Button';
 import { apiClient } from '../../services/api';
+import { useUserMedia } from '../../hooks/useUserMedia';
 
 interface CameraCaptureProps {
   onCapture: (file: File) => void;
   onClose: () => void;
+  variant?: 'modal' | 'inline';
 }
 
-const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => {
+const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose, variant = 'modal' }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | ''>('');
+  const [hasFrame, setHasFrame] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const constraints: MediaStreamConstraints = {
+    video: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : { facingMode: { ideal: 'environment' } },
+    audio: false,
+  };
+  const { stream } = useUserMedia(constraints);
+
+  // (legacy) global stream stopper kept for reference; not used with cached hook
 
   const startCamera = useCallback(async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment', // Use back camera on mobile
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
+      const all = await navigator.mediaDevices.enumerateDevices();
+      const videoInputs = all.filter((d) => d.kind === 'videoinput');
+      setDevices(videoInputs);
+      if (!stream) return;
+      const hasVideo = stream.getVideoTracks().length > 0;
+      if (!hasVideo) throw new Error('No video track');
+
+      const video = videoRef.current;
+      if (video) {
+        // Ensure inline playback and autoplay on mobile browsers
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('muted', 'true');
+        video.muted = true;
+        video.autoplay = true;
+        video.srcObject = stream;
+        // Ensure playback starts after metadata is ready (fixes black frame on some browsers)
+        const play = async () => {
+          try {
+            await video.play();
+          } catch (e) {
+            // Swallow autoplay errors; user will press Take Photo anyway
+          }
+        };
+        if (video.readyState >= 2) {
+          play();
+        } else {
+          video.onloadedmetadata = () => {
+            play();
+          };
         }
-      });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        setStream(mediaStream);
+        // Detect first frame
+        const onLoadedData = () => setHasFrame(true);
+        const onCanPlay = () => setHasFrame(true);
+        video.addEventListener('loadeddata', onLoadedData);
+        video.addEventListener('canplay', onCanPlay);
+        setTimeout(() => {
+          if (video.videoWidth === 0 || video.videoHeight === 0) setHasFrame(false);
+        }, 1500);
+        // Store cleanup
+        (video as any).__smart_cleanup_listeners__ = () => {
+          video.removeEventListener('loadeddata', onLoadedData);
+          video.removeEventListener('canplay', onCanPlay);
+        };
+        // Note: we intentionally do not auto-retry to avoid play/pause race conditions
       }
     } catch (error) {
       console.error('Camera access error:', error);
-      toast.error('Unable to access camera. Please check permissions.');
-      onClose();
     }
-  }, [onClose]);
+  }, [onClose, selectedDeviceId, stream]);
 
   const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
+    try {
+      if (stream) stream.getTracks().forEach((track) => track.stop());
+    } finally {
+      if (videoRef.current) {
+        const video = videoRef.current;
+        const cleanup = (video as any).__smart_cleanup_listeners__;
+        if (cleanup) {
+          try { cleanup(); } catch {}
+          (video as any).__smart_cleanup_listeners__ = undefined;
+        }
+        video.pause();
+        video.srcObject = null;
+        video.removeAttribute('src');
+        // Force reflow to fully detach on some browsers
+        video.load();
+      }
+      setHasFrame(false);
     }
   }, [stream]);
 
@@ -81,54 +138,116 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
   }, [onCapture, stopCamera, onClose]);
 
   React.useEffect(() => {
+    if (!stream) return;
     startCamera();
-    return () => stopCamera();
-  }, [startCamera, stopCamera]);
+    return () => {
+      stopCamera();
+    };
+  }, [stream, startCamera, stopCamera]);
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="text-center mb-4">
-          <h3 className="text-lg font-semibold">Capture Receipt</h3>
-          <p className="text-sm text-gray-600">Position your receipt in the frame</p>
+  // Always stop camera on page hide/unload to avoid stuck indicator
+  React.useEffect(() => {
+    const onHide = () => stopCamera();
+    const onBeforeUnload = () => stopCamera();
+    const onVisibility = () => { if (document.hidden) stopCamera(); };
+    window.addEventListener('pagehide', onHide);
+    window.addEventListener('beforeunload', onBeforeUnload);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('pagehide', onHide);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [stopCamera]);
+
+  const content = (
+    <div className={variant === 'modal' ? 'bg-white rounded-lg p-6 max-w-md w-full mx-4' : ''}>
+      <div className="text-center mb-3">
+        <h3 className="text-lg font-semibold">Capture Receipt</h3>
+        <p className="text-sm text-gray-600">Position your receipt in the frame</p>
+      </div>
+      <div className={`relative mb-3 ${variant === 'inline' ? 'border rounded-lg overflow-hidden bg-black' : ''}`}>
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className={`${variant === 'inline' ? 'w-full h-64 object-contain bg-black' : 'w-full rounded-lg'}`}
+        />
+        <canvas ref={canvasRef} className="hidden" />
+        {!hasFrame && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center text-white text-xs bg-black/40 px-2 py-1 rounded">
+              Camera active but no video. Switch device or use System Camera.
+            </div>
+          </div>
+        )}
+      </div>
+      {variant === 'inline' && devices.length > 1 && (
+        <div className="mb-3">
+          <label className="block text-xs text-gray-600 mb-1">Camera</label>
+          <select
+            className="w-full border rounded px-2 py-1 text-sm"
+            value={selectedDeviceId}
+            onChange={(e) => setSelectedDeviceId(e.target.value)}
+          >
+            <option value="">Auto (rear preferred)</option>
+            {devices.map((d) => (
+              <option key={d.deviceId} value={d.deviceId}>
+                {d.label || `Camera ${d.deviceId.slice(0, 6)}`}
+              </option>
+            ))}
+          </select>
         </div>
-        
-        <div className="relative mb-4">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full rounded-lg"
-          />
-          <canvas
-            ref={canvasRef}
+      )}
+      {!hasFrame && (
+        <div className="mb-3">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
             className="hidden"
-          />
-        </div>
-        
-        <div className="flex space-x-3">
-          <Button
-            onClick={capturePhoto}
-            disabled={isCapturing}
-            className="flex-1"
-          >
-            {isCapturing ? 'Capturing...' : 'Take Photo'}
-          </Button>
-          <Button
-            onClick={() => {
-              stopCamera();
-              onClose();
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                onCapture(file);
+                stopCamera();
+                onClose();
+              }
             }}
-            variant="secondary"
-            className="flex-1"
-          >
-            Cancel
+          />
+          <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="w-full">
+            Use System Camera
           </Button>
         </div>
+      )}
+      <div className="flex space-x-3">
+        <Button onClick={capturePhoto} disabled={isCapturing} className="flex-1">
+          {isCapturing ? 'Capturing...' : 'Take Photo'}
+        </Button>
+        <Button
+          onClick={() => {
+            stopCamera();
+            onClose();
+          }}
+          variant="secondary"
+          className="flex-1"
+        >
+          {variant === 'modal' ? 'Cancel' : 'Close Camera'}
+        </Button>
       </div>
     </div>
   );
+
+  if (variant === 'modal') {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        {content}
+      </div>
+    );
+  }
+  return content;
 };
 
 const ReceiptUploadPage: React.FC = () => {
@@ -284,23 +403,24 @@ const ReceiptUploadPage: React.FC = () => {
           </div>
 
           {/* Camera Capture */}
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-            <div className="text-center">
-              <CameraIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Camera Capture</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Take a photo of your receipt using your device's camera
-              </p>
-              <Button
-                onClick={() => setShowCamera(true)}
-                disabled={isUploading}
-                variant="secondary"
-                className="w-full"
-              >
-                <CameraIcon className="w-5 h-5 mr-2" />
-                Open Camera
-              </Button>
-            </div>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+            {!showCamera ? (
+              <div className="text-center">
+                <CameraIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Camera Capture</h3>
+                <p className="text-sm text-gray-600 mb-4">Take a photo of your receipt using your device's camera</p>
+                <Button onClick={() => setShowCamera(true)} disabled={isUploading} variant="secondary" className="w-full">
+                  <CameraIcon className="w-5 h-5 mr-2" />
+                  Open Camera
+                </Button>
+              </div>
+            ) : (
+              <CameraCapture
+                variant="inline"
+                onCapture={handleCameraCapture}
+                onClose={() => setShowCamera(false)}
+              />
+            )}
           </div>
         </div>
 
@@ -359,13 +479,7 @@ const ReceiptUploadPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Camera Capture Modal */}
-      {showCamera && (
-        <CameraCapture
-          onCapture={handleCameraCapture}
-          onClose={() => setShowCamera(false)}
-        />
-      )}
+      {/* Inline camera is rendered inside the card above when showCamera is true */}
     </div>
   );
 };
