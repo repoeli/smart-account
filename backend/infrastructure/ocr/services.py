@@ -390,25 +390,75 @@ class OCRService:
         Returns:
             Tuple of (success, ocr_data, error_message)
         """
+        # Prefer HTTP Paddle adapter when engine is paddle (env default) or explicitly requested
         try:
-            # Download image from URL
+            preferred = (method is None and str(getattr(settings, 'OCR_ENGINE_DEFAULT', 'paddle')).lower() in ['paddle', 'paddle_ocr'])
+            use_paddle = preferred or method == OCRMethod.PADDLE_OCR
+            if use_paddle:
+                try:
+                    from infrastructure.ocr.adapters.paddle_http import PaddleOCRHTTPAdapter
+                    adapter = PaddleOCRHTTPAdapter()
+                    extraction = adapter.parse_receipt(url=image_url)
+                    ocr_data = OCRData(
+                        merchant_name=extraction.merchant,
+                        total_amount=Decimal(str(extraction.total)) if extraction.total is not None else None,
+                        currency=extraction.currency or 'GBP',
+                        date=self._extract_date([extraction.date]) if extraction.date else None,
+                        vat_amount=Decimal(str(extraction.tax)) if extraction.tax is not None else None,
+                        items=[],
+                        confidence_score=extraction.ocr_confidence,
+                        raw_text=extraction.raw_text or '',
+                        additional_data={
+                            'subtotal': extraction.subtotal,
+                            'tax_rate': extraction.tax_rate,
+                            'engine': extraction.engine,
+                            'latency_ms': extraction.latency_ms,
+                            'source_url': extraction.source_url or image_url,
+                        },
+                    )
+                    return True, ocr_data, None
+                except Exception as e:
+                    logger.warning(f"Paddle HTTP adapter failed, falling back: {e}")
+            if method == OCRMethod.OPENAI_VISION:
+                try:
+                    from infrastructure.storage.adapters.cloudinary_store import CloudinaryStorageAdapter
+                    from infrastructure.ocr.adapters.openai_vision import OpenAIVisionAdapter
+                    storage = CloudinaryStorageAdapter()
+                    adapter = OpenAIVisionAdapter(storage=storage)
+                    extraction = adapter.parse_receipt(url=image_url)
+                    ocr_data = OCRData(
+                        merchant_name=extraction.merchant,
+                        total_amount=Decimal(str(extraction.total)) if extraction.total is not None else None,
+                        currency=extraction.currency or 'GBP',
+                        date=self._extract_date([extraction.date]) if extraction.date else None,
+                        vat_amount=Decimal(str(extraction.tax)) if extraction.tax is not None else None,
+                        items=[],
+                        confidence_score=extraction.ocr_confidence,
+                        raw_text=extraction.raw_text or '',
+                        additional_data={
+                            'subtotal': extraction.subtotal,
+                            'tax_rate': extraction.tax_rate,
+                            'engine': extraction.engine,
+                            'latency_ms': extraction.latency_ms,
+                            'source_url': extraction.source_url or image_url,
+                            'raw_response': extraction.raw_response,
+                        },
+                    )
+                    return True, ocr_data, None
+                except Exception as e:
+                    logger.warning(f"OpenAI Vision adapter failed, falling back to legacy path: {e}")
+            # Legacy path: download the image locally and use in-process OCR
             response = requests.get(image_url, timeout=30)
             response.raise_for_status()
-            
-            # Save to temporary file
             temp_path = f"/tmp/receipt_{datetime.now().timestamp()}.jpg"
             with open(temp_path, 'wb') as f:
                 f.write(response.content)
-            
             try:
-                # Extract receipt data from temporary file
                 success, ocr_data, error = self.extract_receipt_data(temp_path, method)
                 return success, ocr_data, error
             finally:
-                # Clean up temporary file
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
-                    
         except Exception as e:
             logger.error(f"Failed to process receipt from URL: {e}")
             return False, None, str(e)

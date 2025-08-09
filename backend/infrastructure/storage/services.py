@@ -15,12 +15,18 @@ class FileStorageService:
     """Service for handling file storage operations."""
     
     def __init__(self):
-        """Initialize Cloudinary configuration."""
-        cloudinary.config(
-            cloud_name=settings.CLOUDINARY_CLOUD_NAME,
-            api_key=settings.CLOUDINARY_API_KEY,
-            api_secret=settings.CLOUDINARY_API_SECRET
+        """Initialize Cloudinary configuration if keys are present."""
+        self._cloudinary_enabled = bool(
+            getattr(settings, "CLOUDINARY_CLOUD_NAME", None)
+            and getattr(settings, "CLOUDINARY_API_KEY", None)
+            and getattr(settings, "CLOUDINARY_API_SECRET", None)
         )
+        if self._cloudinary_enabled:
+            cloudinary.config(
+                cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+                api_key=settings.CLOUDINARY_API_KEY,
+                api_secret=settings.CLOUDINARY_API_SECRET
+            )
     
     def upload_file(self, file_path: str, folder: str = "receipts") -> Tuple[bool, Optional[str], Optional[str]]:
         """
@@ -61,20 +67,43 @@ class FileStorageService:
         Returns:
             Tuple of (success, file_url, error_message)
         """
+        # Try Cloudinary first when enabled
+        if self._cloudinary_enabled:
+            try:
+                result = cloudinary.uploader.upload(
+                    file_data,
+                    folder=folder,
+                    resource_type="auto",
+                    public_id=filename,
+                    use_filename=True,
+                    unique_filename=True,
+                    overwrite=False
+                )
+                return True, result['secure_url'], None
+            except Exception:
+                # Fall back to local storage
+                pass
+
+        # Local development fallback: save to MEDIA_ROOT/<folder> and build absolute URL
         try:
-            # Upload file from memory to Cloudinary
-            result = cloudinary.uploader.upload(
-                file_data,
-                folder=folder,
-                resource_type="auto",
-                public_id=filename,
-                use_filename=True,
-                unique_filename=True,
-                overwrite=False
-            )
-            
-            return True, result['secure_url'], None
-            
+            from pathlib import Path
+            base_dir = Path(getattr(settings, 'BASE_DIR', '.'))
+            media_root_base = Path(getattr(settings, 'MEDIA_ROOT', base_dir / 'media'))
+            target_dir = media_root_base / (folder or 'receipts')
+            target_dir.mkdir(parents=True, exist_ok=True)
+
+            from uuid import uuid4
+            suffix = os.path.splitext(filename)[1] or '.bin'
+            local_name = f"{uuid4().hex}{suffix}"
+            file_path = target_dir / local_name
+            with open(file_path, 'wb') as f:
+                f.write(file_data)
+
+            media_url = getattr(settings, 'MEDIA_URL', '/media/')
+            public_base = getattr(settings, 'PUBLIC_BASE_URL', '').rstrip('/')
+            rel = file_path.relative_to(media_root_base)
+            url_path = f"{media_url.rstrip('/')}/{rel.as_posix()}"
+            return True, (f"{public_base}{url_path}" if public_base else url_path), None
         except Exception as e:
             return False, None, str(e)
     

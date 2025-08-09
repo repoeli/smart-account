@@ -24,11 +24,11 @@ function App() {
   const { isAuthenticated, token } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    // Check if user is authenticated on app load
-    if (token && !isAuthenticated) {
+    // Always try to hydrate user if we have a token
+    if (token) {
       dispatch(getCurrentUser());
     }
-  }, [dispatch, token, isAuthenticated]);
+  }, [dispatch, token]);
 
   return (
     <div className="App">

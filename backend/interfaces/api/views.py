@@ -11,16 +11,20 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+import requests
 import logging
 
 from .serializers import (
     UserRegistrationSerializer, UserLoginSerializer, EmailVerificationSerializer,
     PasswordResetRequestSerializer, PasswordResetConfirmSerializer, UserProfileSerializer,
     ReceiptUploadSerializer, ReceiptUploadResponseSerializer, ReceiptReprocessSerializer,
-    ReceiptValidateSerializer, ReceiptCategorizeSerializer, ReceiptUpdateSerializer
+    ReceiptValidateSerializer, ReceiptCategorizeSerializer, ReceiptUpdateSerializer,
+    ReceiptReprocessResponseSerializer, ReceiptValidateResponseSerializer, ReceiptCategorizeResponseSerializer,
+    ReceiptStatisticsResponseSerializer, ReceiptListResponseSerializer, ReceiptDetailResponseSerializer,
 )
 from infrastructure.ocr.services import OCRService, OCRMethod
 from domain.receipts.entities import ReceiptType
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +41,28 @@ class HealthCheckView(APIView):
             'message': 'Backend is running',
             'timestamp': timezone.now().isoformat()
         }, status=status.HTTP_200_OK)
+
+
+class FileInfoView(APIView):
+    """
+    Diagnostics endpoint to inspect stored files (Cloudinary or local).
+    GET /api/v1/files/info?url=<file_url>
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        url = request.query_params.get('url')
+        if not url:
+            return Response({"detail": "url query param is required"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            from infrastructure.storage.services import FileStorageService
+            svc = FileStorageService()
+            ok, info, err = svc.get_file_info(url)
+            if ok:
+                return Response({"success": True, "info": info}, status=status.HTTP_200_OK)
+            return Response({"success": False, "error": err}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"success": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserRegistrationView(APIView):
@@ -389,9 +415,9 @@ class UserProfileView(APIView):
             profile_use_case = UserProfileUseCase(user_repository=user_repository)
             
             # Execute get profile
-            result = profile_use_case.execute(user=request.user)
+            result = profile_use_case.get_profile(user_id=request.user.id)
             
-            return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST)
+            return Response({'success': True, **result}, status=status.HTTP_200_OK)
             
         except Exception as e:
             return Response(
@@ -428,12 +454,12 @@ class UserProfileView(APIView):
             profile_use_case = UserProfileUseCase(user_repository=user_repository)
             
             # Execute update profile
-            result = profile_use_case.execute(
-                user=request.user,
+            result = profile_use_case.update_profile(
+                user_id=request.user.id,
                 profile_data=serializer.validated_data
             )
             
-            return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST)
+            return Response({'success': True, **result}, status=status.HTTP_200_OK)
             
         except Exception as e:
             return Response(
@@ -540,6 +566,84 @@ class ReceiptUploadView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class ReceiptParseView(APIView):
+    """
+    POST /api/v1/receipts/parse?engine=paddle|openai&source=file|url
+    - If source=file: multipart upload, stored to Cloudinary first
+    - If source=url: JSON body {"url": "..."}
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            engine = request.query_params.get('engine', getattr(settings, 'OCR_ENGINE_DEFAULT', 'paddle'))
+            source = request.query_params.get('source', 'file')
+
+            # Prepare providers
+            from application.receipts.ports import OCRProvider
+            from infrastructure.storage.adapters.cloudinary_store import CloudinaryStorageAdapter
+            from infrastructure.ocr.adapters.paddle_http import PaddleOCRHTTPAdapter
+            from infrastructure.ocr.adapters.openai_vision import OpenAIVisionAdapter
+
+            storage = CloudinaryStorageAdapter()
+
+            def call_provider(provider: OCRProvider, *, file_bytes=None, url=None, filename: str = None):
+                options = {"filename": filename} if filename else {}
+                return provider.parse_receipt(file_bytes=file_bytes, url=url, options=options)
+
+            # Handle input
+            if source == 'file':
+                if 'file' not in request.FILES:
+                    return Response({"detail": "file is required"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                f = request.FILES['file']
+                if f.size > getattr(settings, 'MAX_RECEIPT_MB', 10) * 1024 * 1024:
+                    return Response({"detail": "File too large"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                file_bytes = f.read()
+                filename = f.name
+                if engine == 'openai':
+                    provider = OpenAIVisionAdapter(storage=storage)
+                    extraction = call_provider(provider, file_bytes=file_bytes, filename=filename)
+                else:
+                    provider = PaddleOCRHTTPAdapter()
+                    extraction = call_provider(provider, file_bytes=file_bytes, filename=filename)
+            else:
+                data = request.data or {}
+                url = data.get('url')
+                if not url:
+                    return Response({"detail": "url is required"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                if engine == 'openai':
+                    provider = OpenAIVisionAdapter(storage=storage)
+                    extraction = call_provider(provider, url=url)
+                else:
+                    provider = PaddleOCRHTTPAdapter()
+                    extraction = call_provider(provider, url=url)
+
+            # Uniform response
+            from .serializers import ReceiptParseResponseSerializer
+            ser = ReceiptParseResponseSerializer(extraction.model_dump())
+            return Response(ser.data, status=status.HTTP_200_OK)
+
+        except requests.Timeout:
+            return Response({"detail": "OCR provider timeout"}, status=status.HTTP_504_GATEWAY_TIMEOUT)
+        except Exception as e:
+            # Optional fallback
+            if engine == 'openai' and getattr(settings, 'FALLBACK_TO_PADDLE', True):
+                try:
+                    from infrastructure.ocr.adapters.paddle_http import PaddleOCRHTTPAdapter
+                    provider = PaddleOCRHTTPAdapter()
+                    if source == 'file' and 'file' in request.FILES:
+                        f = request.FILES['file']
+                        extraction = provider.parse_receipt(file_bytes=f.read(), options={"filename": f.name})
+                    else:
+                        extraction = provider.parse_receipt(url=(request.data or {}).get('url'))
+                    from .serializers import ReceiptParseResponseSerializer
+                    ser = ReceiptParseResponseSerializer(extraction.model_dump())
+                    return Response(ser.data, status=status.HTTP_200_OK)
+                except Exception:
+                    pass
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ReceiptReprocessView(APIView):

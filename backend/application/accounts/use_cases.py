@@ -330,27 +330,33 @@ class UserProfileUseCase:
         if not user:
             raise ValueError("User not found")
         
+        # Map domain user to API shape expected by frontend
         return {
             'id': str(user.id),
-            'email': user.email,
+            'email': user.email.address,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'company_name': user.company_name,
-            'business_type': user.business_type,
-            'phone': user.phone,
             'user_type': user.user_type.value,
             'status': user.status.value,
-            'subscription_tier': user.subscription_tier,
+            'subscription_tier': user.subscription_tier.value if hasattr(user.subscription_tier, 'value') else user.subscription_tier,
             'is_verified': user.is_verified,
-            'address_street': user.address_street,
-            'address_city': user.address_city,
-            'address_postal_code': user.address_postal_code,
-            'address_country': user.address_country,
+            'phone': user.phone.number if user.phone else None,
+            'business_profile': {
+                'company_name': getattr(user.business_profile, 'company_name', None),
+                'company_registration': None,
+                'vat_number': None,
+                'address': {
+                    'street': getattr(getattr(user.business_profile, 'address', None), 'street', ''),
+                    'city': getattr(getattr(user.business_profile, 'address', None), 'city', ''),
+                    'postal_code': getattr(getattr(user.business_profile, 'address', None), 'postal_code', ''),
+                    'country': getattr(getattr(user.business_profile, 'address', None), 'country', 'UK'),
+                } if getattr(user.business_profile, 'address', None) else None,
+            },
             'timezone': user.timezone,
             'language': user.language,
-            'notification_preferences': user.notification_preferences,
-            'created_at': user.created_at.isoformat(),
-            'last_login': user.last_login.isoformat() if user.last_login else None
+            'notification_preferences': user.notification_preferences.to_dict() if hasattr(user, 'notification_preferences') else {},
+            'created_at': user.created_at.isoformat() if hasattr(user, 'created_at') and user.created_at else None,
+            'last_login': user.last_login.isoformat() if user.last_login else None,
         }
     
     def update_profile(self, user_id: uuid.UUID, profile_data: Dict[str, Any]) -> Dict[str, Any]:

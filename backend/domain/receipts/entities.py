@@ -39,16 +39,8 @@ class FileInfo(ValueObject):
         self.mime_type = mime_type
         self.file_url = file_url
     
-    def __eq__(self, other):
-        if not isinstance(other, FileInfo):
-            return False
-        return (self.filename == other.filename and
-                self.file_size == other.file_size and
-                self.mime_type == other.mime_type and
-                self.file_url == other.file_url)
-    
-    def __hash__(self):
-        return hash((self.filename, self.file_size, self.mime_type, self.file_url))
+    def _get_equality_components(self) -> tuple:
+        return (self.filename, self.file_size, self.mime_type, self.file_url)
 
 
 class OCRData(ValueObject):

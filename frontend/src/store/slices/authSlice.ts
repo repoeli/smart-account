@@ -110,8 +110,10 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload.user;
-        state.token = action.payload.access;
+        // Store tokens; user will be fetched via getCurrentUser to stay consistent across refreshes
+        state.token = action.payload.access_token;
+        localStorage.setItem('access_token', action.payload.access_token);
+        localStorage.setItem('refresh_token', action.payload.refresh_token);
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -128,7 +130,7 @@ const authSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.isLoading = false;
         state.error = null;
         

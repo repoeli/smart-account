@@ -114,7 +114,7 @@ class ApiClient {
     const response = await this.client.post<LoginResponse>('/auth/login/', credentials);
     if (response.data.access_token && response.data.refresh_token) {
       this.setTokens(response.data.access_token, response.data.refresh_token);
-      localStorage.setItem('user', JSON.stringify(response.data));
+      // User profile will be fetched via getCurrentUser after login
     }
     return response.data;
   }

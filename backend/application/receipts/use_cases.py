@@ -19,6 +19,7 @@ from domain.receipts.services import (
 from domain.accounts.entities import User
 from infrastructure.storage.services import FileStorageService
 from infrastructure.ocr.services import OCRService, OCRMethod
+from django.conf import settings
 
 
 class ReceiptUploadUseCase:
@@ -72,10 +73,35 @@ class ReceiptUploadUseCase:
                     'validation_errors': validation_errors
                 }
             
-            # Step 2: Upload file to storage
-            upload_success, file_url, upload_error = self.file_storage_service.upload_file_from_memory(
-                file_data, filename
-            )
+            # Step 2: Upload file to storage (prefer Cloudinary when configured)
+            file_url = None
+            upload_error = None
+            upload_success = False
+            storage_provider = "local"
+            cloudinary_public_id: Optional[str] = None
+            try:
+                if getattr(settings, 'CLOUDINARY_CLOUD_NAME', None) and getattr(settings, 'CLOUDINARY_API_KEY', None) and getattr(settings, 'CLOUDINARY_API_SECRET', None):
+                    from infrastructure.storage.adapters.cloudinary_store import CloudinaryStorageAdapter
+                    cloud = CloudinaryStorageAdapter()
+                    asset = cloud.upload(file_bytes=file_data, filename=filename, mime=mime_type)
+                    file_url = asset.secure_url
+                    upload_success = True
+                    storage_provider = "cloudinary"
+                    cloudinary_public_id = asset.public_id
+                else:
+                    upload_success, file_url, upload_error = self.file_storage_service.upload_file_from_memory(
+                        file_data, filename
+                    )
+            except Exception as e:
+                # Cloudinary failed; attempt local fallback before erroring
+                fallback_success, fallback_url, fallback_err = self.file_storage_service.upload_file_from_memory(
+                    file_data, filename
+                )
+                if fallback_success:
+                    upload_success, file_url, upload_error = True, fallback_url, None
+                    storage_provider = "local"
+                else:
+                    upload_success, file_url, upload_error = False, None, f"cloudinary_error: {str(e)}; fallback_error: {fallback_err}"
             
             if not upload_success:
                 return {
@@ -98,6 +124,13 @@ class ReceiptUploadUseCase:
                 status=ReceiptStatus.UPLOADED,
                 receipt_type=receipt_type
             )
+            # Add storage telemetry to metadata
+            try:
+                receipt.metadata.custom_fields["storage_provider"] = storage_provider
+                if cloudinary_public_id:
+                    receipt.metadata.custom_fields["cloudinary_public_id"] = cloudinary_public_id
+            except Exception:
+                pass
             
             # Step 5: Save receipt to repository
             saved_receipt = self.receipt_repository.save(receipt)

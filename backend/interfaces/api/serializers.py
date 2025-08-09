@@ -142,8 +142,11 @@ class ReceiptUploadSerializer(serializers.Serializer):
         if value.size > 10 * 1024 * 1024:
             raise serializers.ValidationError("File size must be less than 10MB.")
         
-        # Check file type
-        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']
+        # Check file type (align with domain validation and US-004: include PDF, WEBP; accept common JPEG aliases)
+        allowed_types = [
+            'image/jpeg', 'image/jpg', 'image/pjpeg', 'image/png', 'image/gif',
+            'image/bmp', 'image/tiff', 'image/webp', 'application/pdf'
+        ]
         if value.content_type not in allowed_types:
             raise serializers.ValidationError("Only image files are allowed.")
         
@@ -162,6 +165,24 @@ class ReceiptUploadResponseSerializer(serializers.Serializer):
     ocr_data = serializers.DictField(required=False)
     ocr_error = serializers.CharField(required=False)
     error = serializers.CharField(required=False)
+
+
+class ReceiptParseResponseSerializer(serializers.Serializer):
+    """
+    Serializer for unified OCR parse response.
+    """
+    engine = serializers.ChoiceField(choices=["paddle", "openai", "fallback"]) 
+    merchant = serializers.CharField(required=False, allow_null=True)
+    date = serializers.CharField(required=False, allow_null=True)
+    total = serializers.FloatField(required=False, allow_null=True)
+    currency = serializers.CharField(required=False, allow_null=True)
+    tax = serializers.FloatField(required=False, allow_null=True)
+    tax_rate = serializers.FloatField(required=False, allow_null=True)
+    subtotal = serializers.FloatField(required=False, allow_null=True)
+    ocr_confidence = serializers.FloatField(required=False, allow_null=True)
+    raw_text = serializers.CharField(required=False, allow_null=True)
+    source_url = serializers.CharField(required=False, allow_null=True)
+    latency_ms = serializers.IntegerField(required=False, allow_null=True)
 
 
 class ReceiptReprocessSerializer(serializers.Serializer):

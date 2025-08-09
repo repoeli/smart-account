@@ -11,7 +11,12 @@ import environ
 
 # Initialize environment variables
 env = environ.Env()
-environ.Env.read_env()
+# Explicitly load backend/.env so local configuration is always picked up
+try:
+    environ.Env.read_env(str(Path(__file__).resolve().parent.parent.parent / '.env'))
+except Exception:
+    # Fallback to default lookup
+    environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -204,6 +209,33 @@ SPECTACULAR_SETTINGS = {
     'SCHEMA_PATH_PREFIX': '/api/v1/',
 }
 
+# OCR/Storage configuration (env-driven)
+# Support both our canonical names and the user's provided names for compatibility
+OCR_ENGINE_DEFAULT = env("OCR_ENGINE_DEFAULT", default=env("OCR_PROVIDER_DEFAULT", default="paddle"))
+OCR_TIMEOUT_SECONDS = env.int("OCR_TIMEOUT_SECONDS", default=env.int("PADDLE_TIMEOUT_SECONDS", default=25))
+MAX_RECEIPT_MB = env.int("MAX_RECEIPT_MB", default=env.int("OCR_MAX_IMAGE_MB", default=10))
+
+# External Paddle FastAPI service
+_paddle_base = env("PADDLE_API_BASE", default="http://127.0.0.1:8089")
+PADDLE_OCR_URL = env("PADDLE_OCR_URL", default=f"{_paddle_base}/ocr/receipt")
+PADDLE_OCR_URL_BY_URL = env("PADDLE_OCR_URL_BY_URL", default=f"{_paddle_base}/ocr/receipt-by-url")
+
+# OpenAI
+OPENAI_API_KEY = env("OPENAI_API_KEY", default=None)
+OPENAI_VISION_MODEL = env("OPENAI_VISION_MODEL", default="gpt-4o-mini")
+FALLBACK_TO_PADDLE = env.bool("FALLBACK_TO_PADDLE", default=True)
+
+# Cloudinary (support both RECEIPTS_FOLDER and legacy UPLOAD_FOLDER env names)
+CLOUDINARY_CLOUD_NAME = env("CLOUDINARY_CLOUD_NAME", default=None)
+CLOUDINARY_API_KEY = env("CLOUDINARY_API_KEY", default=None)
+CLOUDINARY_API_SECRET = env("CLOUDINARY_API_SECRET", default=None)
+CLOUDINARY_RECEIPTS_FOLDER = env(
+    "CLOUDINARY_RECEIPTS_FOLDER",
+    default=env("CLOUDINARY_UPLOAD_FOLDER", default="receipts"),
+)
+
+# Public base URL used to build absolute URLs for locally stored media
+PUBLIC_BASE_URL = env("PUBLIC_BASE_URL", default="http://127.0.0.1:8000")
 # Logging Configuration
 LOGGING = {
     'version': 1,

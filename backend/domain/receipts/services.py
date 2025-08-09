@@ -11,6 +11,7 @@ from datetime import datetime, date
 from enum import Enum
 
 from domain.receipts.entities import Receipt, OCRData, ReceiptMetadata, FileInfo
+from django.conf import settings
 from domain.common.entities import ValueObject
 
 
@@ -18,12 +19,13 @@ class FileValidationService:
     """Service for validating file uploads."""
     
     def __init__(self):
-        self.max_file_size = 10 * 1024 * 1024  # 10MB
+        max_mb = getattr(settings, 'MAX_RECEIPT_MB', 10)
+        self.max_file_size = int(max_mb) * 1024 * 1024
         self.allowed_mime_types = [
             'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 
-            'image/bmp', 'image/tiff', 'image/webp'
+            'image/bmp', 'image/tiff', 'image/webp', 'application/pdf'
         ]
-        self.allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp']
+        self.allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp', '.pdf']
     
     def validate_file(self, filename: str, file_size: int, mime_type: str) -> Tuple[bool, List[str]]:
         """
@@ -456,7 +458,9 @@ class ReceiptValidationService:
     """Service for validating receipt data and OCR results."""
     
     def __init__(self):
-        self.min_confidence_threshold = 0.6
+        # Be permissive by default: low confidence should not hard-fail the receipt.
+        # We surface low confidence to the UI via quality score and allow manual correction.
+        self.min_confidence_threshold = 0.2
         self.max_amount_threshold = Decimal("100000.00")  # £100,000
         self.min_amount_threshold = Decimal("0.01")       # £0.01
     

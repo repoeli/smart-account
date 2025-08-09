@@ -10,7 +10,8 @@ from .views import (
     HealthCheckView, UserRegistrationView, UserLoginView, EmailVerificationView, UserProfileView,
     PasswordResetRequestView, PasswordResetConfirmView,
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView,
-    ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView
+    ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
+    ReceiptParseView,
 )
 from .management_views import (
     CreateFolderView, FolderDetailView, FolderListView, SearchReceiptsView,
@@ -37,6 +38,7 @@ urlpatterns = [
     
     # Receipt management endpoints
     path('receipts/upload/', ReceiptUploadView.as_view(), name='receipt-upload'),
+    path('receipts/parse/', ReceiptParseView.as_view(), name='receipt-parse'),
     path('receipts/', ReceiptListView.as_view(), name='receipt-list'),
     path('receipts/<str:receipt_id>/', ReceiptDetailView.as_view(), name='receipt-detail'),
     path('receipts/<str:receipt_id>/update/', ReceiptUpdateView.as_view(), name='receipt-update'),

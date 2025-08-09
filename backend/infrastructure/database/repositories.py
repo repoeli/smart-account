@@ -292,7 +292,7 @@ class DjangoReceiptRepository(ReceiptRepository):
                 if receipt.metadata:
                     django_receipt.metadata = {
                         'category': receipt.metadata.category,
-                        'tags': receipt.metadata.tags,
+                        'tags': list(receipt.metadata.tags) if hasattr(receipt.metadata, 'tags') and receipt.metadata.tags is not None else [],
                         'notes': receipt.metadata.notes,
                         'is_business_expense': receipt.metadata.is_business_expense,
                         'tax_deductible': receipt.metadata.tax_deductible,
@@ -329,7 +329,7 @@ class DjangoReceiptRepository(ReceiptRepository):
                     } if receipt.ocr_data else {},
                     metadata={
                         'category': receipt.metadata.category,
-                        'tags': receipt.metadata.tags,
+                        'tags': list(receipt.metadata.tags) if hasattr(receipt.metadata, 'tags') and receipt.metadata.tags is not None else [],
                         'notes': receipt.metadata.notes,
                         'is_business_expense': receipt.metadata.is_business_expense,
                         'tax_deductible': receipt.metadata.tax_deductible,
@@ -490,8 +490,8 @@ class DjangoReceiptRepository(ReceiptRepository):
                 custom_fields=django_receipt.metadata.get('custom_fields', {})
             )
         
-        # Create domain receipt
-        return DomainReceipt(
+        # Create domain receipt (do not pass created_at/updated_at; managed by base entity)
+        domain_receipt = DomainReceipt(
             id=str(django_receipt.id),
             user=user,
             file_info=file_info,
@@ -499,7 +499,6 @@ class DjangoReceiptRepository(ReceiptRepository):
             receipt_type=ReceiptType(django_receipt.receipt_type),
             ocr_data=ocr_data,
             metadata=metadata,
-            created_at=django_receipt.created_at,
-            updated_at=django_receipt.updated_at,
             processed_at=django_receipt.processed_at
-        ) 
+        )
+        return domain_receipt

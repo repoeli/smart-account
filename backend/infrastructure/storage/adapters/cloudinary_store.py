@@ -26,7 +26,7 @@ class CloudinaryStorageAdapter(StorageProvider):
         result = cloudinary.uploader.upload(
             file_bytes,
             folder=self.folder,
-            resource_type="image",
+            resource_type="auto",
             use_filename=True,
             unique_filename=True,
             overwrite=False,
