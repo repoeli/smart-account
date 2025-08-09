@@ -32,7 +32,9 @@ class CloudinaryStorageAdapter(StorageProvider):
             overwrite=False,
             public_id=None,
         )
-        return StoredAsset(
+        # Capture resource_type for PDF/raw fallback links on frontend
+        resource_type = result.get("resource_type") or "image"
+        asset = StoredAsset(
             public_id=result.get("public_id"),
             secure_url=result.get("secure_url"),
             width=result.get("width"),
@@ -40,5 +42,9 @@ class CloudinaryStorageAdapter(StorageProvider):
             bytes=result.get("bytes"),
             format=result.get("format"),
         )
+        # Piggyback resource_type into secure_url query for diagnostics if needed
+        if asset.secure_url and resource_type != "image" and "?" not in asset.secure_url:
+            asset.secure_url = f"{asset.secure_url}?rt={resource_type}"
+        return asset
 
 

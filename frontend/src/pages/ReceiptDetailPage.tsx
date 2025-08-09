@@ -13,6 +13,14 @@ const ReceiptDetailPage: React.FC = () => {
     if (!r) return null;
     const fileUrl: string | undefined = r.file_url;
     if (fileUrl && /res\.cloudinary\.com\//.test(fileUrl)) {
+      // If the query string contains rt=resource_type from backend, normalize to proper path
+      try {
+        const u = new URL(fileUrl);
+        const rt = u.searchParams.get('rt');
+        if (rt && !u.pathname.includes(`/${rt}/`)) {
+          return fileUrl.replace('/image/', `/${rt}/`).split('?')[0];
+        }
+      } catch {}
       return fileUrl;
     }
     const publicId: string | undefined = r.cloudinary_public_id;
@@ -21,7 +29,9 @@ const ReceiptDetailPage: React.FC = () => {
     const inferred = fileUrl?.match(/res\.cloudinary\.com\/([^/]+)/)?.[1];
     const cloudName = envName || inferred;
     if (!cloudName) return null;
-    const resourceType = fileUrl?.includes('/video/') ? 'video' : 'image';
+    let resourceType = 'image';
+    if (fileUrl?.includes('/video/')) resourceType = 'video';
+    if ((fileUrl || '').includes('.pdf') || r.mime_type === 'application/pdf') resourceType = 'raw';
     return `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${publicId}`;
   }, [receipt]);
 
