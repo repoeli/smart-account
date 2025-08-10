@@ -498,30 +498,50 @@ class ReceiptValidateUseCase:
             
             # Validate corrected OCR data
             is_valid, validation_errors = self.receipt_validation_service.validate_ocr_data(receipt.ocr_data)
-            
+
+            # Ensure metadata container exists
+            if receipt.metadata is None:
+                receipt.metadata = ReceiptMetadata()
+
             if is_valid:
                 # Get suggestions for further improvements
                 suggestions = self.receipt_validation_service.suggest_corrections(receipt.ocr_data)
-                
+
                 # Calculate data quality score
                 quality_score = self.receipt_validation_service.calculate_data_quality_score(receipt.ocr_data)
-                
+
+                # Determine review status; flag for review if quality is low
+                needs_review_flag = False if (quality_score is not None and quality_score >= 0.8) else True
+                try:
+                    receipt.metadata.custom_fields['needs_review'] = needs_review_flag
+                except Exception:
+                    # Defensive: ensure dict exists
+                    receipt.metadata.custom_fields = { 'needs_review': needs_review_flag }
+
                 # Save updated receipt
                 self.receipt_repository.save(receipt)
-                
+
                 return {
                     'success': True,
                     'receipt_id': receipt_id,
                     'validation_errors': [],
                     'suggestions': suggestions,
                     'quality_score': quality_score,
+                    'needs_review': needs_review_flag,
                     'message': 'Receipt data validated and corrected successfully'
                 }
             else:
+                # Persist needs_review to signal attention in UI
+                try:
+                    receipt.metadata.custom_fields['needs_review'] = True
+                except Exception:
+                    receipt.metadata = ReceiptMetadata(custom_fields={'needs_review': True})
+                self.receipt_repository.save(receipt)
                 return {
                     'success': False,
                     'error': 'Validation failed',
-                    'validation_errors': validation_errors
+                    'validation_errors': validation_errors,
+                    'needs_review': True
                 }
                 
         except Exception as e:

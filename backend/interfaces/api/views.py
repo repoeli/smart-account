@@ -855,6 +855,7 @@ class ReceiptValidateView(APIView):
             from infrastructure.database.repositories import DjangoReceiptRepository
             from domain.receipts.services import ReceiptValidationService, ReceiptDataEnrichmentService
             from application.receipts.use_cases import ReceiptValidateUseCase
+            from infrastructure.database.models import UserAuditLog
             
             receipt_repository = DjangoReceiptRepository()
             receipt_validation_service = ReceiptValidationService()
@@ -877,6 +878,22 @@ class ReceiptValidateView(APIView):
             # Return response
             response_serializer = ReceiptValidateResponseSerializer(data=result)
             response_serializer.is_valid()
+
+            # Audit log for validation/edit
+            try:
+                UserAuditLog.objects.create(
+                    user=request.user,
+                    event_type='receipt_validate',
+                    event_data={
+                        'receipt_id': str(receipt_id),
+                        'corrections': serializer.validated_data,
+                        'result': response_serializer.data,
+                    },
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    user_agent=request.META.get('HTTP_USER_AGENT')
+                )
+            except Exception:
+                pass
             
             return Response(
                 response_serializer.data,
@@ -1642,6 +1659,7 @@ class ReceiptUpdateView(APIView):
             from infrastructure.database.repositories import DjangoReceiptRepository
             from domain.receipts.services import ReceiptValidationService
             from application.receipts.use_cases import ReceiptUpdateUseCase
+            from infrastructure.database.models import UserAuditLog
             
             receipt_repository = DjangoReceiptRepository()
             receipt_validation_service = ReceiptValidationService()
@@ -1659,6 +1677,21 @@ class ReceiptUpdateView(APIView):
                 metadata=serializer.validated_data
             )
             
+            try:
+                UserAuditLog.objects.create(
+                    user=request.user,
+                    event_type='receipt_update',
+                    event_data={
+                        'receipt_id': str(receipt_id),
+                        'metadata': serializer.validated_data,
+                        'result': result,
+                    },
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    user_agent=request.META.get('HTTP_USER_AGENT')
+                )
+            except Exception:
+                pass
+
             return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST)
             
         except Exception as e:

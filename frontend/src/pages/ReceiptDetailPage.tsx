@@ -78,13 +78,18 @@ const ReceiptDetailPage: React.FC = () => {
           <img src={receipt.file_url} alt={receipt.filename} className="h-32 w-32 object-cover rounded bg-gray-100" />
           <div className="flex-1 grid grid-cols-2 gap-4 text-sm">
             <div><span className="text-gray-500">Filename:</span> {receipt.filename}</div>
-            <div>
-              <span className="text-gray-500">Status:</span>{' '}
-              <span className={`px-2 py-0.5 rounded border ${
-                receipt.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
-                receipt.status === 'processed' ? 'bg-green-50 text-green-700 border-green-200' :
-                receipt.status === 'needs_review' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-gray-50 text-gray-600 border-gray-200'
-              }`}>{receipt.status}</span>
+            <div className="flex items-center gap-2">
+              <div>
+                <span className="text-gray-500">Status:</span>{' '}
+                <span className={`px-2 py-0.5 rounded border ${
+                  receipt.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
+                  receipt.status === 'processed' ? 'bg-green-50 text-green-700 border-green-200' :
+                  receipt.status === 'needs_review' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-gray-50 text-gray-600 border-gray-200'
+                }`}>{receipt.status}</span>
+              </div>
+              {receipt.needs_review && (
+                <span title="This receipt needs manual review" className="px-2 py-0.5 rounded border bg-yellow-50 text-yellow-700 border-yellow-200">needs review</span>
+              )}
             </div>
             <div><span className="text-gray-500">Merchant:</span> {receipt.merchant_name || '-'}</div>
             <div><span className="text-gray-500">Total:</span> {receipt.currency || 'GBP'} {receipt.total_amount || '-'}</div>

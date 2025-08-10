@@ -196,3 +196,38 @@
 #### Verification
 - Search: type ≥2 chars → results update; clear input (no filters) → default list, page reset; Prev/Next using cursors; URL reflects state.
 - OCR: open from details, edit fields, Save (server validates/persists), confidence shows correctly without overflow, Reprocess works.
+
+---
+
+### User Stories Mapping (for this update)
+- US-007: Receipt Search and Filtering — Status: Completed (this iteration)
+  - Debounced merchant search with cancelation, URL sync, cursor-based pagination, clear-search restores default list, sorting and page size, error states, a11y live regions.
+- US-005: OCR Receipt Processing — Status: Completed (this iteration)
+  - "Open OCR Results" page functional; manual edit and save via server validation; reprocess action; normalized confidence display (no overflow).
+- US-004: Receipt Upload — Status: Improved (partial)
+  - Cloudinary-first storage with local fallback, camera capture stabilization, file validation improvements, telemetry and diagnostics.
+  - Remaining (not in this update): richer progress UI, batch/multi uploads, broader file types/limits per spec.
+- NFRs: Accessibility & Internationalization — Status: Completed (for Receipts and OCR screens)
+  - ARIA labels/live regions, keyboard navigation, localized currency/dates.
+
+---
+
+### Phase 1 – OCR Editing & Audit (In Progress)
+
+- Backend
+  - Persisted review state: `ReceiptValidateUseCase` now sets `metadata.custom_fields.needs_review`.
+    - Logic: needs_review = true when validation fails or `quality_score < 0.8`; false when high quality.
+    - Always persisted so the UI can reliably surface a “needs review” badge.
+  - Audit logging for edits/updates:
+    - `ReceiptValidateView` and `ReceiptUpdateView` create `UserAuditLog` entries (user, receipt_id, payload, result, IP, user agent).
+- Frontend
+  - Reads `needs_review` from receipt metadata; confirm badge visibility across Receipts list and Receipt detail.
+- Files changed
+  - `backend/application/receipts/use_cases.py` (update `ReceiptValidateUseCase`).
+  - `backend/interfaces/api/views.py` (add audit writes in validate and update views).
+- Test plan (pending)
+  - Unit: validation success/failure → needs_review true/false; quality threshold behavior.
+  - Integration: validate API persists flag; audit row created; round‑trip visible via GET detail.
+- User Stories mapping
+  - US‑005 (OCR Receipt Processing): edit, validate, reprocess flows; review state persisted.
+  - NFR (Auditability): user edit actions are captured with context for traceability.

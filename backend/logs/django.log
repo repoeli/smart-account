@@ -4831,3 +4831,73 @@ INFO 2025-08-10 15:49:40,387 basehttp 28052 42800 "GET /api/v1/receipts/?limit=5
 INFO 2025-08-10 15:49:45,878 basehttp 28052 42800 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24&q=li HTTP/1.1" 200 401
 INFO 2025-08-10 15:49:48,256 basehttp 28052 42800 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
 INFO 2025-08-10 15:49:48,584 basehttp 28052 42800 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 3237
+INFO 2025-08-10 16:23:37,378 autoreload 28052 6132 C:\cursor\smart-account\backend\application\receipts\use_cases.py changed, reloading.
+INFO 2025-08-10 16:23:52,316 autoreload 50420 48768 Watching for file changes with StatReloader
+WARNING 2025-08-10 17:09:31,391 log 50420 53052 Unauthorized: /api/v1/receipts/
+WARNING 2025-08-10 17:09:31,393 basehttp 50420 53052 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 401 183
+INFO 2025-08-10 17:09:31,400 basehttp 50420 53052 "OPTIONS /api/v1/auth/token/refresh/ HTTP/1.1" 200 0
+WARNING 2025-08-10 17:09:31,433 log 50420 34712 Unauthorized: /api/v1/receipts/
+WARNING 2025-08-10 17:09:31,433 basehttp 50420 34712 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 401 183
+INFO 2025-08-10 17:09:31,443 basehttp 50420 53052 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-10 17:09:31,476 basehttp 50420 34712 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-10 17:09:32,310 basehttp 50420 53052 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 17:09:32,482 basehttp 50420 53052 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 17:09:36,804 basehttp 50420 34712 "OPTIONS /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 0
+INFO 2025-08-10 17:09:36,806 basehttp 50420 53052 "OPTIONS /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 0
+INFO 2025-08-10 17:09:36,892 basehttp 50420 53052 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 1305
+INFO 2025-08-10 17:09:36,964 basehttp 50420 53052 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 1305
+INFO 2025-08-10 17:10:23,281 basehttp 50420 53052 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 1305
+INFO 2025-08-10 17:10:23,348 basehttp 50420 53052 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 1305
+INFO 2025-08-10 17:56:42,131 basehttp 50420 7436 "OPTIONS /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-10 17:56:42,136 basehttp 50420 17660 "OPTIONS /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-10 17:56:42,308 basehttp 50420 7436 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 17:56:42,478 basehttp 50420 17660 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:01:11,143 autoreload 50420 48768 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-10 18:01:14,950 autoreload 11780 11092 Watching for file changes with StatReloader
+INFO 2025-08-10 18:01:38,996 autoreload 11780 11092 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-10 18:01:42,932 autoreload 11832 48792 Watching for file changes with StatReloader
+INFO 2025-08-10 18:12:02,734 basehttp 11832 34628 "OPTIONS /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-10 18:12:02,746 basehttp 11832 43440 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-10 18:12:02,746 basehttp 11832 32760 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-10 18:12:02,746 basehttp 11832 44704 "OPTIONS /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 0
+WARNING 2025-08-10 18:12:03,144 log 11832 43440 Unauthorized: /api/v1/users/profile/
+WARNING 2025-08-10 18:12:03,147 log 11832 34628 Unauthorized: /api/v1/receipts/
+WARNING 2025-08-10 18:12:03,148 log 11832 44704 Unauthorized: /api/v1/receipts/
+WARNING 2025-08-10 18:12:03,149 log 11832 32760 Unauthorized: /api/v1/users/profile/
+WARNING 2025-08-10 18:12:03,150 basehttp 11832 43440 "GET /api/v1/users/profile/ HTTP/1.1" 401 183
+WARNING 2025-08-10 18:12:03,150 basehttp 11832 34628 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 401 183
+WARNING 2025-08-10 18:12:03,155 basehttp 11832 44704 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 401 183
+WARNING 2025-08-10 18:12:03,156 basehttp 11832 32760 "GET /api/v1/users/profile/ HTTP/1.1" 401 183
+INFO 2025-08-10 18:12:03,272 basehttp 11832 34628 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-10 18:12:03,272 basehttp 11832 43440 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-10 18:12:03,327 basehttp 11832 44704 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-10 18:12:03,343 basehttp 11832 32760 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-10 18:12:04,160 basehttp 11832 43440 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-10 18:12:04,292 basehttp 11832 34628 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:04,317 basehttp 11832 43440 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-10 18:12:04,496 basehttp 11832 34628 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:04,645 basehttp 11832 43440 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:04,762 basehttp 11832 3864 "GET /media/receipts/3a6ebd2c7e354097a7ef7dc41b631eab.jpg HTTP/1.1" 304 0
+INFO 2025-08-10 18:12:04,825 basehttp 11832 34628 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:09,808 basehttp 11832 34628 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 1305
+INFO 2025-08-10 18:12:09,898 basehttp 11832 34628 "GET /api/v1/receipts/c55514dd-3f16-41b9-99be-04e2fce1b804/ HTTP/1.1" 200 1305
+INFO 2025-08-10 18:12:24,694 basehttp 11832 34628 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:24,845 basehttp 11832 43440 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:26,030 basehttp 11832 43440 "OPTIONS /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 0
+INFO 2025-08-10 18:12:26,031 basehttp 11832 34628 "OPTIONS /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 0
+INFO 2025-08-10 18:12:26,130 basehttp 11832 34628 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 1376
+INFO 2025-08-10 18:12:26,203 basehttp 11832 34628 "GET /api/v1/receipts/d3ec0b56-1bb9-485e-be27-de88e9094cb9/ HTTP/1.1" 200 1376
+INFO 2025-08-10 18:12:34,383 basehttp 11832 34628 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:34,535 basehttp 11832 43440 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:36,147 basehttp 11832 34628 "OPTIONS /api/v1/receipts/3f30c182-806d-4af4-8be1-f411231ea34f/ HTTP/1.1" 200 0
+INFO 2025-08-10 18:12:36,147 basehttp 11832 43440 "OPTIONS /api/v1/receipts/3f30c182-806d-4af4-8be1-f411231ea34f/ HTTP/1.1" 200 0
+INFO 2025-08-10 18:12:36,287 basehttp 11832 34628 "GET /api/v1/receipts/3f30c182-806d-4af4-8be1-f411231ea34f/ HTTP/1.1" 200 1116
+INFO 2025-08-10 18:12:36,405 basehttp 11832 34628 "GET /api/v1/receipts/3f30c182-806d-4af4-8be1-f411231ea34f/ HTTP/1.1" 200 1116
+INFO 2025-08-10 18:12:37,993 basehttp 11832 34628 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:38,162 basehttp 11832 34628 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:39,248 basehttp 11832 43440 "OPTIONS /api/v1/receipts/7e74f4ca-3d2d-480a-9746-678f2e14e50c/ HTTP/1.1" 200 0
+INFO 2025-08-10 18:12:39,248 basehttp 11832 34628 "OPTIONS /api/v1/receipts/7e74f4ca-3d2d-480a-9746-678f2e14e50c/ HTTP/1.1" 200 0
+INFO 2025-08-10 18:12:39,325 basehttp 11832 34628 "GET /api/v1/receipts/7e74f4ca-3d2d-480a-9746-678f2e14e50c/ HTTP/1.1" 200 1087
+INFO 2025-08-10 18:12:39,398 basehttp 11832 34628 "GET /api/v1/receipts/7e74f4ca-3d2d-480a-9746-678f2e14e50c/ HTTP/1.1" 200 1087
+INFO 2025-08-10 18:12:41,188 basehttp 11832 34628 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
+INFO 2025-08-10 18:12:41,307 basehttp 11832 34628 "GET /api/v1/receipts/?limit=50&offset=0 HTTP/1.1" 200 7327
