@@ -726,6 +726,7 @@ class ReceiptListUseCase:
                 receipt_data = {
                     'id': receipt.id,
                     'filename': receipt.file_info.filename,
+                    'mime_type': receipt.file_info.mime_type,
                     'status': receipt.status.value,
                     'receipt_type': receipt.receipt_type.value,
                     'created_at': receipt.created_at.isoformat(),
@@ -750,7 +751,8 @@ class ReceiptListUseCase:
                         'tags': receipt.metadata.tags,
                         'notes': receipt.metadata.notes,
                         'is_business_expense': receipt.metadata.is_business_expense,
-                        'tax_deductible': receipt.metadata.tax_deductible
+                        'tax_deductible': receipt.metadata.tax_deductible,
+                        'custom_fields': receipt.metadata.custom_fields,
                     }
                 
                 receipt_list.append(receipt_data)
@@ -828,7 +830,8 @@ class ReceiptDetailUseCase:
                     'receipt_number': receipt.ocr_data.receipt_number,
                     'items': receipt.ocr_data.items,
                     'confidence_score': receipt.ocr_data.confidence_score,
-                    'raw_text': receipt.ocr_data.raw_text
+                    'raw_text': receipt.ocr_data.raw_text,
+                    'additional_data': getattr(receipt.ocr_data, 'additional_data', None)
                 }
             
             # Add metadata if available

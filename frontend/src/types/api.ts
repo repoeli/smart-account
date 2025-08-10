@@ -89,6 +89,7 @@ export interface EmailVerificationRequest {
 export interface Receipt {
   id: string;
   filename: string;
+  mime_type?: string;
   status: 'uploaded' | 'processing' | 'processed' | 'failed' | 'archived';
   receipt_type: 'purchase' | 'expense' | 'invoice' | 'bill' | 'other';
   created_at: string;

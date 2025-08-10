@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiClient } from '../services/api';
+import { toast } from 'react-hot-toast';
 
 const ReceiptDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,7 +43,13 @@ const ReceiptDetailPage: React.FC = () => {
         const r = await apiClient.getReceipt(id!);
         setReceipt(r);
       } catch (e: any) {
-        setError(e?.message || 'Failed to load receipt');
+        const msg = e?.response?.data?.message || e?.message || 'Failed to load receipt';
+        setError(msg);
+        if (e?.response?.status === 400 && /Not authorized/i.test(msg)) {
+          toast.error('You are not authorized to view this receipt.');
+          navigate('/receipts');
+          return;
+        }
       } finally {
         setIsLoading(false);
       }
@@ -81,10 +88,22 @@ const ReceiptDetailPage: React.FC = () => {
             </div>
             <div><span className="text-gray-500">Merchant:</span> {receipt.merchant_name || '-'}</div>
             <div><span className="text-gray-500">Total:</span> {receipt.currency || 'GBP'} {receipt.total_amount || '-'}</div>
+            <div><span className="text-gray-500">Type:</span> {receipt.mime_type || '-'}</div>
             <div><span className="text-gray-500">Date:</span> {receipt.date ? new Date(receipt.date).toLocaleDateString() : '-'}</div>
             <div><span className="text-gray-500">Confidence:</span> {receipt.confidence_score ? `${Math.round(receipt.confidence_score * 100)}%` : '-'}</div>
             <div><span className="text-gray-500">OCR Latency:</span> {typeof receipt.ocr_latency_ms === 'number' ? `${receipt.ocr_latency_ms} ms` : '-'}</div>
-            <div><span className="text-gray-500">Storage:</span> {receipt.storage_provider || '-'}</div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500">Storage:</span> {receipt.storage_provider || '-'}
+              {receipt.mime_type === 'application/pdf' && (
+                <span className="ml-2 px-1.5 py-0.5 rounded bg-gray-100 border border-gray-300 text-gray-700">PDF</span>
+              )}
+              {receipt.file_url && (
+                <button
+                  className="btn-xs btn-outline"
+                  onClick={() => { navigator.clipboard.writeText(receipt.file_url); toast.success('File URL copied'); }}
+                >Copy File URL</button>
+              )}
+            </div>
             <div>
               <span className="text-gray-500">Cloudinary ID:</span> {receipt.cloudinary_public_id || '-'}
               {receipt.storage_provider === 'cloudinary' && receipt.cloudinary_public_id && cloudinaryAssetUrl && (
@@ -99,6 +118,11 @@ const ReceiptDetailPage: React.FC = () => {
                   >
                     View on Cloudinary
                   </a>
+                  {' '}·{' '}
+                  <button
+                    className="btn-xs btn-outline"
+                    onClick={() => { navigator.clipboard.writeText(receipt.cloudinary_public_id); toast.success('Cloudinary ID copied'); }}
+                  >Copy ID</button>
                 </>
               )}
             </div>
@@ -111,6 +135,12 @@ const ReceiptDetailPage: React.FC = () => {
           <div className="space-x-2">
             <button className="btn-outline" onClick={() => apiClient.reprocessReceipt(id!, 'paddle_ocr').then(() => window.location.reload())}>Reprocess (Paddle)</button>
             <button className="btn-outline" onClick={() => apiClient.reprocessReceipt(id!, 'openai_vision').then(() => window.location.reload())}>Reprocess (OpenAI)</button>
+            {receipt?.ocr_latency_ms && (
+              <span className="text-xs text-gray-500">OCR latency: {receipt.ocr_latency_ms} ms</span>
+            )}
+            {receipt?.ocr_data?.additional_data?.source_url && (
+              <a href={receipt.ocr_data.additional_data.source_url} target="_blank" rel="noreferrer" className="btn-outline">Open Source URL</a>
+            )}
           </div>
         </div>
       </div>

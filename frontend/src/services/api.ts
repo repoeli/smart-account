@@ -182,6 +182,7 @@ class ApiClient {
       ...response.data,
       receipts: (response.data.receipts as any[]).map((r: any) => ({
         ...r,
+        mime_type: r.mime_type,
         ocr_latency_ms: r.ocr_data?.additional_data?.latency_ms || r.metadata?.custom_fields?.latency_ms,
         needs_review: r.metadata?.custom_fields?.needs_review || r.ocr_data?.additional_data?.needs_review,
       })),
@@ -195,6 +196,7 @@ class ApiClient {
     return {
       id: r.id,
       filename: r.filename,
+      mime_type: r.mime_type,
       status: r.status,
       receipt_type: r.receipt_type,
       created_at: r.created_at,
