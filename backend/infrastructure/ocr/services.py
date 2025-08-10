@@ -58,15 +58,19 @@ class OCRService:
             from paddleocr import PaddleOCR
             
             self.paddle_ocr_engine = PaddleOCR(
-                lang='en'
+                lang='en',
+                use_angle_cls=True,
+                use_gpu=False  # Use CPU for better compatibility
             )
             logger.info("PaddleOCR initialized successfully")
             
         except ImportError:
-            logger.warning("PaddleOCR not available")
+            logger.warning("PaddleOCR not available - please install with: pip install paddlepaddle paddleocr")
+            logger.info("Falling back to OpenAI Vision API or fallback OCR methods")
             self.paddle_ocr_engine = None
         except Exception as e:
             logger.error(f"Failed to initialize PaddleOCR: {e}")
+            logger.warning("Falling back to OpenAI Vision API or fallback OCR methods")
             self.paddle_ocr_engine = None
     
     def _extract_with_openai_vision(self, image_path: str) -> Tuple[bool, Optional[str], Optional[str]]:
@@ -464,19 +468,24 @@ class OCRService:
             return False, None, str(e)
     
     def get_available_methods(self) -> List[OCRMethod]:
-        """
-        Get list of available OCR methods.
+        """Get list of available OCR methods."""
+        available_methods = []
         
-        Returns:
-            List of available OCR methods
-        """
-        available_methods = [OCRMethod.FALLBACK]  # Fallback is always available
-        
-        if self.paddle_ocr_engine:
+        if self.paddle_ocr_engine is not None:
             available_methods.append(OCRMethod.PADDLE_OCR)
+            logger.info("PaddleOCR is available")
+        else:
+            logger.info("PaddleOCR is not available")
         
         if self.openai_api_key:
             available_methods.append(OCRMethod.OPENAI_VISION)
+            logger.info("OpenAI Vision API is available")
+        else:
+            logger.warning("OpenAI API key not configured")
+        
+        # Fallback is always available
+        available_methods.append(OCRMethod.FALLBACK)
+        logger.info("Fallback OCR is always available")
         
         return available_methods
     

@@ -239,3 +239,4 @@ def test_reprocess_preserves_existing_telemetry():
     # Check that new telemetry is added
     assert 'ocr_latency_ms' in metadata
     assert metadata['ocr_latency_ms'] > 0
+

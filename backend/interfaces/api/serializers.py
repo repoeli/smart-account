@@ -147,8 +147,18 @@ class ReceiptUploadSerializer(serializers.Serializer):
             'image/jpeg', 'image/jpg', 'image/pjpeg', 'image/png', 'image/gif',
             'image/bmp', 'image/tiff', 'image/webp', 'application/pdf'
         ]
-        if value.content_type not in allowed_types:
-            raise serializers.ValidationError("Only image files are allowed.")
+        
+        # Log the actual content type for debugging
+        print(f"DEBUG: File content type: {value.content_type}")
+        print(f"DEBUG: File name: {value.name}")
+        print(f"DEBUG: File size: {value.size}")
+        
+        # More flexible validation - check if content type contains image or pdf
+        content_type = value.content_type.lower()
+        is_valid = any(allowed in content_type for allowed in ['image', 'pdf', 'jpeg', 'jpg', 'png', 'gif', 'bmp', 'tiff', 'webp'])
+        
+        if not is_valid:
+            raise serializers.ValidationError(f"File type '{value.content_type}' not supported. Allowed types: {', '.join(allowed_types)}")
         
         return value
 
