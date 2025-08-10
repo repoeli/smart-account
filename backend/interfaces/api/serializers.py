@@ -407,6 +407,27 @@ class ReceiptValidateResponseSerializer(serializers.Serializer):
     error = serializers.CharField(required=False)
 
 
+# Sprint 2.2 – Transactions & Category suggestion
+class CategorySuggestQuerySerializer(serializers.Serializer):
+    receiptId = serializers.UUIDField(required=False)
+    merchant = serializers.CharField(required=False, allow_blank=True)
+
+
+class TransactionCreateSerializer(serializers.Serializer):
+    description = serializers.CharField(max_length=255)
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    currency = serializers.CharField(max_length=10, required=False, default='GBP')
+    type = serializers.ChoiceField(choices=['income', 'expense'])
+    transaction_date = serializers.DateField()
+    receipt_id = serializers.UUIDField(required=False)
+    category = serializers.CharField(max_length=100, required=False, allow_blank=True)
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('Amount must be greater than 0')
+        return value
+
+
 class ReceiptCategorizeResponseSerializer(serializers.Serializer):
     """
     Serializer for receipt categorization response.

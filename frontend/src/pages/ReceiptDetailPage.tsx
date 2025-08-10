@@ -140,6 +140,33 @@ const ReceiptDetailPage: React.FC = () => {
           <div className="space-x-2">
             <button className="btn-outline" onClick={() => apiClient.reprocessReceipt(id!, 'paddle_ocr').then(() => window.location.reload())}>Reprocess (Paddle)</button>
             <button className="btn-outline" onClick={() => apiClient.reprocessReceipt(id!, 'openai_vision').then(() => window.location.reload())}>Reprocess (OpenAI)</button>
+            <button
+              className="btn-primary"
+              onClick={async () => {
+                try {
+                  const desc = receipt.merchant_name ? `${receipt.merchant_name} receipt` : 'Receipt expense';
+                  const payload = {
+                    description: desc,
+                    amount: Number(receipt.total_amount) || 0,
+                    currency: receipt.currency || 'GBP',
+                    type: 'expense' as const,
+                    transaction_date: (receipt.date || '').slice(0, 10),
+                    receipt_id: id!,
+                  };
+                  const suggestion = await apiClient.suggestCategory({ receiptId: id!, merchant: receipt.merchant_name });
+                  if (suggestion?.success && suggestion?.category) (payload as any).category = suggestion.category;
+                  const res = await apiClient.createTransaction(payload as any);
+                  if (res?.success) {
+                    toast.success('Transaction created');
+                    navigate('/transactions');
+                  } else {
+                    toast.error(res?.message || 'Failed to create transaction');
+                  }
+                } catch (e: any) {
+                  toast.error(e?.message || 'Failed to create transaction');
+                }
+              }}
+            >Create Transaction</button>
             {receipt?.ocr_latency_ms && (
               <span className="text-xs text-gray-500">OCR latency: {receipt.ocr_latency_ms} ms</span>
             )}

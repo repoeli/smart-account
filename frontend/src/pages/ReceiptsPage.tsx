@@ -120,24 +120,33 @@ const ReceiptsPage = () => {
     const load = async () => {
       try {
         setIsLoading(true);
-        const resp = await apiClient.getReceipts({ limit: 50, offset: 0 });
-        const mapped: Receipt[] = (resp.receipts as any[]).map((r: any) => ({
-          id: r.id,
-          filename: r.filename,
-          status: r.status,
-          receipt_type: r.receipt_type,
-          created_at: r.created_at,
-          updated_at: r.updated_at,
-          file_url: r.file_url,
-          merchant_name: r.ocr_data?.merchant_name,
-          total_amount: r.ocr_data?.total_amount,
-          date: r.ocr_data?.date,
-          confidence_score: r.ocr_data?.confidence_score,
-          currency: r.ocr_data?.currency,
-          storage_provider: r.metadata?.custom_fields?.storage_provider,
-          cloudinary_public_id: r.metadata?.custom_fields?.cloudinary_public_id,
+        if (!accountId) return;
+        const r = await apiClient.searchReceiptsCursor({
+          accountId,
+          sort: sortField,
+          order: sortOrder,
+          limit,
+        } as any);
+        const mapped: Receipt[] = r.items.map((it: any) => ({
+          id: it.id,
+          filename: it.merchant,
+          status: it.status as any,
+          receipt_type: 'purchase',
+          created_at: it.date,
+          updated_at: it.date,
+          file_url: it.thumbnailUrl,
+          merchant_name: it.merchant,
+          total_amount: String(it.amount),
+          date: it.date,
+          confidence_score: it.confidence,
+          currency: it.currency,
+          storage_provider: it.provider as any,
         }));
         setReceipts(mapped);
+        setNextCursor(r.pageInfo.nextCursor);
+        setPrevCursor(r.pageInfo.prevCursor);
+        setHasNext(r.pageInfo.hasNext);
+        setHasPrev(r.pageInfo.hasPrev);
       } catch (e: any) {
         setError(e?.message || 'Failed to load receipts');
       } finally {
@@ -145,7 +154,8 @@ const ReceiptsPage = () => {
       }
     };
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountId]);
 
   // Debounced search (query + applied filters + sorting) – resets pagination and clears cursor
   useEffect(() => {

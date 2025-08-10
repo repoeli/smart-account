@@ -261,6 +261,30 @@ class ApiClient {
     return response.data;
   }
 
+  // Transactions (Sprint 2.2)
+  async createTransaction(payload: {
+    description: string;
+    amount: number | string;
+    currency?: string;
+    type: 'income' | 'expense';
+    transaction_date: string; // YYYY-MM-DD
+    receipt_id?: string;
+    category?: string;
+  }): Promise<{ success: boolean; transaction_id?: string; message?: string }>{
+    const response = await this.client.post('/transactions/', payload);
+    return response.data;
+  }
+
+  async suggestCategory(params: { receiptId?: string; merchant?: string }): Promise<{ success: boolean; category?: string }>{
+    try {
+      const response = await this.client.get('/categories/suggest/', { params });
+      return response.data;
+    } catch (e) {
+      // Graceful fallback when endpoint not ready yet
+      return { success: true, category: undefined } as any;
+    }
+  }
+
   // Folders
   async getFolders(): Promise<{ success: boolean; folders: Folder[]; total_count: number }> {
     const response = await this.client.get('/folders/');

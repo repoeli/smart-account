@@ -11,7 +11,7 @@ from .views import (
     PasswordResetRequestView, PasswordResetConfirmView,
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView, ReceiptManualCreateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
-    ReceiptParseView,
+    ReceiptParseView, CategorySuggestView, TransactionCreateView,
 )
 from .management_views import (
     CreateFolderView, FolderDetailView, FolderListView, SearchReceiptsView,
@@ -50,6 +50,9 @@ urlpatterns = [
     path('receipts/<str:receipt_id>/validate/', ReceiptValidateView.as_view(), name='receipt-validate'),
     path('receipts/<str:receipt_id>/categorize/', ReceiptCategorizeView.as_view(), name='receipt-categorize'),
     path('receipts/statistics/', ReceiptStatisticsView.as_view(), name='receipt-statistics'),
+    # Sprint 2.2 endpoints (temporary stub implementations for UI wiring)
+    path('categories/suggest/', CategorySuggestView.as_view(), name='category-suggest'),
+    path('transactions/', TransactionCreateView.as_view(), name='transaction-create'),
     
     # US-006: Receipt Management and Organization endpoints
     path('folders/', FolderListView.as_view(), name='folder-list'),

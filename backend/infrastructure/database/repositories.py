@@ -20,7 +20,9 @@ from domain.receipts.entities import (
 )
 from domain.receipts.repositories import ReceiptRepository
 from domain.common.entities import Email, PhoneNumber, Address
-from .models import User, Receipt
+from .models import User, Receipt, Transaction as TxModel
+from domain.transactions.repositories import TransactionRepository
+from domain.transactions.entities import Transaction as DomainTx, TransactionType as TxType, Money, Category
 
 UserModel = get_user_model()
 
@@ -360,6 +362,66 @@ class DjangoReceiptRepository(ReceiptRepository):
             status=status.value
         )[offset:offset + limit]
         return [self._to_domain_receipt(receipt) for receipt in django_receipts]
+
+
+class DjangoTransactionRepository(TransactionRepository):
+    def save(self, tx: DomainTx) -> DomainTx:
+        with transaction.atomic():
+            if not tx.id:
+                obj = TxModel.objects.create(
+                    user_id=tx.user.id,
+                    receipt_id=tx.receipt_id,
+                    description=tx.description,
+                    amount=tx.amount.amount,
+                    currency=tx.amount.currency,
+                    type=tx.type.value,
+                    transaction_date=tx.transaction_date,
+                    category=tx.category.name if tx.category else None,
+                )
+            else:
+                obj = TxModel.objects.get(id=tx.id)
+                obj.description = tx.description
+                obj.amount = tx.amount.amount
+                obj.currency = tx.amount.currency
+                obj.type = tx.type.value
+                obj.transaction_date = tx.transaction_date
+                obj.category = tx.category.name if tx.category else None
+                obj.receipt_id = tx.receipt_id
+                obj.save()
+            return self._to_domain_tx(obj)
+
+    def find_by_id(self, tx_id: str) -> Optional[DomainTx]:
+        try:
+            return self._to_domain_tx(TxModel.objects.get(id=tx_id))
+        except TxModel.DoesNotExist:
+            return None
+
+    def find_by_user(self, user: DomainUser, limit: int = 100, offset: int = 0) -> List[DomainTx]:
+        qs = TxModel.objects.filter(user_id=user.id).order_by('-transaction_date', '-created_at')[offset:offset+limit]
+        return [self._to_domain_tx(o) for o in qs]
+
+    def _to_domain_tx(self, obj: TxModel) -> DomainTx:
+        from domain.accounts.entities import User as DUser, UserType, BusinessProfile
+        # Build a minimal but valid domain user placeholder to satisfy invariants
+        duser = DUser(
+            id=str(obj.user_id),
+            email=Email('placeholder@example.com'),
+            password_hash='x',
+            first_name='x',
+            last_name='x',
+            user_type=UserType.INDIVIDUAL,
+            business_profile=BusinessProfile(company_name='x', business_type='x'),
+        )
+        return DomainTx(
+            id=str(obj.id),
+            user=duser,
+            description=obj.description,
+            amount=Money(amount=obj.amount, currency=obj.currency),
+            type=TxType(obj.type),
+            transaction_date=obj.transaction_date,
+            receipt_id=str(obj.receipt_id) if obj.receipt_id else None,
+            category=Category(obj.category) if obj.category else None,
+        )
     
     def find_by_type(self, user: DomainUser, receipt_type: ReceiptType, limit: int = 100, offset: int = 0) -> List[DomainReceipt]:
         """Find receipts by type for a specific user."""

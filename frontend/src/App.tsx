@@ -15,6 +15,7 @@ import ReceiptUploadPage from './pages/receipts/ReceiptUploadPage';
 import ReceiptManualCreatePage from './pages/receipts/ReceiptManualCreatePage';
 import OCRResultsPage from './pages/receipts/OCRResultsPage';
 import ProfilePage from './pages/ProfilePage';
+import TransactionsPage from './pages/TransactionsPage';
 
 // Layouts
 import MainLayout from './components/layouts/MainLayout';
@@ -60,6 +61,7 @@ function App() {
           <Route path="receipts/new" element={<ReceiptManualCreatePage />} />
           <Route path="receipts/:id/ocr" element={<OCRResultsPage />} />
           <Route path="receipts/:id" element={<ReceiptDetailPage />} />
+          <Route path="transactions" element={<TransactionsPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 

@@ -196,6 +196,31 @@
 #### Verification
 - Search: type ≥2 chars → results update; clear input (no filters) → default list, page reset; Prev/Next using cursors; URL reflects state.
 - OCR: open from details, edit fields, Save (server validates/persists), confidence shows correctly without overflow, Reprocess works.
+ - Transactions: create via Receipt Detail → success toast → redirected to Transactions page → new row visible.
+
+---
+
+### Phase 2 – One‑click Transaction + Category Suggestions (Planned split)
+
+Sprint 2.1 (Backend foundations)
+- Domain: add Transactions entities/repository (domain layer) and application `CreateTransactionUseCase` (done: scaffolding created; no integration yet).
+- Persistence: introduce infrastructure repo + Django model/migration (next).
+- API: POST /api/v1/transactions (create), GET /api/v1/categories (list), GET /api/v1/categories/suggest?receiptId=… (next).
+
+Sprint 2.2 (Frontend CTA + flow)
+- Add “Create Transaction” button on receipt detail / OCR page, prefilled with merchant/date/amount/currency; category suggestion call; submit to create.
+- Confirm success path navigates to Transactions list with snackbar.
+
+Sprint 2.3 (Quality)
+- Tests: unit (suggestion), integration (create from receipt), E2E happy path.
+- Perf: indexes on transactions per ERD; basic metrics.
+
+Constraints
+- Respect SoC: keep domain/app/infrastructure/interfaces layers separate; avoid perturbing existing receipts flows.
+- Backwards compatible migrations; feature‑flag if needed.
+
+User Stories mapping
+- US‑006 (Categorization) & US‑008/009 (Finance): transaction creation from receipt; suggestions.
 
 ---
 
@@ -231,3 +256,38 @@
 - User Stories mapping
   - US‑005 (OCR Receipt Processing): edit, validate, reprocess flows; review state persisted.
   - NFR (Auditability): user edit actions are captured with context for traceability.
+
+---
+
+### Phase 2 – Sprint 2.2 (Frontend CTA + Flow) – In Progress
+
+- What’s done
+  - API client additions: `createTransaction(...)`, `suggestCategory(...)` (graceful fallback if backend not ready).
+  - Receipt detail UI: added “Create Transaction” action.
+    - Prefills: description from merchant, amount/currency/date from OCR, receipt_id attached.
+    - Fetches category suggestion (if available) and submits to create.
+    - Success/error toasts.
+- To do (this sprint)
+  - Backend endpoints: POST `/api/v1/transactions` and GET `/api/v1/categories/suggest` (map to new use case + repo once infra model exists).
+  - Frontend: Transactions list page (minimal stub) and navigation after create.
+  - Tests: happy path E2E for CTA; integration once backend endpoint lands.
+- Guardrails
+  - Non‑breaking: client gracefully no‑ops if suggestion endpoint missing; create surfaces backend errors.
+- User Story mapping
+  - US‑006, US‑008/009 (Categorization & Finance): one‑click create with suggested category.
+
+---
+
+### Phase 2 – Sprint 2.2 (Backend persistence + UI nav) – Progress
+
+- Backend
+  - Added Django model `transactions` with indexes (user, date, type, category).
+  - Implemented infrastructure repo `DjangoTransactionRepository` and wired POST `/api/v1/transactions` to `CreateTransactionUseCase`.
+- Frontend
+  - Receipt Detail “Create Transaction” now calls real endpoint.
+  - Added Transactions list page and navigation after success.
+- Tests (next)
+  - Integration: POST create returns transaction_id and persists; GET list shows it.
+  - E2E: click CTA → success toast → redirected to list with new row.
+- User Story mapping
+  - US‑006, US‑008/009 – persistence of transactions and creation from receipt now functional.
