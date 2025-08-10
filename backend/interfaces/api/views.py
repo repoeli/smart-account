@@ -18,11 +18,15 @@ import uuid
 from .serializers import (
     UserRegistrationSerializer, UserLoginSerializer, EmailVerificationSerializer,
     PasswordResetRequestSerializer, PasswordResetConfirmSerializer, UserProfileSerializer,
-    ReceiptUploadSerializer, ReceiptUploadResponseSerializer, ReceiptReprocessSerializer,
-    ReceiptValidateSerializer, ReceiptCategorizeSerializer, ReceiptUpdateSerializer,
-    ReceiptReprocessResponseSerializer, ReceiptValidateResponseSerializer, ReceiptCategorizeResponseSerializer,
-    ReceiptStatisticsResponseSerializer, ReceiptListResponseSerializer, ReceiptDetailResponseSerializer,
-    ReceiptManualCreateSerializer,
+    ReceiptUploadSerializer, ReceiptUploadResponseSerializer, ReceiptParseResponseSerializer,
+    ReceiptReprocessSerializer, ReceiptValidateSerializer, ReceiptCategorizeSerializer,
+    ReceiptUpdateSerializer, ReceiptManualCreateSerializer, ReceiptListResponseSerializer,
+    ReceiptDetailResponseSerializer, ReceiptStatisticsResponseSerializer,
+    ReceiptReprocessResponseSerializer, ReceiptValidateResponseSerializer,
+    ReceiptCategorizeResponseSerializer, CreateFolderSerializer, MoveFolderSerializer,
+    SearchReceiptsSerializer, AddTagsSerializer, BulkOperationSerializer,
+    MoveReceiptsToFolderSerializer, FolderResponseSerializer, SearchResultsSerializer,
+    UserStatisticsResponseSerializer, ReceiptSearchRequestSerializer, ReceiptSearchResponseSerializer
 )
 from infrastructure.ocr.services import OCRService, OCRMethod
 from domain.receipts.entities import ReceiptType
@@ -996,51 +1000,20 @@ class ReceiptStatisticsView(APIView):
 
 class ReceiptListView(APIView):
     """
-    API view for listing receipts.
+    API view for listing receipts with enhanced search and cursor pagination.
+    Supports both legacy offset pagination and new cursor-based pagination.
     """
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """List user receipts with optional filtering."""
+        """List user receipts with optional filtering, search, and cursor pagination."""
         try:
-            # Get query parameters
-            status_param = request.query_params.get('status')
-            receipt_type_param = request.query_params.get('receipt_type')
-            limit = int(request.query_params.get('limit', 50))
-            offset = int(request.query_params.get('offset', 0))
-            
-            # Initialize dependencies
-            from infrastructure.database.repositories import DjangoReceiptRepository
-            from application.receipts.use_cases import ReceiptListUseCase
-            from domain.receipts.entities import ReceiptStatus, ReceiptType
-            
-            receipt_repository = DjangoReceiptRepository()
-            
-            # Initialize use case
-            list_use_case = ReceiptListUseCase(receipt_repository=receipt_repository)
-            
-            # Convert parameters to enums
-            status_enum = ReceiptStatus(status_param) if status_param else None
-            receipt_type_enum = ReceiptType(receipt_type_param) if receipt_type_param else None
-            
-            # Execute list use case
-            result = list_use_case.execute(
-                user=request.user,
-                status=status_enum,
-                receipt_type=receipt_type_enum,
-                limit=limit,
-                offset=offset
-            )
-            
-            # Return response
-            response_serializer = ReceiptListResponseSerializer(data=result)
-            response_serializer.is_valid()
-            
-            return Response(
-                response_serializer.data,
-                status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
-            )
-            
+            # Check if this is a search request (has search parameters)
+            if self._is_search_request(request):
+                return self._handle_search_request(request)
+            else:
+                return self._handle_legacy_request(request)
+                
         except Exception as e:
             return Response(
                 {
@@ -1050,6 +1023,554 @@ class ReceiptListView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+    
+    def _is_search_request(self, request):
+        """Check if this request has search parameters."""
+        search_params = ['q', 'status', 'currency', 'provider', 'dateFrom', 'dateTo', 
+                        'amountMin', 'amountMax', 'confidenceMin', 'sort', 'order', 'cursor']
+        return any(request.query_params.get(param) for param in search_params)
+    
+    def _handle_legacy_request(self, request):
+        """Handle legacy offset-based pagination request."""
+        # Get query parameters
+        status_param = request.query_params.get('status')
+        receipt_type_param = request.query_params.get('receipt_type')
+        limit = int(request.query_params.get('limit', 50))
+        offset = int(request.query_params.get('offset', 0))
+        
+        # Initialize dependencies
+        from infrastructure.database.repositories import DjangoReceiptRepository
+        from application.receipts.use_cases import ReceiptListUseCase
+        from domain.receipts.entities import ReceiptStatus, ReceiptType
+        
+        receipt_repository = DjangoReceiptRepository()
+        
+        # Initialize use case
+        list_use_case = ReceiptListUseCase(receipt_repository=receipt_repository)
+        
+        # Convert parameters to enums
+        status_enum = ReceiptStatus(status_param) if status_param else None
+        receipt_type_enum = ReceiptType(receipt_type_param) if receipt_type_param else None
+        
+        # Execute list use case
+        result = list_use_case.execute(
+            user=request.user,
+            status=status_enum,
+            receipt_type=receipt_type_enum,
+            limit=limit,
+            offset=offset
+        )
+        
+        # Return response
+        response_serializer = ReceiptListResponseSerializer(data=result)
+        response_serializer.is_valid()
+        
+        return Response(
+            response_serializer.data,
+            status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
+        )
+    
+    def _handle_search_request(self, request):
+        """Handle search request with cursor pagination."""
+        try:
+            # Validate request parameters
+            serializer = ReceiptSearchRequestSerializer(data=request.query_params)
+            if not serializer.is_valid():
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'validation_error',
+                        'message': 'Invalid parameters',
+                        'details': serializer.errors
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            params = serializer.validated_data
+
+            # Enforce account scope: provided accountId must match the authenticated user id
+            if str(params.get('accountId')) != str(request.user.id):
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'forbidden',
+                        'message': 'accountId does not match the current user'
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # Initialize dependencies
+            from infrastructure.pagination.cursor import CursorPagination
+            
+            # Build search filters
+            filters = self._build_search_filters(params)
+            
+            # Handle cursor pagination
+            cursor_info = None
+            if params.get('cursor'):
+                try:
+                    cursor_info = CursorPagination.decode_cursor(params['cursor'])
+                except ValueError as e:
+                    return Response(
+                        {
+                            'success': False,
+                            'error': 'invalid_cursor',
+                            'message': f'Invalid cursor: {str(e)}'
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Execute search with cursor pagination
+            result = self._execute_search(
+                user=request.user,
+                filters=filters,
+                sort=params['sort'],
+                order=params['order'],
+                limit=params['limit'],
+                cursor_info=cursor_info
+            )
+            
+            # Build response
+            response_data = self._build_response(result, params, cursor_info)
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'search_error',
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def _build_search_filters(self, params):
+        """Build search filters from request parameters."""
+        filters = {}
+        
+        # Search query
+        if params.get('q'):
+            filters['search_query'] = params['q']
+        
+        # Status filter
+        if params.get('status'):
+            filters['statuses'] = [s.strip() for s in params['status'].split(',')]
+        
+        # Currency filter
+        if params.get('currency'):
+            filters['currencies'] = [c.strip() for c in params['currency'].split(',')]
+        
+        # Provider filter
+        if params.get('provider'):
+            filters['providers'] = [p.strip() for p in params['provider'].split(',')]
+        
+        # Date range
+        if params.get('dateFrom'):
+            filters['date_from'] = params['dateFrom']
+        if params.get('dateTo'):
+            filters['date_to'] = params['dateTo']
+        
+        # Amount range
+        if params.get('amountMin'):
+            filters['amount_min'] = params['amountMin']
+        if params.get('amountMax'):
+            filters['amount_max'] = params['amountMax']
+        
+        # Confidence filter
+        if params.get('confidenceMin'):
+            filters['confidence_min'] = params['confidenceMin']
+        
+        return filters
+    
+    def _execute_search(self, user, filters, sort, order, limit, cursor_info):
+        """Execute the search query with cursor pagination."""
+        from django.db import connection
+        from infrastructure.database.models import Receipt
+
+        if connection.vendor != 'postgresql':
+            # Fallback path for SQLite or other backends that don't support JSON key transforms reliably
+            base_qs = Receipt.objects.filter(user_id=user.id)
+            # Sort order first (created_at only for fallback)
+            base_qs = base_qs.order_by('-created_at', '-id') if order == 'desc' else base_qs.order_by('created_at', 'id')
+
+            # Materialize then filter in Python (acceptable for dev/small datasets)
+            all_items = list(base_qs)
+
+            def text_contains(val, needle):
+                if not val:
+                    return False
+                try:
+                    return needle.lower() in str(val).lower()
+                except Exception:
+                    return False
+
+            # Apply filters in Python
+            q = filters.get('search_query')
+            if q:
+                all_items = [r for r in all_items if (
+                    text_contains((r.ocr_data or {}).get('merchant_name'), q)
+                    or text_contains((r.metadata or {}).get('notes'), q)
+                    or text_contains((r.ocr_data or {}).get('receipt_number'), q)
+                )]
+
+            if filters.get('statuses'):
+                allowed = set(filters['statuses'])
+                all_items = [r for r in all_items if r.status in allowed]
+
+            if filters.get('currencies'):
+                allowed = set(filters['currencies'])
+                all_items = [r for r in all_items if (r.ocr_data or {}).get('currency') in allowed]
+
+            if filters.get('providers'):
+                allowed = set(filters['providers'])
+                all_items = [r for r in all_items if ((r.metadata or {}).get('custom_fields') or {}).get('storage_provider') in allowed]
+
+            if filters.get('date_from'):
+                all_items = [r for r in all_items if r.created_at.date() >= filters['date_from']]
+            if filters.get('date_to'):
+                all_items = [r for r in all_items if r.created_at.date() <= filters['date_to']]
+
+            def to_decimal(v):
+                try:
+                    return float(v)
+                except Exception:
+                    return None
+
+            if filters.get('amount_min'):
+                mn = to_decimal(filters['amount_min'])
+                if mn is not None:
+                    all_items = [r for r in all_items if to_decimal((r.ocr_data or {}).get('total_amount')) is not None and to_decimal((r.ocr_data or {}).get('total_amount')) >= mn]
+            if filters.get('amount_max'):
+                mx = to_decimal(filters['amount_max'])
+                if mx is not None:
+                    all_items = [r for r in all_items if to_decimal((r.ocr_data or {}).get('total_amount')) is not None and to_decimal((r.ocr_data or {}).get('total_amount')) <= mx]
+
+            if filters.get('confidence_min'):
+                mn = to_decimal(filters['confidence_min'])
+                if mn is not None:
+                    all_items = [r for r in all_items if to_decimal((r.ocr_data or {}).get('confidence_score')) is not None and to_decimal((r.ocr_data or {}).get('confidence_score')) >= mn]
+
+            # Cursor - fallback: use created_at/id only when a cursor is present
+            if cursor_info:
+                key_val, key_id = cursor_info.key
+                from datetime import datetime, date
+                if isinstance(key_val, str):
+                    try:
+                        key_date = datetime.fromisoformat(key_val).date()
+                    except Exception:
+                        key_date = None
+                elif isinstance(key_val, (datetime, date)):
+                    key_date = key_val if isinstance(key_val, date) else key_val.date()
+                else:
+                    key_date = None
+
+                def cmp_before(r):
+                    if key_date is None:
+                        return True
+                    return (r.created_at.date(), str(r.id)) < (key_date, key_id) if cursor_info.order == 'desc' else (r.created_at.date(), str(r.id)) > (key_date, key_id)
+
+                all_items = [r for r in all_items if cmp_before(r)]
+
+            # Slice +1 to detect next
+            results = all_items[: limit + 1]
+            has_next = len(results) > limit
+            if has_next:
+                results = results[:-1]
+
+            return {
+                'receipts': results,
+                'has_next': has_next,
+                'has_prev': cursor_info is not None,
+                'total_count': None,
+            }
+
+        # PostgreSQL optimized path with safe fallback on error
+        try:
+            queryset = Receipt.objects.filter(user_id=user.id)
+            queryset = self._apply_filters(queryset, filters)
+            if cursor_info:
+                queryset = self._apply_cursor_pagination(queryset, cursor_info, sort)
+            queryset = self._apply_sorting(queryset, sort, order)
+            results = list(queryset[: limit + 1])
+            has_next = len(results) > limit
+            if has_next:
+                results = results[:-1]
+            return {
+                'receipts': results,
+                'has_next': has_next,
+                'has_prev': cursor_info is not None,
+                'total_count': None,
+            }
+        except Exception as e:
+            # Log and fallback to Python evaluation to avoid 500s in development
+            import logging
+            logging.getLogger(__name__).exception("Search PG path failed; falling back to safe path: %s", e)
+            return self._execute_search(user, filters, sort, order, limit, cursor_info=None)
+    
+    def _apply_filters(self, queryset, filters):
+        """Apply search filters to the queryset."""
+        from django.db import connection
+        from django.db.models import Q, DecimalField, FloatField, DateField
+        from django.db.models.functions import Cast
+        is_pg = connection.vendor == 'postgresql'
+        KeyTextTransform = None
+        if is_pg:
+            try:
+                # Modern Django
+                from django.db.models.fields.json import KeyTextTransform as _KTT  # type: ignore
+                KeyTextTransform = _KTT
+            except Exception:
+                try:
+                    # Older Django (Postgres contrib)
+                    from django.contrib.postgres.fields.jsonb import KeyTextTransform as _KTT  # type: ignore
+                    KeyTextTransform = _KTT
+                except Exception:
+                    is_pg = False
+        
+        # Search query across merchant, notes, receipt_number
+        if filters.get('search_query'):
+            search_query = filters['search_query']
+            queryset = queryset.filter(
+                Q(ocr_data__merchant_name__icontains=search_query)
+                | Q(metadata__notes__icontains=search_query)
+                | Q(ocr_data__receipt_number__icontains=search_query)
+            )
+        
+        # Status filter
+        if filters.get('statuses'):
+            queryset = queryset.filter(status__in=filters['statuses'])
+        
+        # Currency filter
+        if filters.get('currencies'):
+            queryset = queryset.filter(ocr_data__currency__in=filters['currencies'])
+        
+        # Provider filter
+        if filters.get('providers'):
+            queryset = queryset.filter(metadata__custom_fields__storage_provider__in=filters['providers'])
+        
+        # Date range: fall back to created_at date to avoid casting arbitrary text dates in JSON
+        if filters.get('date_from'):
+            queryset = queryset.filter(created_at__date__gte=filters['date_from'])
+        if filters.get('date_to'):
+            queryset = queryset.filter(created_at__date__lte=filters['date_to'])
+        
+        # Amount range (cast JSON text to numeric when supported)
+        if filters.get('amount_min'):
+            if is_pg and KeyTextTransform:
+                queryset = queryset.annotate(
+                    _amt_val=Cast(
+                        KeyTextTransform('total_amount', 'ocr_data'),
+                        output_field=DecimalField(max_digits=12, decimal_places=2),
+                    )
+                ).filter(
+                    _amt_val__gte=filters['amount_min']
+                )
+            else:
+                # Best-effort on non-PG: try direct filter (may be lexicographic)
+                queryset = queryset.filter(ocr_data__total_amount__gte=str(filters['amount_min']))
+        if filters.get('amount_max'):
+            if is_pg and KeyTextTransform:
+                queryset = queryset.annotate(
+                    _amt_val=Cast(
+                        KeyTextTransform('total_amount', 'ocr_data'),
+                        output_field=DecimalField(max_digits=12, decimal_places=2),
+                    )
+                ).filter(
+                    _amt_val__lte=filters['amount_max']
+                )
+            else:
+                queryset = queryset.filter(ocr_data__total_amount__lte=str(filters['amount_max']))
+        
+        # Confidence filter (cast JSON text to float when supported)
+        if filters.get('confidence_min'):
+            if is_pg and KeyTextTransform:
+                queryset = queryset.annotate(
+                    _conf_val=Cast(KeyTextTransform('confidence_score', 'ocr_data'), output_field=FloatField())
+                ).filter(
+                    _conf_val__gte=filters['confidence_min']
+                )
+            else:
+                queryset = queryset.filter(ocr_data__confidence_score__gte=str(filters['confidence_min']))
+        
+        return queryset
+    
+    def _apply_cursor_pagination(self, queryset, cursor_info, sort):
+        """Apply cursor-based pagination to the queryset."""
+        from django.db import connection
+        from django.db.models import Q, DecimalField, FloatField, DateField, F
+        from django.db.models.functions import Cast
+        is_pg = connection.vendor == 'postgresql'
+        KeyTextTransform = None
+        if is_pg:
+            try:
+                from django.db.models.fields.json import KeyTextTransform as _KTT  # type: ignore
+                KeyTextTransform = _KTT
+            except Exception:
+                try:
+                    from django.contrib.postgres.fields.jsonb import KeyTextTransform as _KTT  # type: ignore
+                    KeyTextTransform = _KTT
+                except Exception:
+                    is_pg = False
+        if cursor_info.order == 'desc':
+            # For descending order, get rows with (sort_value, id) < (cursor_sort_value, cursor_id)
+            if sort == 'date':
+                # Compare directly on created_at date for robustness
+                queryset = queryset.filter(
+                    Q(created_at__date__lt=cursor_info.key[0]) | (Q(created_at__date=cursor_info.key[0]) & Q(id__lt=cursor_info.key[1]))
+                )
+            elif sort == 'amount' and is_pg and KeyTextTransform:
+                sort_val = Cast(
+                    KeyTextTransform('total_amount', 'ocr_data'),
+                    output_field=DecimalField(max_digits=12, decimal_places=2),
+                )
+                queryset = queryset.annotate(_sort_val=sort_val).filter(
+                    Q(_sort_val__lt=cursor_info.key[0]) | (Q(_sort_val=cursor_info.key[0]) & Q(id__lt=cursor_info.key[1]))
+                )
+            elif sort == 'merchant' and is_pg and KeyTextTransform:
+                queryset = queryset.annotate(_sort_val=KeyTextTransform('merchant_name', 'ocr_data')).filter(
+                    Q(_sort_val__lt=cursor_info.key[0]) | (Q(_sort_val=cursor_info.key[0]) & Q(id__lt=cursor_info.key[1]))
+                )
+            elif sort == 'confidence' and is_pg and KeyTextTransform:
+                sort_val = Cast(KeyTextTransform('confidence_score', 'ocr_data'), output_field=FloatField())
+                queryset = queryset.annotate(_sort_val=sort_val).filter(
+                    Q(_sort_val__lt=cursor_info.key[0]) | (Q(_sort_val=cursor_info.key[0]) & Q(id__lt=cursor_info.key[1]))
+                )
+        else:
+            # For ascending order, get rows with (sort_value, id) > (cursor_sort_value, cursor_id)
+            if sort == 'date':
+                queryset = queryset.filter(
+                    Q(created_at__date__gt=cursor_info.key[0]) | (Q(created_at__date=cursor_info.key[0]) & Q(id__gt=cursor_info.key[1]))
+                )
+            elif sort == 'amount' and is_pg and KeyTextTransform:
+                sort_val = Cast(
+                    KeyTextTransform('total_amount', 'ocr_data'),
+                    output_field=DecimalField(max_digits=12, decimal_places=2),
+                )
+                queryset = queryset.annotate(_sort_val=sort_val).filter(
+                    Q(_sort_val__gt=cursor_info.key[0]) | (Q(_sort_val=cursor_info.key[0]) & Q(id__gt=cursor_info.key[1]))
+                )
+            elif sort == 'merchant' and is_pg and KeyTextTransform:
+                queryset = queryset.annotate(_sort_val=KeyTextTransform('merchant_name', 'ocr_data')).filter(
+                    Q(_sort_val__gt=cursor_info.key[0]) | (Q(_sort_val=cursor_info.key[0]) & Q(id__gt=cursor_info.key[1]))
+                )
+            elif sort == 'confidence' and is_pg and KeyTextTransform:
+                sort_val = Cast(KeyTextTransform('confidence_score', 'ocr_data'), output_field=FloatField())
+                queryset = queryset.annotate(_sort_val=sort_val).filter(
+                    Q(_sort_val__gt=cursor_info.key[0]) | (Q(_sort_val=cursor_info.key[0]) & Q(id__gt=cursor_info.key[1]))
+                )
+        
+        return queryset
+    
+    def _apply_sorting(self, queryset, sort, order):
+        """Apply sorting to the queryset."""
+        from django.db import connection
+        from django.db.models import DecimalField, FloatField, DateField, F
+        from django.db.models.functions import Cast
+        is_pg = connection.vendor == 'postgresql'
+        KeyTextTransform = None
+        if is_pg:
+            try:
+                from django.db.models.fields.json import KeyTextTransform as _KTT  # type: ignore
+                KeyTextTransform = _KTT
+            except Exception:
+                try:
+                    from django.contrib.postgres.fields.jsonb import KeyTextTransform as _KTT  # type: ignore
+                    KeyTextTransform = _KTT
+                except Exception:
+                    is_pg = False
+        if sort == 'date':
+            # order directly on created_at for maximum compatibility
+            if order == 'desc':
+                return queryset.order_by('-created_at', '-id')
+            return queryset.order_by('created_at', 'id')
+        elif sort == 'amount' and is_pg and KeyTextTransform:
+            sort_val = Cast(
+                KeyTextTransform('total_amount', 'ocr_data'),
+                output_field=DecimalField(max_digits=12, decimal_places=2),
+            )
+        elif sort == 'confidence' and is_pg and KeyTextTransform:
+            sort_val = Cast(KeyTextTransform('confidence_score', 'ocr_data'), output_field=FloatField())
+        elif sort == 'merchant' and is_pg and KeyTextTransform:
+            sort_val = KeyTextTransform('merchant_name', 'ocr_data')
+        else:
+            # Fallback for non-postgres or unsupported sort fields
+            sort_val = Cast(F('created_at'), output_field=DateField())
+
+        queryset = queryset.annotate(_sort_val=sort_val)
+        if order == 'desc':
+            queryset = queryset.order_by('-_sort_val', '-id')
+        else:
+            queryset = queryset.order_by('_sort_val', 'id')
+        
+        return queryset
+    
+    def _build_response(self, result, params, cursor_info):
+        """Build the API response with cursor pagination."""
+        from infrastructure.pagination.cursor import CursorPagination
+        
+        # Transform receipts to API format
+        items = []
+        for receipt in result['receipts']:
+            items.append({
+                'id': str(receipt.id),
+                'merchant': receipt.ocr_data.get('merchant_name', '') if receipt.ocr_data else '',
+                'date': receipt.ocr_data.get('date', '') if receipt.ocr_data else '',
+                'amount': float(receipt.ocr_data.get('total_amount', 0)) if receipt.ocr_data else 0,
+                'currency': receipt.ocr_data.get('currency', 'GBP') if receipt.ocr_data else 'GBP',
+                'status': receipt.status,
+                'confidence': receipt.ocr_data.get('confidence_score', 0) if receipt.ocr_data else 0,
+                'provider': receipt.metadata.get('custom_fields', {}).get('storage_provider', '') if receipt.metadata else '',
+                'thumbnailUrl': receipt.file_url
+            })
+        
+        # Build pagination info
+        page_info = {
+            'nextCursor': None,
+            'prevCursor': None,
+            'hasNext': result['has_next'],
+            'hasPrev': result['has_prev']
+        }
+        
+        # Generate next cursor if there are more results
+        if result['has_next'] and result['receipts']:
+            last_receipt = result['receipts'][-1]
+            sort_value = self._get_sort_value(last_receipt, params['sort'])
+            page_info['nextCursor'] = CursorPagination.encode_cursor(
+                sort=params['sort'],
+                order=params['order'],
+                sort_value=sort_value,
+                receipt_id=str(last_receipt.id)
+            )
+        
+        # Generate previous cursor if we have a current cursor
+        if cursor_info and result['receipts']:
+            first_receipt = result['receipts'][0]
+            sort_value = self._get_sort_value(first_receipt, params['sort'])
+            page_info['prevCursor'] = CursorPagination.encode_cursor(
+                sort=params['sort'],
+                order=params['order'],
+                sort_value=sort_value,
+                receipt_id=str(first_receipt.id)
+            )
+        
+        return {
+            'items': items,
+            'pageInfo': page_info,
+            'totalCount': result['total_count']
+        }
+    
+    def _get_sort_value(self, receipt, sort_field):
+        """Get the sort value for a receipt based on the sort field."""
+        if sort_field == 'date':
+            return receipt.ocr_data.get('date') if receipt.ocr_data else None
+        elif sort_field == 'amount':
+            return receipt.ocr_data.get('total_amount') if receipt.ocr_data else 0
+        elif sort_field == 'merchant':
+            return receipt.ocr_data.get('merchant_name') if receipt.ocr_data else ''
+        elif sort_field == 'confidence':
+            return receipt.ocr_data.get('confidence_score') if receipt.ocr_data else 0
+        return None
 
 
 class ReceiptDetailView(APIView):
@@ -1149,3 +1670,313 @@ class ReceiptUpdateView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             ) 
+
+
+class ReceiptSearchView(APIView):
+    """
+    Enhanced API view for searching receipts with cursor-based pagination.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Search receipts with advanced filtering and cursor pagination."""
+        try:
+            # Validate request parameters
+            serializer = ReceiptSearchRequestSerializer(data=request.query_params)
+            if not serializer.is_valid():
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'validation_error',
+                        'message': 'Invalid parameters',
+                        'details': serializer.errors
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            params = serializer.validated_data
+            
+            # Initialize dependencies
+            from infrastructure.database.repositories import DjangoReceiptRepository
+            from infrastructure.pagination.cursor import CursorPagination
+            
+            receipt_repository = DjangoReceiptRepository()
+            
+            # Build search filters
+            filters = self._build_search_filters(params)
+            
+            # Handle cursor pagination
+            cursor_info = None
+            if params.get('cursor'):
+                try:
+                    cursor_info = CursorPagination.decode_cursor(params['cursor'])
+                except ValueError as e:
+                    return Response(
+                        {
+                            'success': False,
+                            'error': 'invalid_cursor',
+                            'message': f'Invalid cursor: {str(e)}'
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Execute search with cursor pagination
+            result = self._execute_search(
+                receipt_repository=receipt_repository,
+                user=request.user,
+                filters=filters,
+                sort=params['sort'],
+                order=params['order'],
+                limit=params['limit'],
+                cursor_info=cursor_info
+            )
+            
+            # Build response
+            response_data = self._build_response(result, params, cursor_info)
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'search_error',
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def _build_search_filters(self, params):
+        """Build search filters from request parameters."""
+        filters = {}
+        
+        # Search query
+        if params.get('q'):
+            filters['search_query'] = params['q']
+        
+        # Status filter
+        if params.get('status'):
+            filters['statuses'] = [s.strip() for s in params['status'].split(',')]
+        
+        # Currency filter
+        if params.get('currency'):
+            filters['currencies'] = [c.strip() for c in params['currency'].split(',')]
+        
+        # Provider filter
+        if params.get('provider'):
+            filters['providers'] = [p.strip() for p in params['provider'].split(',')]
+        
+        # Date range
+        if params.get('dateFrom'):
+            filters['date_from'] = params['dateFrom']
+        if params.get('dateTo'):
+            filters['date_to'] = params['dateTo']
+        
+        # Amount range
+        if params.get('amountMin'):
+            filters['amount_min'] = params['amountMin']
+        if params.get('amountMax'):
+            filters['amount_max'] = params['amountMax']
+        
+        # Confidence filter
+        if params.get('confidenceMin'):
+            filters['confidence_min'] = params['confidenceMin']
+        
+        return filters
+    
+    def _execute_search(self, receipt_repository, user, filters, sort, order, limit, cursor_info):
+        """Execute the search query with cursor pagination."""
+        # This is a simplified implementation - in production, you'd want to use
+        # raw SQL or Django ORM with proper indexing for performance
+        
+        # Get base queryset
+        from infrastructure.database.models import Receipt
+        queryset = Receipt.objects.filter(user_id=user.id)
+        
+        # Apply filters
+        queryset = self._apply_filters(queryset, filters)
+        
+        # Apply cursor pagination
+        if cursor_info:
+            queryset = self._apply_cursor_pagination(queryset, cursor_info, sort)
+        
+        # Apply sorting
+        queryset = self._apply_sorting(queryset, sort, order)
+        
+        # Apply limit and get results
+        results = list(queryset[:limit + 1])  # +1 to check if there's a next page
+        
+        # Check if there are more results
+        has_next = len(results) > limit
+        if has_next:
+            results = results[:-1]  # Remove the extra item
+        
+        return {
+            'receipts': results,
+            'has_next': has_next,
+            'has_prev': cursor_info is not None,
+            'total_count': None  # Not calculating total for performance
+        }
+    
+    def _apply_filters(self, queryset, filters):
+        """Apply search filters to the queryset."""
+        from django.db.models import Q
+        
+        # Search query across merchant, notes, receipt_number
+        if filters.get('search_query'):
+            search_query = filters['search_query']
+            queryset = queryset.filter(
+                Q(ocr_data__merchant_name__icontains=search_query) |
+                Q(metadata__notes__icontains=search_query) |
+                Q(metadata__custom_fields__receipt_number__icontains=search_query)
+            )
+        
+        # Status filter
+        if filters.get('statuses'):
+            queryset = queryset.filter(status__in=filters['statuses'])
+        
+        # Currency filter
+        if filters.get('currencies'):
+            queryset = queryset.filter(ocr_data__currency__in=filters['currencies'])
+        
+        # Provider filter
+        if filters.get('providers'):
+            queryset = queryset.filter(metadata__custom_fields__storage_provider__in=filters['providers'])
+        
+        # Date range
+        if filters.get('date_from'):
+            queryset = queryset.filter(ocr_data__date__gte=filters['date_from'])
+        if filters.get('date_to'):
+            queryset = queryset.filter(ocr_data__date__lte=filters['date_to'])
+        
+        # Amount range
+        if filters.get('amount_min'):
+            queryset = queryset.filter(ocr_data__total_amount__gte=filters['amount_min'])
+        if filters.get('amount_max'):
+            queryset = queryset.filter(ocr_data__total_amount__lte=filters['amount_max'])
+        
+        # Confidence filter
+        if filters.get('confidence_min'):
+            queryset = queryset.filter(ocr_data__confidence_score__gte=filters['confidence_min'])
+        
+        return queryset
+    
+    def _apply_cursor_pagination(self, queryset, cursor_info, sort):
+        """Apply cursor-based pagination to the queryset."""
+        from infrastructure.pagination.cursor import CursorPagination
+        
+        # Map API sort fields to database fields
+        sort_field_mapping = {
+            'date': 'ocr_data__date',
+            'amount': 'ocr_data__total_amount',
+            'merchant': 'ocr_data__merchant_name',
+            'confidence': 'ocr_data__confidence_score'
+        }
+        
+        db_sort_field = sort_field_mapping.get(sort, 'ocr_data__date')
+        
+        # Build where clause for cursor pagination
+        where_clause, params = CursorPagination.build_where_clause(cursor_info, db_sort_field)
+        
+        # Apply the cursor filter
+        from django.db.models import Q
+        if cursor_info.order == 'desc':
+            # For descending order, get rows with (sort_value, id) < (cursor_sort_value, cursor_id)
+            queryset = queryset.extra(
+                where=[where_clause],
+                params=params
+            )
+        else:
+            # For ascending order, get rows with (sort_value, id) > (cursor_sort_value, cursor_id)
+            queryset = queryset.extra(
+                where=[where_clause],
+                params=params
+            )
+        
+        return queryset
+    
+    def _apply_sorting(self, queryset, sort, order):
+        """Apply sorting to the queryset."""
+        # Map API sort fields to database fields
+        sort_field_mapping = {
+            'date': 'ocr_data__date',
+            'amount': 'ocr_data__total_amount',
+            'merchant': 'ocr_data__merchant_name',
+            'confidence': 'ocr_data__confidence_score'
+        }
+        
+        db_sort_field = sort_field_mapping.get(sort, 'ocr_data__date')
+        
+        if order == 'desc':
+            queryset = queryset.order_by(f'-{db_sort_field}', '-id')
+        else:
+            queryset = queryset.order_by(db_sort_field, 'id')
+        
+        return queryset
+    
+    def _build_response(self, result, params, cursor_info):
+        """Build the API response with cursor pagination."""
+        from infrastructure.pagination.cursor import CursorPagination
+        
+        # Transform receipts to API format
+        items = []
+        for receipt in result['receipts']:
+            items.append({
+                'id': str(receipt.id),
+                'merchant': receipt.ocr_data.get('merchant_name', '') if receipt.ocr_data else '',
+                'date': receipt.ocr_data.get('date', '') if receipt.ocr_data else '',
+                'amount': float(receipt.ocr_data.get('total_amount', 0)) if receipt.ocr_data else 0,
+                'currency': receipt.ocr_data.get('currency', 'GBP') if receipt.ocr_data else 'GBP',
+                'status': receipt.status,
+                'confidence': receipt.ocr_data.get('confidence_score', 0) if receipt.ocr_data else 0,
+                'provider': receipt.metadata.get('custom_fields', {}).get('storage_provider', '') if receipt.metadata else '',
+                'thumbnailUrl': receipt.file_url
+            })
+        
+        # Build pagination info
+        page_info = {
+            'nextCursor': None,
+            'prevCursor': None,
+            'hasNext': result['has_next'],
+            'hasPrev': result['has_prev']
+        }
+        
+        # Generate next cursor if there are more results
+        if result['has_next'] and result['receipts']:
+            last_receipt = result['receipts'][-1]
+            sort_value = self._get_sort_value(last_receipt, params['sort'])
+            page_info['nextCursor'] = CursorPagination.encode_cursor(
+                sort=params['sort'],
+                order=params['order'],
+                sort_value=sort_value,
+                receipt_id=str(last_receipt.id)
+            )
+        
+        # Generate previous cursor if we have a current cursor
+        if cursor_info and result['receipts']:
+            first_receipt = result['receipts'][0]
+            sort_value = self._get_sort_value(first_receipt, params['sort'])
+            page_info['prevCursor'] = CursorPagination.encode_cursor(
+                sort=params['sort'],
+                order=params['order'],
+                sort_value=sort_value,
+                receipt_id=str(first_receipt.id)
+            )
+        
+        return {
+            'items': items,
+            'pageInfo': page_info,
+            'totalCount': result['total_count']
+        }
+    
+    def _get_sort_value(self, receipt, sort_field):
+        """Get the sort value for a receipt based on the sort field."""
+        if sort_field == 'date':
+            return receipt.ocr_data.get('date') if receipt.ocr_data else None
+        elif sort_field == 'amount':
+            return receipt.ocr_data.get('total_amount') if receipt.ocr_data else 0
+        elif sort_field == 'merchant':
+            return receipt.ocr_data.get('merchant_name') if receipt.ocr_data else ''
+        elif sort_field == 'confidence':
+            return receipt.ocr_data.get('confidence_score') if receipt.ocr_data else 0
+        return None 

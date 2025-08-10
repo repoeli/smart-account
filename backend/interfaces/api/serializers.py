@@ -266,6 +266,93 @@ class ReceiptManualCreateSerializer(serializers.Serializer):
     upload_to_cloudinary = serializers.BooleanField(required=False)
 
 
+class ReceiptSearchRequestSerializer(serializers.Serializer):
+    """
+    Serializer for receipt search request parameters.
+    """
+    accountId = serializers.UUIDField(required=True, help_text="Account ID to scope the search")
+    q = serializers.CharField(required=False, max_length=255, help_text="Search query (min 2 chars)")
+    status = serializers.CharField(required=False, help_text="Comma-separated list of statuses")
+    currency = serializers.CharField(required=False, help_text="Comma-separated list of currencies")
+    provider = serializers.CharField(required=False, help_text="Comma-separated list of providers")
+    dateFrom = serializers.DateField(required=False, help_text="Start date (YYYY-MM-DD)")
+    dateTo = serializers.DateField(required=False, help_text="End date (YYYY-MM-DD)")
+    amountMin = serializers.DecimalField(required=False, max_digits=10, decimal_places=2, help_text="Minimum amount")
+    amountMax = serializers.DecimalField(required=False, max_digits=10, decimal_places=2, help_text="Maximum amount")
+    confidenceMin = serializers.FloatField(required=False, min_value=0.0, max_value=1.0, help_text="Minimum confidence score")
+    sort = serializers.ChoiceField(
+        required=False,
+        choices=[('date', 'Date'), ('amount', 'Amount'), ('merchant', 'Merchant'), ('confidence', 'Confidence')],
+        default='date',
+        help_text="Sort field"
+    )
+    order = serializers.ChoiceField(
+        required=False,
+        choices=[('asc', 'Ascending'), ('desc', 'Descending')],
+        default='desc',
+        help_text="Sort order"
+    )
+    limit = serializers.IntegerField(required=False, min_value=12, max_value=100, default=24, help_text="Page size (12-100)")
+    cursor = serializers.CharField(required=False, help_text="Pagination cursor")
+
+    def validate(self, attrs):
+        """Validate the search parameters."""
+        # Validate q length
+        if attrs.get('q') and len(attrs['q']) < 2:
+            raise serializers.ValidationError("Search query must be at least 2 characters long")
+        
+        # Validate date range
+        if attrs.get('dateFrom') and attrs.get('dateTo'):
+            if attrs['dateFrom'] > attrs['dateTo']:
+                raise serializers.ValidationError("dateFrom must be less than or equal to dateTo")
+        
+        # Validate amount range
+        if attrs.get('amountMin') and attrs.get('amountMax'):
+            if attrs['amountMin'] > attrs['amountMax']:
+                raise serializers.ValidationError("amountMin must be less than or equal to amountMax")
+        
+        # Validate confidence range
+        if attrs.get('confidenceMin') is not None:
+            if not 0.0 <= attrs['confidenceMin'] <= 1.0:
+                raise serializers.ValidationError("confidenceMin must be between 0.0 and 1.0")
+        
+        return attrs
+
+
+class ReceiptSearchItemSerializer(serializers.Serializer):
+    """
+    Serializer for individual receipt items in search results.
+    """
+    id = serializers.CharField()
+    merchant = serializers.CharField()
+    date = serializers.DateField()
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    currency = serializers.CharField()
+    status = serializers.CharField()
+    confidence = serializers.FloatField()
+    provider = serializers.CharField()
+    thumbnailUrl = serializers.CharField()
+
+
+class ReceiptSearchPageInfoSerializer(serializers.Serializer):
+    """
+    Serializer for pagination information.
+    """
+    nextCursor = serializers.CharField(allow_null=True, help_text="Next page cursor")
+    prevCursor = serializers.CharField(allow_null=True, help_text="Previous page cursor")
+    hasNext = serializers.BooleanField(help_text="Whether there's a next page")
+    hasPrev = serializers.BooleanField(help_text="Whether there's a previous page")
+
+
+class ReceiptSearchResponseSerializer(serializers.Serializer):
+    """
+    Serializer for receipt search response.
+    """
+    items = ReceiptSearchItemSerializer(many=True, help_text="List of receipts")
+    pageInfo = ReceiptSearchPageInfoSerializer(help_text="Pagination information")
+    totalCount = serializers.IntegerField(allow_null=True, help_text="Total count (may be null for performance)")
+
+
 class ReceiptListResponseSerializer(serializers.Serializer):
     """
     Serializer for receipt list response.

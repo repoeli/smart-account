@@ -18,7 +18,9 @@ import type {
   SearchReceiptsRequest,
   UserStatistics,
   BulkOperationRequest,
-  AddTagsRequest
+  AddTagsRequest,
+  ReceiptSearchParams,
+  ReceiptSearchResponseDTO
 } from '../types/api';
 
 class ApiClient {
@@ -247,6 +249,15 @@ class ApiClient {
   // Search
   async searchReceipts(params: SearchReceiptsRequest): Promise<ReceiptListResponse> {
     const response = await this.client.post<ReceiptListResponse>('/receipts/search/', params);
+    return response.data;
+  }
+
+  // New cursor search (GET /receipts)
+  async searchReceiptsCursor(params: ReceiptSearchParams, signal?: AbortSignal): Promise<ReceiptSearchResponseDTO> {
+    const response = await this.client.get<ReceiptSearchResponseDTO>('/receipts/', {
+      params,
+      signal,
+    });
     return response.data;
   }
 

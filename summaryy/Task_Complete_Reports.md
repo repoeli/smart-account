@@ -100,3 +100,99 @@
   2. Switch devices via dropdown if multiple cameras exist; verify preview updates without permission re‑prompt.
   3. Click Close Camera; browser camera indicator should turn off shortly. Re‑open to confirm re‑attachment works.
   4. Use “Use System Camera”, capture, and check that the photo is added to the upload list and can be uploaded end‑to‑end.
+
+### Task 1 (Backend API View)  In Progress
+- Implemented enhanced GET /api/receipts in ReceiptListView to support search filters, sorting, and cursor-based pagination with stable (field, id) tie-break.
+- Added server-side validation via ReceiptSearchRequestSerializer.
+- Mapped filter fields to ORM JSON fields (ocr_data, metadata.custom_fields).
+- Replaced deprecated .extra() usage with proper Django ORM comparisons for cursor filters.
+- Kept legacy offset-based path for backward compatibility.
+- Next: wire URL if needed (already mapped to ReceiptListView), basic manual tests, and finalize response mapping parity with frontend expectations.
+
+### Task 3 (Frontend Search Input & Debouncing)  In Progress
+- Added cursor search types in  frontend/src/types/api.ts and API method searchReceiptsCursor with AbortController support.
+- Implemented search input on  frontend/src/pages/ReceiptsPage.tsx with 300ms debounce, inflight cancellation, spinner, and clear button.
+- Search uses GET /api/v1/receipts with  accountId, q, sort, order, limit; maps results to existing card UI.
+- Next: integrate URL state sync and more filters in subsequent tasks.
+
+### Task 3  Completed; Task 4  In Progress
+- Task 3 complete: Implemented debounced search input with cancellation, spinner, and clear, wired to GET /receipts (cursor).
+- Began Task 4: Added collapsible filters panel (status, currency, provider, date range, amount range, confidence slider). Filters feed into debounced request.
+- Next: Task 4 polish (chip indicators, a11y labels reviewed, minor layout refinements).
+
+### Task 5 (Sorting & Pagination)  Completed
+- Added sort field dropdown and order toggle with debounce reset.
+- Implemented page size selector.
+- Implemented Previous/Next using cursors from backend response; disables when unavailable; shows current page.
+- All tied into debounced request and AbortController cancellation.
+
+### Task 7 (UI States & Error Handling)  Completed
+- Added skeleton loaders for initial loading.
+- Implemented error banner with Retry (replays last action or reloads).
+- Added robust handling for invalid cursors by resetting pagination and URL.
+- Added No results state with Clear search and Clear filters actions.
+
+### Task 8 (A11y & i18n)  Completed
+- Added ARIA labels, roles, and live regions for search, results, and filters.
+- Enabled keyboard navigation for receipt cards (Enter/Space).
+- Localized currency and dates using Intl with user locale fallback.
+- Grid marks aria-busy during searches.
+
+---
+
+### Updates – Search & OCR Results (Completed)
+
+#### Delivered
+- Debounced, cancelable search with URL sync and cursor pagination on `ReceiptsPage`.
+- OCR Results page is fully usable: manual edit/save with server validation, reprocess, and fixed display.
+- Search backend hardened with stable cursor semantics and safe JSON handling.
+
+#### Frontend tasks
+- Receipts search
+  - 300ms debounce, `AbortController` cancellations, spinner, and clear button.
+  - URL synchronization for `q|filters|sort|order|limit|cursor` with replace while typing and push on actions.
+  - Cursor pagination (Prev/Next) wired to backend `nextCursor/prevCursor`; page index and disabled states.
+  - Clear‑search behavior: when input transitions from non‑empty to empty (and no filters), fetch base list immediately, reset cursors/page, replace URL.
+  - Error banner with Retry that replays the last action or reloads a base list.
+- OCR Results page
+  - Route param fix: uses `useParams<{ id: string }>()` to match `/receipts/:id/ocr`.
+  - Loads receipt via `getReceipt` and maps to editable OCR fields.
+  - Save uses `validateReceipt(id, payload)`; converts date from `YYYY-MM-DD` to `DD/MM/YYYY`.
+  - Confidence UI: normalize 0–1 or 0–100 into 0–1, clamp, overflow‑safe progress bar.
+
+#### Backend search fixes (recap)
+- Dynamic import of `KeyTextTransform` (modern and legacy paths); guarded PG path with Python fallback when unavailable.
+- Avoid JSON date casts; use `created_at` for date sorting and filtering.
+- Stable seek pagination by `(sortValue, id)` with proper inequality per order.
+- Request validation and limit clamping via `ReceiptSearchRequestSerializer`.
+
+#### Issues encountered → fixes
+- 500 errors on search with `q`
+  - JSON casting and `KeyTextTransform` import differences; brittle JSON date casting.
+  - Fixed with dynamic import, guarded PG‑only path, in‑memory fallback, and `created_at` date handling.
+- ImportError for `KeyTextTransform`
+  - Module moved across Django versions.
+  - Fixed by attempting `django.db.models.fields.json` first, then legacy path; fallback if missing.
+- Search state ignored / account scoping wrong
+  - `accountId` not passed consistently; URL had empty params including `cursor`.
+  - Fixed by deriving from `localStorage.user.id`; stripping empty params; adding `cursor` only while paging.
+- Clearing search didn’t restore list
+  - Debounced effect returned early when `q === ''`.
+  - Fixed by tracking previous query; on non‑empty → empty, fetch base list and reset cursors/page.
+- JSX parse error on grid
+  - Two sibling nodes without wrapper.
+  - Fixed by wrapping grid and pagination with a fragment.
+- OCR Results stuck on loading
+  - Route param mismatch (`receiptId` vs `id`).
+  - Fixed by switching to `id` in `useParams`.
+- Confidence bar overflow
+  - Confidence sometimes 0–100; UI assumed 0–1.
+  - Fixed by normalization and clamping; container `overflow-hidden`.
+
+#### Key files touched (high signal)
+- Frontend: `frontend/src/pages/ReceiptsPage.tsx`, `frontend/src/pages/receipts/OCRResultsPage.tsx`, `frontend/src/components/receipts/OCRResults.tsx`, `frontend/src/pages/ReceiptDetailPage.tsx`.
+- Backend: `backend/interfaces/api/views.py` (search executor), `backend/infrastructure/pagination/cursor.py` (cursor), `backend/infrastructure/database/migrations/0003_search_indexes.py` (indexes).
+
+#### Verification
+- Search: type ≥2 chars → results update; clear input (no filters) → default list, page reset; Prev/Next using cursors; URL reflects state.
+- OCR: open from details, edit fields, Save (server validates/persists), confidence shows correctly without overflow, Reprocess works.

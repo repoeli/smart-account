@@ -18,7 +18,7 @@ interface OCRData {
 }
 
 const OCRResultsPage: React.FC = () => {
-  const { receiptId } = useParams<{ receiptId: string }>();
+  const { id: receiptId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -60,18 +60,27 @@ const OCRResultsPage: React.FC = () => {
     setOcrData(prev => ({ ...prev, ...corrections }));
   };
 
+  const toBackendDate = (iso?: string) => {
+    if (!iso) return undefined;
+    // Convert YYYY-MM-DD -> DD/MM/YYYY for backend validator expectations
+    try {
+      const [y, m, d] = iso.split('-');
+      if (y && m && d) return `${d}/${m}/${y}`;
+    } catch {}
+    return iso;
+  };
+
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      
-      await apiClient.updateReceipt(receiptId!, {
+      // Use validate endpoint to correct OCR data server-side
+      await apiClient.validateReceipt(receiptId!, {
         merchant_name: ocrData.merchant_name,
         total_amount: ocrData.total_amount,
-        date: ocrData.date,
+        date: toBackendDate(ocrData.date),
         vat_number: ocrData.vat_number,
         receipt_number: ocrData.receipt_number,
-        currency: ocrData.currency,
-      });
+      } as any);
 
       toast.success('Receipt data updated successfully');
       setIsEditing(false);

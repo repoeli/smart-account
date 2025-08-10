@@ -135,6 +135,49 @@ export interface ReceiptListResponse {
   offset: number;
 }
 
+// Cursor search API types
+export interface ReceiptSearchItemDTO {
+  id: string;
+  merchant: string;
+  date: string; // YYYY-MM-DD
+  amount: number;
+  currency: string;
+  status: string;
+  confidence: number;
+  provider: string;
+  thumbnailUrl: string;
+}
+
+export interface ReceiptSearchPageInfoDTO {
+  nextCursor: string | null;
+  prevCursor: string | null;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface ReceiptSearchResponseDTO {
+  items: ReceiptSearchItemDTO[];
+  pageInfo: ReceiptSearchPageInfoDTO;
+  totalCount: number | null;
+}
+
+export interface ReceiptSearchParams {
+  accountId: string;
+  q?: string;
+  status?: string; // comma-separated
+  currency?: string; // comma-separated
+  provider?: string; // comma-separated
+  dateFrom?: string; // YYYY-MM-DD
+  dateTo?: string;   // YYYY-MM-DD
+  amountMin?: number;
+  amountMax?: number;
+  confidenceMin?: number; // 0..1
+  sort?: 'date' | 'amount' | 'merchant' | 'confidence';
+  order?: 'asc' | 'desc';
+  limit?: number; // 12..100
+  cursor?: string;
+}
+
 // Folder Types
 export interface Folder {
   id: string;

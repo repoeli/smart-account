@@ -24,6 +24,18 @@ const OCRResults: React.FC<OCRResultsProps> = ({
   onDataCorrection,
   isEditing = false,
 }) => {
+  const normalizeConfidence = (raw: number | undefined): number => {
+    const n = Number(raw);
+    if (Number.isNaN(n)) return 0;
+    // Support backends returning 0–1 or 0–100
+    let v = n > 1 && n <= 100 ? n / 100 : n;
+    if (v < 0) v = 0;
+    if (v > 1) v = 1;
+    return v;
+  };
+
+  const normalizedScore = normalizeConfidence(extractedData.confidence_score);
+
   const getConfidenceColor = (score: number) => {
     if (score >= 0.8) return 'text-green-600 bg-green-50 border-green-200';
     if (score >= 0.6) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
@@ -50,10 +62,10 @@ const OCRResults: React.FC<OCRResultsProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-gray-900">OCR Results</h3>
-        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getConfidenceColor(extractedData.confidence_score)}`}>
-          {getConfidenceIcon(extractedData.confidence_score)}
-          <span className="ml-1">{getConfidenceText(extractedData.confidence_score)}</span>
-          <span className="ml-2">({Math.round(extractedData.confidence_score * 100)}%)</span>
+        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getConfidenceColor(normalizedScore)}`}>
+          {getConfidenceIcon(normalizedScore)}
+          <span className="ml-1">{getConfidenceText(normalizedScore)}</span>
+          <span className="ml-2">({Math.round(normalizedScore * 100)}%)</span>
         </div>
       </div>
 
@@ -187,18 +199,18 @@ const OCRResults: React.FC<OCRResultsProps> = ({
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-blue-700">Overall Confidence</span>
-            <span className="font-medium">{Math.round(extractedData.confidence_score * 100)}%</span>
+            <span className="font-medium">{Math.round(normalizedScore * 100)}%</span>
           </div>
-          <div className="w-full bg-blue-200 rounded-full h-2">
+          <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
             <div
               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${extractedData.confidence_score * 100}%` }}
+              style={{ width: `${Math.min(100, Math.max(0, normalizedScore * 100))}%` }}
             />
           </div>
           <p className="text-xs text-blue-600">
-            {extractedData.confidence_score >= 0.8
+            {normalizedScore >= 0.8
               ? 'High confidence - data is likely accurate'
-              : extractedData.confidence_score >= 0.6
+              : normalizedScore >= 0.6
               ? 'Medium confidence - please review the data'
               : 'Low confidence - manual review recommended'
             }
