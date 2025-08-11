@@ -111,14 +111,17 @@ const OCRResults: React.FC<OCRResultsProps> = ({
           )}
         </div>
 
-        {/* Date */}
+        {/* Date (DD/MM/YYYY) */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             Date
           </label>
           {isEditing ? (
             <input
-              type="date"
+              type="text"
+              inputMode="numeric"
+              pattern="\\d{2}/\\d{2}/\\d{4}"
+              placeholder="DD/MM/YYYY"
               value={extractedData.date || ''}
               onChange={(e) => handleFieldChange('date', e.target.value)}
               className="input-field"

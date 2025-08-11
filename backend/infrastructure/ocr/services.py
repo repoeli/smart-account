@@ -72,6 +72,27 @@ class OCRService:
             logger.error(f"Failed to initialize PaddleOCR: {e}")
             logger.warning("Falling back to OpenAI Vision API or fallback OCR methods")
             self.paddle_ocr_engine = None
+
+    def _normalize_url(self, url: str) -> str:
+        """Ensure the image URL is absolute and reachable by external services.
+
+        - If `url` already starts with http(s), return as-is.
+        - If it's a relative path like /media/..., prefix with PUBLIC_BASE_URL or build from settings (http://127.0.0.1:8000 by default).
+        """
+        try:
+            if not url:
+                return url
+            if url.startswith('http://') or url.startswith('https://'):
+                return url
+            base = getattr(settings, 'PUBLIC_BASE_URL', '').rstrip('/')
+            if not base:
+                host = getattr(settings, 'SERVICE_PUBLIC_HOST', '127.0.0.1')
+                port = getattr(settings, 'SERVICE_PUBLIC_PORT', 8000)
+                scheme = getattr(settings, 'SERVICE_PUBLIC_SCHEME', 'http')
+                base = f"{scheme}://{host}:{port}"
+            return f"{base}{url if url.startswith('/') else '/' + url}"
+        except Exception:
+            return url
     
     def _extract_with_openai_vision(self, image_path: str) -> Tuple[bool, Optional[str], Optional[str]]:
         """
@@ -394,37 +415,69 @@ class OCRService:
         Returns:
             Tuple of (success, ocr_data, error_message)
         """
-        # Prefer HTTP Paddle adapter when engine is paddle (env default) or explicitly requested
+        # Always attempt the HTTP Paddle adapter first (by URL, then by bytes),
+        # then try the requested method (OpenAI) if applicable, then legacy fallback.
         try:
-            preferred = (method is None and str(getattr(settings, 'OCR_ENGINE_DEFAULT', 'paddle')).lower() in ['paddle', 'paddle_ocr'])
-            use_paddle = preferred or method == OCRMethod.PADDLE_OCR
-            if use_paddle:
+            ocr_timeout = int(getattr(settings, 'OCR_TIMEOUT_SECONDS', 25))
+            image_url = self._normalize_url(image_url)
+            # 1) Paddle by URL
+            try:
+                from infrastructure.ocr.adapters.paddle_http import PaddleOCRHTTPAdapter
+                logger.info("OCRService: attempting Paddle HTTP by-url for %s", image_url)
+                adapter = PaddleOCRHTTPAdapter()
+                extraction = adapter.parse_receipt(url=image_url)
+                ocr_data = OCRData(
+                    merchant_name=extraction.merchant,
+                    total_amount=Decimal(str(extraction.total)) if extraction.total is not None else None,
+                    currency=extraction.currency or 'GBP',
+                    date=self._extract_date([extraction.date]) if extraction.date else None,
+                    vat_amount=Decimal(str(extraction.tax)) if extraction.tax is not None else None,
+                    items=[],
+                    confidence_score=extraction.ocr_confidence,
+                    raw_text=extraction.raw_text or '',
+                    additional_data={
+                        'subtotal': extraction.subtotal,
+                        'tax_rate': extraction.tax_rate,
+                        'engine': extraction.engine,
+                        'latency_ms': extraction.latency_ms,
+                        'source_url': extraction.source_url or image_url,
+                    },
+                )
+                return True, ocr_data, None
+            except Exception as e:
+                logger.warning("OCRService: Paddle by-url failed: %s", e)
+            # 2) Paddle by file bytes
+            try:
+                logger.info("OCRService: attempting Paddle HTTP by-file for %s", image_url)
+                resp_dl = requests.get(image_url, timeout=ocr_timeout)
+                resp_dl.raise_for_status()
+                from infrastructure.ocr.adapters.paddle_http import PaddleOCRHTTPAdapter as _Adapter
+                adapter2 = _Adapter()
+                extraction = adapter2.parse_receipt(file_bytes=resp_dl.content, options={'filename': 'receipt.jpg'})
+                ocr_data = OCRData(
+                    merchant_name=extraction.merchant,
+                    total_amount=Decimal(str(extraction.total)) if extraction.total is not None else None,
+                    currency=extraction.currency or 'GBP',
+                    date=self._extract_date([extraction.date]) if extraction.date else None,
+                    vat_amount=Decimal(str(extraction.tax)) if extraction.tax is not None else None,
+                    items=[],
+                    confidence_score=extraction.ocr_confidence,
+                    raw_text=extraction.raw_text or '',
+                    additional_data={
+                        'subtotal': extraction.subtotal,
+                        'tax_rate': extraction.tax_rate,
+                        'engine': extraction.engine,
+                        'latency_ms': extraction.latency_ms,
+                        'source_url': extraction.source_url or image_url,
+                    },
+                )
+                return True, ocr_data, None
+            except Exception as e2:
+                logger.warning("OCRService: Paddle by-file failed: %s", e2)
+            # 3) Explicit OpenAI request or optional fallback to OpenAI when Paddle fails
+            if method == OCRMethod.OPENAI_VISION or getattr(settings, 'FALLBACK_TO_OPENAI_ON_PADDLE_FAIL', True):
                 try:
-                    from infrastructure.ocr.adapters.paddle_http import PaddleOCRHTTPAdapter
-                    adapter = PaddleOCRHTTPAdapter()
-                    extraction = adapter.parse_receipt(url=image_url)
-                    ocr_data = OCRData(
-                        merchant_name=extraction.merchant,
-                        total_amount=Decimal(str(extraction.total)) if extraction.total is not None else None,
-                        currency=extraction.currency or 'GBP',
-                        date=self._extract_date([extraction.date]) if extraction.date else None,
-                        vat_amount=Decimal(str(extraction.tax)) if extraction.tax is not None else None,
-                        items=[],
-                        confidence_score=extraction.ocr_confidence,
-                        raw_text=extraction.raw_text or '',
-                        additional_data={
-                            'subtotal': extraction.subtotal,
-                            'tax_rate': extraction.tax_rate,
-                            'engine': extraction.engine,
-                            'latency_ms': extraction.latency_ms,
-                            'source_url': extraction.source_url or image_url,
-                        },
-                    )
-                    return True, ocr_data, None
-                except Exception as e:
-                    logger.warning(f"Paddle HTTP adapter failed, falling back: {e}")
-            if method == OCRMethod.OPENAI_VISION:
-                try:
+                    logger.info("OCRService: attempting OpenAI Vision for %s", image_url)
                     from infrastructure.storage.adapters.cloudinary_store import CloudinaryStorageAdapter
                     from infrastructure.ocr.adapters.openai_vision import OpenAIVisionAdapter
                     storage = CloudinaryStorageAdapter()
@@ -449,10 +502,10 @@ class OCRService:
                         },
                     )
                     return True, ocr_data, None
-                except Exception as e:
-                    logger.warning(f"OpenAI Vision adapter failed, falling back to legacy path: {e}")
-            # Legacy path: download the image locally and use in-process OCR
-            response = requests.get(image_url, timeout=30)
+                except Exception as e3:
+                    logger.warning("OCRService: OpenAI Vision failed: %s", e3)
+            # 4) Legacy: download and process in-process OCR
+            response = requests.get(image_url, timeout=ocr_timeout)
             response.raise_for_status()
             temp_path = f"/tmp/receipt_{datetime.now().timestamp()}.jpg"
             with open(temp_path, 'wb') as f:

@@ -214,16 +214,50 @@ class ReceiptValidateSerializer(serializers.Serializer):
     Serializer for receipt validation and correction.
     """
     merchant_name = serializers.CharField(max_length=255, required=False)
-    total_amount = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
-    date = serializers.CharField(max_length=50, required=False, help_text="Date in DD/MM/YYYY format")
+    total_amount = serializers.CharField(required=False, help_text="Supports plain number or 2dp")
+    date = serializers.CharField(max_length=50, required=False, allow_blank=True, help_text="Date in DD/MM/YYYY or YYYY-MM-DD format")
     vat_number = serializers.CharField(max_length=50, required=False)
     receipt_number = serializers.CharField(max_length=100, required=False)
+    currency = serializers.CharField(max_length=10, required=False)
     
-    def validate_total_amount(self, value):
-        """Validate total amount."""
-        if value and value <= 0:
-            raise serializers.ValidationError("Total amount must be greater than zero.")
-        return value
+    def validate(self, attrs):
+        # Normalize total_amount string -> Decimal-ish string with 2dp where possible
+        from decimal import Decimal, InvalidOperation
+        amt = attrs.get('total_amount')
+        if amt is not None and amt != '':
+            try:
+                amt_num = Decimal(str(amt))
+                if amt_num <= 0:
+                    raise serializers.ValidationError({'total_amount': ['Total amount must be greater than zero.']})
+                attrs['total_amount'] = str(amt_num)
+            except InvalidOperation:
+                raise serializers.ValidationError({'total_amount': ['Invalid amount']})
+
+        # Normalize date: accept DD/MM/YYYY, YYYY-MM-DD; keep as DD/MM/YYYY for UI
+        d = attrs.get('date')
+        if d:
+            from datetime import datetime
+            normalized = None
+            for fmt in ('%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y'):
+                try:
+                    dt = datetime.strptime(d, fmt)
+                    normalized = dt.strftime('%d/%m/%Y')
+                    break
+                except Exception:
+                    continue
+            if normalized:
+                attrs['date'] = normalized
+            else:
+                raise serializers.ValidationError({'date': ['Invalid date format']})
+        
+        # Normalize currency: uppercase 3-letter if provided
+        c = attrs.get('currency')
+        if c:
+            c_norm = str(c).strip().upper()
+            if len(c_norm) not in (3, 4):
+                raise serializers.ValidationError({'currency': ['Invalid currency']})
+            attrs['currency'] = c_norm
+        return attrs
 
 
 class ReceiptCategorizeSerializer(serializers.Serializer):

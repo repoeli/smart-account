@@ -33,3 +33,5 @@ Next steps queued:
   - Frontend charts: income vs expense over time (line/area), category breakdown (pie/donut), top merchants (bar). [US-010]
   - Performance (NFR): cache summary responses server-side (e.g., 60s in-memory) and ensure p95 < 300ms; add simple timing logs. [US-010]
   - Tests: backend summary grouping/caching; frontend E2E to validate filters reflect in charts and totals. [US-010]
+  - Tests: Dashboard custom date range presets persist across reload; summary reflects selected dates; error banner shown on 500s.
+  - Tests: Transactions list timing logs do not alter response; totals remain consistent with filters.

@@ -195,6 +195,12 @@ class ApiClient {
   async getReceipt(id: string): Promise<Receipt> {
     const response = await this.client.get<{ success: boolean; receipt: any }>(`/receipts/${id}/`);
     const r = response.data.receipt;
+    // Normalize file_url to absolute if backend returned a relative path
+    const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+    const publicBase = apiBase.replace(/\/?api\/v1\/?$/, '');
+    const normalizedFileUrl = typeof r.file_url === 'string' && r.file_url.startsWith('/')
+      ? `${publicBase}${r.file_url}`
+      : r.file_url;
     return {
       id: r.id,
       filename: r.filename,
@@ -203,7 +209,7 @@ class ApiClient {
       receipt_type: r.receipt_type,
       created_at: r.created_at,
       updated_at: r.updated_at,
-      file_url: r.file_url,
+      file_url: normalizedFileUrl,
       merchant_name: r.ocr_data?.merchant_name,
       total_amount: r.ocr_data?.total_amount,
       date: r.ocr_data?.date,

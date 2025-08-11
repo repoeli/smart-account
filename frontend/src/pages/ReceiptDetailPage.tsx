@@ -9,8 +9,46 @@ const ReceiptDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<any>(null);
+  const [isReprocessing, setIsReprocessing] = useState<boolean>(false);
   const [hasTransaction, setHasTransaction] = useState<boolean>(false);
   const [linkedTransactionId, setLinkedTransactionId] = useState<string | null>(null);
+  const formatDisplayDate = React.useCallback((value?: string) => {
+    if (!value) return '-';
+    // Accept DD/MM/YYYY and display as-is; else try ISO/parsable
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) return value;
+    if (/^\d{4}-\d{2}-\d{2}/.test(value)) {
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) return d.toLocaleDateString();
+      // Fallback: convert YYYY-MM-DD to DD/MM/YYYY manually
+      try {
+        const [y, m, d2] = value.slice(0, 10).split('-');
+        return `${d2}/${m}/${y}`;
+      } catch {
+        return value;
+      }
+    }
+    // Unknown format – do not attempt to parse to prevent Invalid Date
+    return value;
+  }, []);
+
+  const toTransactionDate = (value?: string) => {
+    if (!value) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+      const [d, m, y] = value.split('/');
+      return `${y}-${m}-${d}`;
+    }
+    return value;
+  };
+
+  const canCreateTransaction = React.useMemo(() => {
+    if (!receipt) return false;
+    const amountNum = Number(receipt.total_amount);
+    if (!isFinite(amountNum) || amountNum <= 0) return false;
+    const txDate = toTransactionDate(receipt.date);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(txDate)) return false;
+    return true;
+  }, [receipt]);
   const cloudinaryAssetUrl = React.useMemo(() => {
     const r = receipt;
     if (!r) return null;
@@ -110,9 +148,24 @@ const ReceiptDetailPage: React.FC = () => {
               )}
             </div>
             <div><span className="text-gray-500">Merchant:</span> {receipt.merchant_name || '-'}</div>
-            <div><span className="text-gray-500">Total:</span> {receipt.currency || 'GBP'} {receipt.total_amount || '-'}</div>
+            <div>
+              <span className="text-gray-500">Total:</span>{' '}
+              {(() => {
+                const currency = receipt.currency || 'GBP';
+                const amountNum = Number(receipt.total_amount);
+                if (!isNaN(amountNum)) {
+                  try {
+                    const fmt = new Intl.NumberFormat(undefined, { style: 'currency', currency });
+                    return fmt.format(amountNum);
+                  } catch {
+                    return `${currency} ${receipt.total_amount}`;
+                  }
+                }
+                return `${currency} ${receipt.total_amount || '-'}`;
+              })()}
+            </div>
             <div><span className="text-gray-500">Type:</span> {receipt.mime_type || '-'}</div>
-            <div><span className="text-gray-500">Date:</span> {receipt.date ? new Date(receipt.date).toLocaleDateString() : '-'}</div>
+            <div><span className="text-gray-500">Date:</span> {formatDisplayDate(receipt.date)}</div>
             <div><span className="text-gray-500">Confidence:</span> {receipt.confidence_score ? `${Math.round(receipt.confidence_score * 100)}%` : '-'}</div>
             <div><span className="text-gray-500">OCR Latency:</span> {typeof receipt.ocr_latency_ms === 'number' ? `${receipt.ocr_latency_ms} ms` : '-'}</div>
             <div className="flex items-center gap-2">
@@ -156,13 +209,61 @@ const ReceiptDetailPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="font-semibold">Actions</div>
           <div className="space-x-2">
-            <button className="btn-outline" onClick={() => apiClient.reprocessReceipt(id!, 'paddle_ocr').then(() => window.location.reload())}>Reprocess (Paddle)</button>
-            <button className="btn-outline" onClick={() => apiClient.reprocessReceipt(id!, 'openai_vision').then(() => window.location.reload())}>Reprocess (OpenAI)</button>
             <button
-              className={`btn-primary ${hasTransaction ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={hasTransaction}
+              className="btn-outline"
+              disabled={isReprocessing}
               onClick={async () => {
-                if (hasTransaction) return;
+                try {
+                  setIsReprocessing(true);
+                  const res = await apiClient.reprocessReceipt(id!, 'paddle_ocr');
+                  if (res?.success) {
+                    // Refresh details asynchronously
+                    const fresh = await apiClient.getReceipt(id!);
+                    setReceipt(fresh);
+                    toast.success('Reprocessed with Paddle');
+                  } else {
+                    toast.error(res?.message || 'Reprocess failed');
+                  }
+                } catch (e: any) {
+                  toast.error(e?.message || 'Reprocess failed');
+                } finally {
+                  setIsReprocessing(false);
+                }
+              }}
+            >{isReprocessing ? 'Reprocessing…' : 'Reprocess (Paddle)'}
+            </button>
+            <button
+              className="btn-outline"
+              disabled={isReprocessing}
+              onClick={async () => {
+                try {
+                  setIsReprocessing(true);
+                  const res = await apiClient.reprocessReceipt(id!, 'openai_vision');
+                  if (res?.success) {
+                    const fresh = await apiClient.getReceipt(id!);
+                    setReceipt(fresh);
+                    toast.success('Reprocessed with OpenAI Vision');
+                  } else {
+                    toast.error(res?.message || 'Reprocess failed');
+                  }
+                } catch (e: any) {
+                  toast.error(e?.message || 'Reprocess failed');
+                } finally {
+                  setIsReprocessing(false);
+                }
+              }}
+            >{isReprocessing ? 'Reprocessing…' : 'Reprocess (OpenAI)'}
+            </button>
+            <button
+              className={`btn-primary ${hasTransaction || !canCreateTransaction ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={hasTransaction || !canCreateTransaction}
+              onClick={async () => {
+                if (hasTransaction || !canCreateTransaction) {
+                  if (!canCreateTransaction) {
+                    toast.error('Amount and date are required. Open OCR Results to fix data.');
+                  }
+                  return;
+                }
                 try {
                   const desc = receipt.merchant_name ? `${receipt.merchant_name} receipt` : 'Receipt expense';
                   const payload = {
@@ -170,7 +271,7 @@ const ReceiptDetailPage: React.FC = () => {
                     amount: Number(receipt.total_amount) || 0,
                     currency: receipt.currency || 'GBP',
                     type: 'expense' as const,
-                    transaction_date: (receipt.date || '').slice(0, 10),
+                    transaction_date: toTransactionDate(receipt.date),
                     receipt_id: id!,
                   };
                   const suggestion = await apiClient.suggestCategory({ receiptId: id!, merchant: receipt.merchant_name });

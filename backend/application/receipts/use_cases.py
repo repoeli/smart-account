@@ -470,8 +470,11 @@ class ReceiptValidateUseCase:
             
             if 'total_amount' in corrections:
                 try:
-                    receipt.ocr_data.total_amount = Decimal(str(corrections['total_amount']))
-                except (ValueError, TypeError):
+                    amt = str(corrections['total_amount']).strip()
+                    if amt == '':
+                        amt = '0'
+                    receipt.ocr_data.total_amount = Decimal(amt)
+                except Exception:
                     return {
                         'success': False,
                         'error': 'Invalid total amount format'
@@ -495,6 +498,13 @@ class ReceiptValidateUseCase:
                         'success': False,
                         'error': f'Invalid date format: {str(e)}'
                     }
+
+            if 'currency' in corrections and corrections['currency']:
+                try:
+                    currency_str = str(corrections['currency']).strip().upper()
+                    receipt.ocr_data.currency = currency_str
+                except Exception:
+                    pass
             
             # Validate corrected OCR data
             is_valid, validation_errors = self.receipt_validation_service.validate_ocr_data(receipt.ocr_data)

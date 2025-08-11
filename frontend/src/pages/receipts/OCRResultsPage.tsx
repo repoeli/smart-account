@@ -60,30 +60,37 @@ const OCRResultsPage: React.FC = () => {
     setOcrData(prev => ({ ...prev, ...corrections }));
   };
 
-  const toBackendDate = (iso?: string) => {
-    if (!iso) return undefined;
-    // Convert YYYY-MM-DD -> DD/MM/YYYY for backend validator expectations
-    try {
-      const [y, m, d] = iso.split('-');
-      if (y && m && d) return `${d}/${m}/${y}`;
-    } catch {}
-    return iso;
+  const toBackendDate = (maybe?: string) => {
+    if (!maybe) return undefined;
+    // Accept both DD/MM/YYYY and YYYY-MM-DD; pass through if already in DD/MM/YYYY
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(maybe)) return maybe;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(maybe)) {
+      const [y, m, d] = maybe.split('-');
+      return `${d}/${m}/${y}`;
+    }
+    return maybe;
   };
 
   const handleSave = async () => {
     try {
       setIsSaving(true);
       // Use validate endpoint to correct OCR data server-side
-      await apiClient.validateReceipt(receiptId!, {
+      const res = await apiClient.validateReceipt(receiptId!, {
         merchant_name: ocrData.merchant_name,
         total_amount: ocrData.total_amount,
         date: toBackendDate(ocrData.date),
         vat_number: ocrData.vat_number,
         receipt_number: ocrData.receipt_number,
+        currency: ocrData.currency,
       } as any);
-
-      toast.success('Receipt data updated successfully');
-      setIsEditing(false);
+      if ((res as any)?.success !== false) {
+        toast.success('Receipt data updated successfully');
+        setIsEditing(false);
+        // Soft-refresh current values from server
+        await loadReceiptData();
+      } else {
+        toast.error((res as any)?.message || 'Validation failed');
+      }
     } catch (error: any) {
       console.error('Error saving receipt:', error);
       toast.error('Failed to save receipt data');

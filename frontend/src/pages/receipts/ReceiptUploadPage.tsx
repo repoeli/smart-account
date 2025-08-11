@@ -354,15 +354,15 @@ const ReceiptUploadPage: React.FC = () => {
             setCompletedFiles(successCount);
             toast.success(`Successfully uploaded ${file.name}`);
           } else {
-            toast.error(`Failed to upload ${file.name}: ${response.message}`);
+            toast.error(`Failed to upload ${file.name}: ${response.message || 'We may have saved your file; check Receipts and reprocess if needed.'}`);
           }
         } catch (error: any) {
           console.error('Upload error:', error);
           const errorMessage = error.response?.data?.message || 
                              error.response?.data?.error || 
                              error.message || 
-                             'Unknown error';
-          toast.error(`Failed to upload ${file.name}: ${errorMessage}`);
+                              'Unknown error';
+          toast.error(`Failed to upload ${file.name}: ${errorMessage}. If this persists, check Receipts list; a fallback save may have occurred.`);
         }
 
         // Update progress

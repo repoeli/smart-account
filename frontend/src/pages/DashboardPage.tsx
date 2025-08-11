@@ -14,7 +14,7 @@ const DashboardPage = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [totals, setTotals] = useState<Totals>({ income: [], expense: [] });
   const [receiptsCount, setReceiptsCount] = useState<number>(0);
-  const [range, setRange] = useState<'this_month' | 'last_month' | 'this_year'>('this_month');
+  const [range, setRange] = useState<'this_month' | 'last_month' | 'this_year' | 'custom'>('this_month');
   // removed unused loading state to avoid linter warning
   const [dateFrom, setDateFrom] = useState<string>('');
   const [dateTo, setDateTo] = useState<string>('');
@@ -24,28 +24,55 @@ const DashboardPage = () => {
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  // Hydrate persisted range and dates
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('dashboard_range');
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved.range) setRange(saved.range);
+        if (saved.dateFrom) setDateFrom(saved.dateFrom);
+        if (saved.dateTo) setDateTo(saved.dateTo);
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist range and dates
+  useEffect(() => {
+    try {
+      localStorage.setItem('dashboard_range', JSON.stringify({ range, dateFrom, dateTo }));
+    } catch {}
+  }, [range, dateFrom, dateTo]);
+
   useEffect(() => {
     (async () => {
       try {
         const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
         const now = new Date();
-        let start: Date;
-        let end: Date;
-        if (range === 'last_month') {
-          const first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-          const last = new Date(now.getFullYear(), now.getMonth(), 0);
-          start = first; end = last;
-        } else if (range === 'this_year') {
-          start = new Date(now.getFullYear(), 0, 1);
-          end = new Date(now.getFullYear(), 11, 31);
+        let df = dateFrom;
+        let dt = dateTo;
+        if (range !== 'custom') {
+          let start: Date;
+          let end: Date;
+          if (range === 'last_month') {
+            const first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const last = new Date(now.getFullYear(), now.getMonth(), 0);
+            start = first; end = last;
+          } else if (range === 'this_year') {
+            start = new Date(now.getFullYear(), 0, 1);
+            end = new Date(now.getFullYear(), 11, 31);
+          } else {
+            start = new Date(now.getFullYear(), now.getMonth(), 1);
+            end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+          }
+          df = start.toISOString().slice(0, 10);
+          dt = end.toISOString().slice(0, 10);
+          setDateFrom(df);
+          setDateTo(dt);
         } else {
-          start = new Date(now.getFullYear(), now.getMonth(), 1);
-          end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+          if (!df || !dt) return;
         }
-        const df = start.toISOString().slice(0, 10);
-        const dt = end.toISOString().slice(0, 10);
-        setDateFrom(df);
-        setDateTo(dt);
         const url = new URL(`${apiBase}/transactions/summary/`);
         url.searchParams.set('dateFrom', df);
         url.searchParams.set('dateTo', dt);
@@ -80,7 +107,7 @@ const DashboardPage = () => {
       } finally {
       }
     })();
-  }, [range]);
+  }, [range, dateFrom, dateTo]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -106,8 +133,21 @@ const DashboardPage = () => {
           <button className={`btn btn-outline ${range==='this_month'?'btn-active':''}`} onClick={() => setRange('this_month')}>This month</button>
           <button className={`btn btn-outline ${range==='last_month'?'btn-active':''}`} onClick={() => setRange('last_month')}>Last month</button>
           <button className={`btn btn-outline ${range==='this_year'?'btn-active':''}`} onClick={() => setRange('this_year')}>This year</button>
+          <button className={`btn btn-outline ${range==='custom'?'btn-active':''}`} onClick={() => setRange('custom')}>Custom</button>
         </div>
       </div>
+      {range === 'custom' && (
+        <div className="mb-6 flex items-center gap-3">
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">From</label>
+            <input type="date" value={dateFrom} onChange={(e)=>setDateFrom(e.target.value)} className="input input-bordered" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">To</label>
+            <input type="date" value={dateTo} onChange={(e)=>setDateTo(e.target.value)} className="input input-bordered" />
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="card cursor-pointer" onClick={() => navigate(`/transactions?dateFrom=${dateFrom}&dateTo=${dateTo}`)}>

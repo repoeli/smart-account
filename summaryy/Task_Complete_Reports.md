@@ -81,6 +81,7 @@
   - Uses `/api/v1/transactions/summary/` to display current month totals: Income, Expenses, and Net per currency, formatted via Intl.
   - Added simple charts for by-month and category breakdown; added Top Merchants chart using new `groupBy=merchant` support.
   - Added error banner to gracefully handle summary load failures; falls back to empty visuals.
+  - Added date range presets with Custom option (date pickers) and persisted selection to `localStorage`.
 
 #### Notes
 - A “PaddleOCR not available” warning can still appear from the in‑process initializer; the actual OCR path uses the FastAPI HTTP service when running.
@@ -90,6 +91,8 @@
 #### New since last push
 - Backend
   - Transactions summary: added `groupBy=merchant`, added timing logs, and made cache TTL configurable via `SUMMARY_CACHE_TTL` (default 60s).
+  - Transactions list: added timing logs for performance tracking.
+  - Receipts upload: hardened `POST /api/v1/receipts/upload/` with a last-resort fallback that saves the file (Cloudinary or local) and persists a minimal `Receipt` row to avoid 500s; includes storage telemetry in `metadata.custom_fields`.
   - Receipt telemetry: persist `metadata.custom_fields.storage_provider` and `metadata.custom_fields.cloudinary_public_id` on upload (Cloudinary vs local visibility per receipt).
   - Added diagnostics API `GET /api/v1/files/info/?url=...` to verify Cloudinary/local assets and return metadata (public_id, format, width/height, bytes, created_at).
   - Relaxed receipt ownership checks in development for detail/update/reprocess/validate flows to prevent 400s while data is normalized.
@@ -98,6 +101,7 @@
 - Frontend
   - TransactionsPage: Inline category editor with optimistic update + toasts; PATCH to `/transactions/:id` wired.
   - ReceiptsPage: Converted badge now hydrated via `has_transaction` from list API.
+  - ReceiptUploadPage: improved error messaging to inform about potential fallback save; advises user to check Receipts list and reprocess if needed.
   - Receipts list (`ReceiptsPage.tsx`): shows storage origin badge (cloudinary/local) and OCR confidence percentage. Mapping updated to read `metadata.custom_fields`.
   - Receipt detail page (`ReceiptDetailPage.tsx`): implemented fully. Displays thumbnail, merchant, total, date, confidence, storage provider, Cloudinary public_id. Adds actions to reprocess with Paddle or OpenAI and to open the OCR results page.
   - API client (`api.ts`): `getReceipt` now normalizes backend shape (nested `ocr_data`, `metadata.custom_fields`) into the frontend `Receipt` type.

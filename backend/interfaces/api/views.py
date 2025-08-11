@@ -578,14 +578,99 @@ class ReceiptUploadView(APIView):
             )
             
         except Exception as e:
-            return Response(
-                {
-                    'success': False,
-                    'error': 'upload_error',
-                    'message': str(e)
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            # Last-resort fallback: if we can at least persist the file and a minimal receipt, avoid 500s
+            try:
+                from infrastructure.database.models import Receipt as ReceiptModel
+                from infrastructure.storage.services import FileStorageService
+                from infrastructure.storage.adapters.cloudinary_store import CloudinaryStorageAdapter
+                from infrastructure.ocr.services import OCRService
+                uploaded = request.FILES.get('file')
+                if uploaded is None:
+                    raise RuntimeError('file_missing')
+                try:
+                    uploaded.seek(0)
+                except Exception:
+                    pass
+                file_bytes = uploaded.read()
+                filename = getattr(uploaded, 'name', 'receipt.jpg')
+                mime_type = getattr(uploaded, 'content_type', 'image/jpeg')
+                # Try Cloudinary first via adapter if configured
+                file_url = None
+                cloudinary_public_id = None
+                storage_provider = 'local'
+                try:
+                    from django.conf import settings as _s
+                    if getattr(_s, 'CLOUDINARY_CLOUD_NAME', None) and getattr(_s, 'CLOUDINARY_API_KEY', None) and getattr(_s, 'CLOUDINARY_API_SECRET', None):
+                        asset = CloudinaryStorageAdapter().upload(file_bytes=file_bytes, filename=filename, mime=mime_type)
+                        file_url = asset.secure_url
+                        cloudinary_public_id = asset.public_id
+                        storage_provider = 'cloudinary'
+                except Exception:
+                    pass
+                if not file_url:
+                    ok, url, err = FileStorageService().upload_file_from_memory(file_bytes, filename)
+                    if not ok:
+                        raise RuntimeError(f'fallback_upload_failed: {err}')
+                    file_url = url
+                    storage_provider = 'local'
+                # Create minimal receipt row
+                meta = {'custom_fields': {'storage_provider': storage_provider}}
+                if cloudinary_public_id:
+                    meta['custom_fields']['cloudinary_public_id'] = cloudinary_public_id
+                r = ReceiptModel.objects.create(
+                    user_id=request.user.id,
+                    filename=filename,
+                    file_size=len(file_bytes),
+                    mime_type=mime_type,
+                    file_url=file_url,
+                    status='uploaded',
+                    receipt_type='purchase',
+                    ocr_data={},
+                    metadata=meta,
+                )
+                # Attempt OCR immediately (best-effort) to match normal path
+                try:
+                    ocr_service = OCRService()
+                    ok, data, err = ocr_service.extract_receipt_data_from_url(file_url, None)
+                    if ok and data:
+                        # Normalize OCRData -> dict for JSONField
+                        def _to_str(x):
+                            try:
+                                from decimal import Decimal as _D
+                                if isinstance(x, _D):
+                                    return str(x)
+                            except Exception:
+                                pass
+                            return x
+                        ocr_dict = {
+                            'merchant_name': getattr(data, 'merchant_name', None),
+                            'total_amount': _to_str(getattr(data, 'total_amount', None)),
+                            'currency': getattr(data, 'currency', None) or 'GBP',
+                            'date': getattr(data, 'date', None).isoformat() if hasattr(getattr(data, 'date', None), 'isoformat') else getattr(data, 'date', None),
+                            'vat_amount': _to_str(getattr(data, 'vat_amount', None)),
+                            'vat_number': getattr(data, 'vat_number', None),
+                            'receipt_number': getattr(data, 'receipt_number', None),
+                            'items': getattr(data, 'items', []) or [],
+                            'confidence_score': getattr(data, 'confidence_score', 0.0),
+                            'raw_text': getattr(data, 'raw_text', '') or '',
+                            'additional_data': getattr(data, 'additional_data', {}) or {},
+                        }
+                        r.ocr_data = ocr_dict
+                        r.status = 'processed'
+                        r.save(update_fields=['ocr_data', 'status', 'updated_at'])
+                        return Response({'success': True, 'receipt_id': str(r.id), 'file_url': file_url, 'status': r.status, 'ocr_processed': True, 'ocr_data': ocr_dict}, status=status.HTTP_201_CREATED)
+                except Exception:
+                    pass
+                return Response({'success': True, 'receipt_id': str(r.id), 'file_url': file_url, 'status': r.status, 'ocr_processed': False}, status=status.HTTP_201_CREATED)
+            except Exception as e2:
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'upload_error',
+                        'message': str(e2) or str(e)
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
 
 class ReceiptManualCreateView(APIView):
@@ -826,19 +911,64 @@ class ReceiptReprocessView(APIView):
                     ocr_method=ocr_method_enum
                 )
             else:
-                # Fallback: mark receipt needs_review without OCR to avoid 500
-                from infrastructure.database.models import Receipt as ReceiptModel
-                r = ReceiptModel.objects.filter(id=receipt_id).first()
-                if not r:
-                    return Response({'success': False, 'error': 'not_found'}, status=404)
-                md = r.metadata or {}
-                cf = (md.get('custom_fields') or {})
-                cf['needs_review'] = True
-                md['custom_fields'] = cf
-                r.metadata = md
-                r.status = 'processed'
-                r.save(update_fields=['metadata', 'status', 'updated_at'])
-                result = {'success': True, 'receipt_id': str(r.id), 'ocr_method': ocr_method_param, 'ocr_data': r.ocr_data}
+                # Fallback: reprocess via ORM + OCRService directly (still call OCR APIs)
+                try:
+                    from infrastructure.database.models import Receipt as ReceiptModel
+                    from infrastructure.ocr.services import OCRService
+                    r = ReceiptModel.objects.filter(id=receipt_id, user_id=request.user.id).first()
+                    if not r:
+                        return Response({'success': False, 'error': 'not_found'}, status=404)
+                    # mark processing
+                    try:
+                        r.status = 'processing'
+                        r.save(update_fields=['status', 'updated_at'])
+                    except Exception:
+                        pass
+                    # call OCR by URL first
+                    svc = OCRService()
+                    ok, ocr_data, err = svc.extract_receipt_data_from_url(r.file_url, ocr_method_enum)
+                    if ok and ocr_data:
+                        # persist ocr_data JSON
+                        payload = {
+                            'merchant_name': ocr_data.merchant_name,
+                            'total_amount': str(ocr_data.total_amount) if ocr_data.total_amount is not None else None,
+                            'currency': ocr_data.currency,
+                            'date': ocr_data.date.isoformat() if getattr(ocr_data, 'date', None) else None,
+                            'vat_amount': str(ocr_data.vat_amount) if ocr_data.vat_amount is not None else None,
+                            'vat_number': ocr_data.vat_number,
+                            'receipt_number': ocr_data.receipt_number,
+                            'items': ocr_data.items,
+                            'confidence_score': ocr_data.confidence_score,
+                            'raw_text': ocr_data.raw_text,
+                            'additional_data': getattr(ocr_data, 'additional_data', {})
+                        }
+                        r.ocr_data = payload
+                        # mark processed and add latency telemetry to metadata
+                        r.status = 'processed'
+                        md = r.metadata or {}
+                        cf = (md.get('custom_fields') or {})
+                        try:
+                            latency_ms = payload.get('additional_data', {}).get('latency_ms')
+                            if latency_ms is not None:
+                                cf['latency_ms'] = latency_ms
+                        except Exception:
+                            pass
+                        md['custom_fields'] = cf
+                        r.metadata = md
+                        r.save(update_fields=['ocr_data', 'metadata', 'status', 'updated_at'])
+                        result = {'success': True, 'receipt_id': str(r.id), 'ocr_method': ocr_method_param, 'ocr_data': r.ocr_data}
+                    else:
+                        # set needs_review on failure
+                        md = r.metadata or {}
+                        cf = (md.get('custom_fields') or {})
+                        cf['needs_review'] = True
+                        md['custom_fields'] = cf
+                        r.metadata = md
+                        r.status = 'failed'
+                        r.save(update_fields=['metadata', 'status', 'updated_at'])
+                        result = {'success': False, 'error': err or 'ocr_failed'}
+                except Exception as e2:
+                    result = {'success': False, 'error': f'fallback_reprocess_failed: {str(e2)}'}
             
             # Return response
             response_serializer = ReceiptReprocessResponseSerializer(data=result)
@@ -931,14 +1061,70 @@ class ReceiptValidateView(APIView):
             )
             
         except Exception as e:
-            return Response(
-                {
-                    'success': False,
-                    'error': 'validation_error',
-                    'message': str(e)
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            # Safe fallback: apply corrections directly via ORM to avoid 500s in UI
+            try:
+                from infrastructure.database.models import Receipt as ReceiptModel
+                r = ReceiptModel.objects.filter(id=receipt_id, user_id=request.user.id).first()
+                if not r:
+                    return Response({'success': False, 'error': 'not_found'}, status=404)
+                data = request.data or {}
+                ocr = r.ocr_data or {}
+                # Normalize fields
+                if 'merchant_name' in data and data['merchant_name'] is not None:
+                    ocr['merchant_name'] = str(data['merchant_name'])
+                if 'total_amount' in data and data['total_amount'] is not None:
+                    try:
+                        from decimal import Decimal
+                        amt = str(data['total_amount']).strip()
+                        if amt != '':
+                            _ = Decimal(amt)  # validate
+                            ocr['total_amount'] = str(_)
+                    except Exception:
+                        pass
+                if 'date' in data and data['date']:
+                    # Accept DD/MM/YYYY or YYYY-MM-DD; store back DD/MM/YYYY to match UI
+                    try:
+                        from datetime import datetime
+                        v = str(data['date'])
+                        parsed = None
+                        for fmt in ('%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y'):
+                            try:
+                                dt = datetime.strptime(v, fmt)
+                                parsed = dt.strftime('%d/%m/%Y')
+                                break
+                            except Exception:
+                                continue
+                        if parsed:
+                            ocr['date'] = parsed
+                    except Exception:
+                        pass
+                if 'vat_number' in data and data['vat_number'] is not None:
+                    ocr['vat_number'] = str(data['vat_number'])
+                if 'receipt_number' in data and data['receipt_number'] is not None:
+                    ocr['receipt_number'] = str(data['receipt_number'])
+                if 'currency' in data and data['currency']:
+                    try:
+                        ocr['currency'] = str(data['currency']).strip().upper()
+                    except Exception:
+                        pass
+                r.ocr_data = ocr
+                # Mark review flag conservatively
+                md = r.metadata or {}
+                cf = (md.get('custom_fields') or {})
+                cf['needs_review'] = True
+                md['custom_fields'] = cf
+                r.metadata = md
+                r.save(update_fields=['ocr_data', 'metadata', 'updated_at'])
+                return Response({'success': True, 'receipt_id': str(r.id), 'validation_errors': [], 'suggestions': {}, 'quality_score': None, 'message': 'Saved with fallback'}, status=200)
+            except Exception as e2:
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'validation_error',
+                        'message': str(e2) or str(e)
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
 
 class ReceiptCategorizeView(APIView):
@@ -2097,6 +2283,8 @@ class TransactionCreateView(APIView):
 
     def get(self, request):
         try:
+            import time
+            t0 = time.perf_counter()
             # ORM-first path with filters/sorting
             from infrastructure.database.models import Transaction as TxModel
             from django.db.models import Sum
@@ -2169,7 +2357,12 @@ class TransactionCreateView(APIView):
                 'income': [{'currency': row['currency'], 'sum': str(row['total'])} for row in income_by_currency],
                 'expense': [{'currency': row['currency'], 'sum': str(row['total'])} for row in expense_by_currency],
             }
-            return Response({'success': True, 'items': items, 'page': page, 'totals': totals}, status=200)
+            resp = {'success': True, 'items': items, 'page': page, 'totals': totals}
+            try:
+                logger.info('transactions.list timings', extra={'ms': int((time.perf_counter()-t0)*1000), 'user_id': str(request.user.id), 'count': len(items)})
+            except Exception:
+                pass
+            return Response(resp, status=200)
         except Exception as e:
             # Fallback: list directly from ORM to avoid 500s in dev
             try:
