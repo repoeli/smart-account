@@ -11,7 +11,7 @@ from .views import (
     PasswordResetRequestView, PasswordResetConfirmView,
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView, ReceiptManualCreateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
-    ReceiptParseView, CategorySuggestView, TransactionCreateView,
+    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionCreateView, ReceiptsCountView,
 )
 from .management_views import (
     CreateFolderView, FolderDetailView, FolderListView, SearchReceiptsView,
@@ -41,6 +41,7 @@ urlpatterns = [
     path('receipts/upload/', ReceiptUploadView.as_view(), name='receipt-upload'),
     path('receipts/manual/', ReceiptManualCreateView.as_view(), name='receipt-manual-create'),
     path('receipts/parse/', ReceiptParseView.as_view(), name='receipt-parse'),
+    path('receipts/count/', ReceiptsCountView.as_view(), name='receipt-count'),
     path('receipts/', ReceiptListView.as_view(), name='receipt-list'),
     path('receipts/<str:receipt_id>/', ReceiptDetailView.as_view(), name='receipt-detail'),
     path('receipts/<str:receipt_id>/update/', ReceiptUpdateView.as_view(), name='receipt-update'),
@@ -52,7 +53,10 @@ urlpatterns = [
     path('receipts/statistics/', ReceiptStatisticsView.as_view(), name='receipt-statistics'),
     # Sprint 2.2 endpoints (temporary stub implementations for UI wiring)
     path('categories/suggest/', CategorySuggestView.as_view(), name='category-suggest'),
+    path('categories/', CategoriesListView.as_view(), name='categories-list'),
+    path('transactions/summary/', TransactionsSummaryView.as_view(), name='transactions-summary'),
     path('transactions/', TransactionCreateView.as_view(), name='transaction-create'),
+    path('transactions/<str:tx_id>/', TransactionCreateView.as_view(), name='transaction-update'),
     
     # US-006: Receipt Management and Organization endpoints
     path('folders/', FolderListView.as_view(), name='folder-list'),

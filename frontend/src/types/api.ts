@@ -112,6 +112,8 @@ export interface Receipt {
   // OCR telemetry
   ocr_latency_ms?: number;
   needs_review?: boolean;
+  // enrichment
+  has_transaction?: boolean;
 }
 
 export interface ReceiptUploadRequest {
@@ -146,6 +148,7 @@ export interface ReceiptSearchItemDTO {
   confidence: number;
   provider: string;
   thumbnailUrl: string;
+  has_transaction?: boolean;
 }
 
 export interface ReceiptSearchPageInfoDTO {
@@ -265,3 +268,22 @@ export interface ApiError {
   validation_errors?: Record<string, string[]>;
   status?: number;
 }
+
+// Transactions – Category type (frontend convenience)
+// Keep in sync with GET /api/v1/categories/
+export type TransactionCategory =
+  | 'food_and_drink'
+  | 'transport'
+  | 'accommodation'
+  | 'office_supplies'
+  | 'utilities'
+  | 'subscriptions'
+  | 'software'
+  | 'marketing'
+  | 'entertainment'
+  | 'healthcare'
+  | 'education'
+  | 'professional_services'
+  | 'maintenance'
+  | 'travel'
+  | 'other';

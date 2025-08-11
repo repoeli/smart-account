@@ -27,7 +27,7 @@ from .serializers import (
     SearchReceiptsSerializer, AddTagsSerializer, BulkOperationSerializer,
     MoveReceiptsToFolderSerializer, FolderResponseSerializer, SearchResultsSerializer,
     UserStatisticsResponseSerializer, ReceiptSearchRequestSerializer, ReceiptSearchResponseSerializer,
-    CategorySuggestQuerySerializer, TransactionCreateSerializer
+    CategorySuggestQuerySerializer, TransactionCreateSerializer, TransactionUpdateSerializer
 )
 from infrastructure.ocr.services import OCRService, OCRMethod
 from domain.receipts.entities import ReceiptType
@@ -70,6 +70,19 @@ class FileInfoView(APIView):
             return Response({"success": False, "error": err}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"success": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ReceiptsCountView(APIView):
+    """Lightweight count endpoint for dashboard to avoid heavy list paths."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            from infrastructure.database.models import Receipt as ReceiptModel
+            count = ReceiptModel.objects.filter(user_id=request.user.id).count()
+            return Response({"success": True, "count": count}, status=200)
+        except Exception as e:
+            return Response({"success": False, "error": str(e)}, status=500)
 
 
 class UserRegistrationView(APIView):
@@ -1220,7 +1233,7 @@ class ReceiptListView(APIView):
     def _execute_search(self, user, filters, sort, order, limit, cursor_info):
         """Execute the search query with cursor pagination."""
         from django.db import connection
-        from infrastructure.database.models import Receipt
+        from infrastructure.database.models import Receipt, Transaction as TxModel
 
         if connection.vendor != 'postgresql':
             # Fallback path for SQLite or other backends that don't support JSON key transforms reliably
@@ -1312,16 +1325,35 @@ class ReceiptListView(APIView):
             if has_next:
                 results = results[:-1]
 
+            # Build map of receipt_id -> has_transaction
+            try:
+                id_list = [str(r.id) for r in results]
+                if id_list:
+                    tx_ids = set(
+                        str(tid)
+                        for tid in TxModel.objects.filter(user_id=user.id, receipt_id__in=id_list).values_list('receipt_id', flat=True)
+                    )
+                else:
+                    tx_ids = set()
+                has_tx_map = {rid: (rid in tx_ids) for rid in id_list}
+            except Exception:
+                has_tx_map = {}
+
             return {
                 'receipts': results,
                 'has_next': has_next,
                 'has_prev': cursor_info is not None,
                 'total_count': None,
+                'has_tx_map': has_tx_map,
             }
 
         # PostgreSQL optimized path with safe fallback on error
         try:
+            from django.db.models import Exists, OuterRef
             queryset = Receipt.objects.filter(user_id=user.id)
+            # Annotate existence of related transaction per receipt for efficiency
+            tx_exists_subq = TxModel.objects.filter(user_id=user.id, receipt_id=OuterRef('pk'))
+            queryset = queryset.annotate(_has_tx=Exists(tx_exists_subq))
             queryset = self._apply_filters(queryset, filters)
             if cursor_info:
                 queryset = self._apply_cursor_pagination(queryset, cursor_info, sort)
@@ -1330,11 +1362,16 @@ class ReceiptListView(APIView):
             has_next = len(results) > limit
             if has_next:
                 results = results[:-1]
+            try:
+                has_tx_map = {str(r.id): bool(getattr(r, '_has_tx', False)) for r in results}
+            except Exception:
+                has_tx_map = {}
             return {
                 'receipts': results,
                 'has_next': has_next,
                 'has_prev': cursor_info is not None,
                 'total_count': None,
+                'has_tx_map': has_tx_map,
             }
         except Exception as e:
             # Log and fallback to Python evaluation to avoid 500s in development
@@ -1545,6 +1582,7 @@ class ReceiptListView(APIView):
         
         # Transform receipts to API format
         items = []
+        has_tx_map = result.get('has_tx_map') or {}
         for receipt in result['receipts']:
             items.append({
                 'id': str(receipt.id),
@@ -1555,7 +1593,8 @@ class ReceiptListView(APIView):
                 'status': receipt.status,
                 'confidence': receipt.ocr_data.get('confidence_score', 0) if receipt.ocr_data else 0,
                 'provider': receipt.metadata.get('custom_fields', {}).get('storage_provider', '') if receipt.metadata else '',
-                'thumbnailUrl': receipt.file_url
+                'thumbnailUrl': receipt.file_url,
+                'has_transaction': bool(has_tx_map.get(str(receipt.id), getattr(receipt, '_has_tx', False)))
             })
         
         # Build pagination info
@@ -1620,15 +1659,23 @@ class ReceiptDetailView(APIView):
             try:
                 from infrastructure.database.repositories import DjangoReceiptRepository
                 from application.receipts.use_cases import ReceiptDetailUseCase
+                from infrastructure.database.models import Transaction as TxModel
                 receipt_repository = DjangoReceiptRepository()
                 detail_use_case = ReceiptDetailUseCase(receipt_repository=receipt_repository)
                 result = detail_use_case.execute(receipt_id=receipt_id, user=request.user)
+                # Enrich with has_transaction without changing use case contract
+                try:
+                    has_tx = TxModel.objects.filter(user_id=request.user.id, receipt_id=receipt_id).exists()
+                    if isinstance(result.get('receipt'), dict):
+                        result['receipt']['has_transaction'] = has_tx
+                except Exception:
+                    pass
                 response_serializer = ReceiptDetailResponseSerializer(data=result)
                 response_serializer.is_valid()
                 return Response(response_serializer.data, status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST)
             except TypeError as repo_error:
                 # Temporary fallback if repository cannot be instantiated (e.g., abstract error)
-                from infrastructure.database.models import Receipt as ReceiptModel
+                from infrastructure.database.models import Receipt as ReceiptModel, Transaction as TxModel
                 r = ReceiptModel.objects.filter(id=receipt_id).first()
                 if not r:
                     return Response({'success': False, 'error': 'Receipt not found'}, status=404)
@@ -1668,6 +1715,10 @@ class ReceiptDetailView(APIView):
                         'tax_deductible': r.metadata.get('tax_deductible', False),
                         'custom_fields': r.metadata.get('custom_fields', {}),
                     }
+                try:
+                    receipt_data['has_transaction'] = TxModel.objects.filter(user_id=request.user.id, receipt_id=receipt_id).exists()
+                except Exception:
+                    receipt_data['has_transaction'] = False
                 result = {'success': True, 'receipt': receipt_data}
                 response_serializer = ReceiptDetailResponseSerializer(data=result)
                 response_serializer.is_valid()
@@ -1840,6 +1891,139 @@ class CategorySuggestView(APIView):
         return Response({'success': True, 'category': suggested}, status=200)
 
 
+class CategoriesListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    # Central catalog of categories (can be moved to domain/config later)
+    CATEGORIES = [
+        'food_and_drink', 'transport', 'accommodation', 'office_supplies', 'utilities',
+        'subscriptions', 'software', 'marketing', 'entertainment', 'healthcare',
+        'education', 'professional_services', 'maintenance', 'travel', 'other'
+    ]
+
+    def get(self, request):
+        return Response({'success': True, 'categories': self.CATEGORIES}, status=200)
+
+
+class TransactionsSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from infrastructure.database.models import Transaction as TxModel
+        from django.db.models import Sum, Value, CharField
+        from django.db.models.functions import TruncMonth, Coalesce
+        from django.core.cache import cache
+        import time
+        from django.conf import settings
+        t0 = time.perf_counter()
+        date_from = request.query_params.get('dateFrom')
+        date_to = request.query_params.get('dateTo')
+        type_param = request.query_params.get('type')
+        category_param = request.query_params.get('category')
+        group_by = (request.query_params.get('groupBy') or '').lower()
+        group_tokens = [t.strip() for t in group_by.split(',') if t.strip()]
+
+        # Cache key (TTL configurable) scoped by user and filters
+        cache_key = f"tx_summary:{request.user.id}:{date_from}:{date_to}:{type_param}:{category_param}:{','.join(group_tokens)}"
+        cached = cache.get(cache_key)
+        if cached:
+            return Response(cached, status=200)
+
+        qs = TxModel.objects.filter(user_id=request.user.id)
+        if date_from:
+            qs = qs.filter(transaction_date__gte=date_from)
+        if date_to:
+            qs = qs.filter(transaction_date__lte=date_to)
+        if type_param:
+            types = [t.strip() for t in type_param.split(',') if t.strip()]
+            qs = qs.filter(type__in=types)
+        if category_param:
+            cats = [c.strip() for c in category_param.split(',') if c.strip()]
+            qs = qs.filter(category__in=cats)
+
+        income_by_currency = list(qs.filter(type='income').values('currency').annotate(total=Sum('amount')))
+        expense_by_currency = list(qs.filter(type='expense').values('currency').annotate(total=Sum('amount')))
+        totals = {
+            'income': [{'currency': row['currency'], 'sum': str(row['total'])} for row in income_by_currency],
+            'expense': [{'currency': row['currency'], 'sum': str(row['total'])} for row in expense_by_currency],
+        }
+
+        response = {'success': True, 'totals': totals}
+
+        # Grouping: month
+        if 'month' in group_tokens:
+            monthly = qs.annotate(m=TruncMonth('transaction_date')).values('m', 'currency', 'type').annotate(total=Sum('amount')).order_by('m')
+            # Build per month per currency income/expense
+            from collections import defaultdict
+            acc = defaultdict(lambda: {'income': 0, 'expense': 0})
+            for row in monthly:
+                key = f"{row['m'].date().isoformat()[:7]}|{row['currency']}"
+                acc[key][row['type']] = float(row['total'] or 0)
+            by_month = []
+            for key, vals in sorted(acc.items()):
+                month, currency = key.split('|', 1)
+                by_month.append({'month': month, 'currency': currency, 'income': vals['income'], 'expense': vals['expense']})
+            response['byMonth'] = by_month
+
+        # Grouping: category
+        if 'category' in group_tokens:
+            by_cat_qs = qs.exclude(category__isnull=True).exclude(category='').values('category', 'currency', 'type').annotate(total=Sum('amount')).order_by('category')
+            from collections import defaultdict
+            acc_cat = defaultdict(lambda: {'income': 0, 'expense': 0})
+            for row in by_cat_qs:
+                key = f"{row['category']}|{row['currency']}"
+                acc_cat[key][row['type']] = float(row['total'] or 0)
+            by_category = []
+            for key, vals in acc_cat.items():
+                cat, currency = key.split('|', 1)
+                by_category.append({'category': cat, 'currency': currency, 'income': vals['income'], 'expense': vals['expense']})
+            response['byCategory'] = by_category
+
+        # Grouping: merchant (from linked receipt ocr_data.merchant_name)
+        if 'merchant' in group_tokens:
+            from django.db import connection
+            merchant_annotation = None
+            if connection.vendor == 'postgresql':
+                # Safely extract JSONB text as CharField using KeyTextTransform + Cast
+                try:
+                    from django.db.models.functions import Cast
+                    try:
+                        from django.db.models.fields.json import KeyTextTransform as _KTT  # type: ignore
+                    except Exception:
+                        from django.contrib.postgres.fields.jsonb import KeyTextTransform as _KTT  # type: ignore
+                    merchant_annotation = Cast(_KTT('merchant_name', 'receipt__ocr_data'), CharField())
+                except Exception:
+                    merchant_annotation = Value('', output_field=CharField())
+            else:
+                # SQLite/others: avoid mixed-type expressions; fallback to empty merchant
+                merchant_annotation = Value('', output_field=CharField())
+
+            merch_qs = (
+                qs.annotate(merchant=Coalesce(merchant_annotation, Value('', output_field=CharField())))
+                  .values('merchant', 'currency', 'type')
+                  .annotate(total=Sum('amount'))
+                  .order_by('merchant')
+            )
+            from collections import defaultdict
+            acc_merch = defaultdict(lambda: {'income': 0, 'expense': 0})
+            for row in merch_qs:
+                key = f"{row['merchant']}|{row['currency']}"
+                acc_merch[key][row['type']] = float(row['total'] or 0)
+            by_merchant = []
+            for key, vals in acc_merch.items():
+                merchant, currency = key.split('|', 1)
+                by_merchant.append({'merchant': merchant, 'currency': currency, 'income': vals['income'], 'expense': vals['expense']})
+            response['byMerchant'] = by_merchant
+        # Cache and timing log
+        ttl = getattr(settings, 'SUMMARY_CACHE_TTL', 60)
+        cache.set(cache_key, response, timeout=ttl)
+        try:
+            logger.info('transactions.summary timings', extra={'ms': int((time.perf_counter()-t0)*1000), 'user_id': str(request.user.id), 'groups': group_tokens})
+        except Exception:
+            pass
+        return Response(response, status=200)
+
+
 class TransactionCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -1891,49 +2075,139 @@ class TransactionCreateView(APIView):
             except Exception as e2:
                 return Response({'success': False, 'error': 'create_error', 'message': str(e2)}, status=500)
 
+    def patch(self, request, tx_id=None):
+        """Partial update of a transaction (currently supports category)."""
+        try:
+            from infrastructure.database.models import Transaction as TxModel
+            serializer = TransactionUpdateSerializer(data=request.data, partial=True)
+            if not serializer.is_valid():
+                return Response({'success': False, 'error': 'validation_error', 'validation_errors': serializer.errors}, status=400)
+            data = serializer.validated_data
+            if not tx_id:
+                return Response({'success': False, 'error': 'missing_id', 'message': 'Transaction id is required in the URL'}, status=400)
+            obj = TxModel.objects.filter(id=tx_id, user_id=request.user.id).first()
+            if not obj:
+                return Response({'success': False, 'error': 'not_found'}, status=404)
+            if 'category' in data:
+                obj.category = data.get('category') or None
+            obj.save(update_fields=['category', 'updated_at'])
+            return Response({'success': True}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'error': 'update_error', 'message': str(e)}, status=500)
+
     def get(self, request):
         try:
-            from infrastructure.database.repositories import DjangoTransactionRepository
-            from domain.accounts.entities import User as DUser, UserType, BusinessProfile
-            from domain.common.entities import Email
-            from infrastructure.database.models import Receipt as ReceiptModel
-
+            # ORM-first path with filters/sorting
+            from infrastructure.database.models import Transaction as TxModel
+            from django.db.models import Sum
             limit = int(request.query_params.get('limit', 50))
             offset = int(request.query_params.get('offset', 0))
-            duser = DUser(id=str(request.user.id), email=Email(request.user.email), password_hash='x', first_name='x', last_name='x', user_type=UserType.INDIVIDUAL, business_profile=BusinessProfile(company_name='x', business_type='x'))
-            repo = DjangoTransactionRepository()
-            txs = repo.find_by_user(duser, limit=limit, offset=offset)
-            # Attach merchant names for transactions linked to receipts
-            receipt_ids = [t.receipt_id for t in txs if t.receipt_id]
-            merchant_by_id = {}
-            if receipt_ids:
-                for r in ReceiptModel.objects.filter(id__in=receipt_ids).only('id', 'ocr_data'):
-                    try:
-                        merchant_by_id[str(r.id)] = (r.ocr_data or {}).get('merchant_name')
-                    except Exception:
-                        merchant_by_id[str(r.id)] = None
+            sort = (request.query_params.get('sort') or 'date').lower()
+            order = (request.query_params.get('order') or 'desc').lower()
+            date_from = request.query_params.get('dateFrom')
+            date_to = request.query_params.get('dateTo')
+            type_param = request.query_params.get('type')
+            category_param = request.query_params.get('category')
+            receipt_id_param = request.query_params.get('receipt_id')
+
+            qs = TxModel.objects.filter(user_id=request.user.id).select_related('receipt')
+            if date_from:
+                qs = qs.filter(transaction_date__gte=date_from)
+            if date_to:
+                qs = qs.filter(transaction_date__lte=date_to)
+            if type_param:
+                types = [t.strip() for t in type_param.split(',') if t.strip()]
+                qs = qs.filter(type__in=types)
+            if category_param:
+                cats = [c.strip() for c in category_param.split(',') if c.strip()]
+                qs = qs.filter(category__in=cats)
+            if receipt_id_param:
+                qs = qs.filter(receipt_id=receipt_id_param)
+
+            total_count = qs.count()
+
+            # Totals by currency for income and expense
+            income_by_currency = list(
+                qs.filter(type='income').values('currency').annotate(total=Sum('amount'))
+            )
+            expense_by_currency = list(
+                qs.filter(type='expense').values('currency').annotate(total=Sum('amount'))
+            )
+
+            # Sorting
+            if sort == 'amount':
+                qs = qs.order_by(('-' if order == 'desc' else '') + 'amount', '-' + 'created_at')
+            elif sort == 'category':
+                qs = qs.order_by(('-' if order == 'desc' else '') + 'category', '-' + 'created_at')
+            else:
+                # date default
+                qs = qs.order_by(('-' if order == 'desc' else '') + 'transaction_date', '-' + 'created_at')
+
+            page_qs = qs[offset:offset + limit]
             items = [
                 {
-                    'id': t.id,
+                    'id': str(t.id),
                     'description': t.description,
-                    'merchant': merchant_by_id.get(t.receipt_id) if t.receipt_id else None,
-                    'amount': str(t.amount.amount),
-                    'currency': t.amount.currency,
-                    'type': t.type.value,
+                    'merchant': ((t.receipt.ocr_data or {}).get('merchant_name') if t.receipt and t.receipt.ocr_data else None),
+                    'amount': str(t.amount),
+                    'currency': t.currency,
+                    'type': t.type,
                     'transaction_date': t.transaction_date.isoformat(),
-                    'receipt_id': t.receipt_id,
-                    'category': t.category.name if t.category else None,
+                    'receipt_id': str(t.receipt_id) if t.receipt_id else None,
+                    'category': t.category,
                 }
-                for t in txs
+                for t in page_qs
             ]
-            return Response({'success': True, 'items': items}, status=200)
+            page = {
+                'limit': limit,
+                'offset': offset,
+                'totalCount': total_count,
+                'hasNext': offset + len(items) < total_count,
+                'hasPrev': offset > 0,
+            }
+            totals = {
+                'income': [{'currency': row['currency'], 'sum': str(row['total'])} for row in income_by_currency],
+                'expense': [{'currency': row['currency'], 'sum': str(row['total'])} for row in expense_by_currency],
+            }
+            return Response({'success': True, 'items': items, 'page': page, 'totals': totals}, status=200)
         except Exception as e:
             # Fallback: list directly from ORM to avoid 500s in dev
             try:
                 from infrastructure.database.models import Transaction as TxModel
+                from django.db.models import Sum
                 limit = int(request.query_params.get('limit', 50))
                 offset = int(request.query_params.get('offset', 0))
-                qs = TxModel.objects.filter(user_id=request.user.id).select_related('receipt').order_by('-transaction_date', '-created_at')[offset:offset+limit]
+                sort = (request.query_params.get('sort') or 'date').lower()
+                order = (request.query_params.get('order') or 'desc').lower()
+                date_from = request.query_params.get('dateFrom')
+                date_to = request.query_params.get('dateTo')
+                type_param = request.query_params.get('type')
+                category_param = request.query_params.get('category')
+                receipt_id_param = request.query_params.get('receipt_id')
+
+                qs = TxModel.objects.filter(user_id=request.user.id).select_related('receipt')
+                if date_from:
+                    qs = qs.filter(transaction_date__gte=date_from)
+                if date_to:
+                    qs = qs.filter(transaction_date__lte=date_to)
+                if type_param:
+                    types = [t.strip() for t in type_param.split(',') if t.strip()]
+                    qs = qs.filter(type__in=types)
+                if category_param:
+                    cats = [c.strip() for c in category_param.split(',') if c.strip()]
+                    qs = qs.filter(category__in=cats)
+                if receipt_id_param:
+                    qs = qs.filter(receipt_id=receipt_id_param)
+                total_count = qs.count()
+                income_by_currency = list(qs.filter(type='income').values('currency').annotate(total=Sum('amount')))
+                expense_by_currency = list(qs.filter(type='expense').values('currency').annotate(total=Sum('amount')))
+                if sort == 'amount':
+                    qs = qs.order_by(('-' if order == 'desc' else '') + 'amount', '-' + 'created_at')
+                elif sort == 'category':
+                    qs = qs.order_by(('-' if order == 'desc' else '') + 'category', '-' + 'created_at')
+                else:
+                    qs = qs.order_by(('-' if order == 'desc' else '') + 'transaction_date', '-' + 'created_at')
+                page_qs = qs[offset:offset+limit]
                 items = [
                     {
                         'id': str(t.id),
@@ -1946,9 +2220,20 @@ class TransactionCreateView(APIView):
                         'receipt_id': str(t.receipt_id) if t.receipt_id else None,
                         'category': t.category,
                     }
-                    for t in qs
+                    for t in page_qs
                 ]
-                return Response({'success': True, 'items': items}, status=200)
+                page = {
+                    'limit': limit,
+                    'offset': offset,
+                    'totalCount': total_count,
+                    'hasNext': offset + len(items) < total_count,
+                    'hasPrev': offset > 0,
+                }
+                totals = {
+                    'income': [{'currency': row['currency'], 'sum': str(row['total'])} for row in income_by_currency],
+                    'expense': [{'currency': row['currency'], 'sum': str(row['total'])} for row in expense_by_currency],
+                }
+                return Response({'success': True, 'items': items, 'page': page, 'totals': totals}, status=200)
             except Exception as e2:
                 return Response({'success': False, 'error': 'list_error', 'message': str(e2)}, status=500)
     

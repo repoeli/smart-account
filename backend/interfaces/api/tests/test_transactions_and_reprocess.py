@@ -59,6 +59,56 @@ class TransactionsAndReprocessTests(TestCase):
         items = list_resp.data.get('items') or []
         self.assertTrue(any(i.get('description') == 'LIDL receipt' for i in items))
 
+    def test_transactions_totals_and_pagination(self):
+        # Seed transactions: 3 expenses GBP, 2 income GBP, 1 expense USD
+        from infrastructure.database.models import Transaction as Tx
+        from datetime import date
+        Tx.objects.create(user_id=self.user.id, description='e1', amount='10.00', currency='GBP', type='expense', transaction_date=date(2024,1,1))
+        Tx.objects.create(user_id=self.user.id, description='e2', amount='5.50', currency='GBP', type='expense', transaction_date=date(2024,1,2))
+        Tx.objects.create(user_id=self.user.id, description='e3', amount='2.50', currency='USD', type='expense', transaction_date=date(2024,1,3))
+        Tx.objects.create(user_id=self.user.id, description='i1', amount='20.00', currency='GBP', type='income', transaction_date=date(2024,1,4))
+        Tx.objects.create(user_id=self.user.id, description='i2', amount='7.00', currency='GBP', type='income', transaction_date=date(2024,1,5))
+
+        # Page 1 (limit 2)
+        resp1 = self.client.get('/api/v1/transactions/?limit=2&offset=0&sort=date&order=asc')
+        self.assertEqual(resp1.status_code, 200, resp1.content)
+        self.assertTrue(resp1.data['page']['hasNext'])
+        self.assertFalse(resp1.data['page']['hasPrev'])
+        self.assertEqual(resp1.data['page']['totalCount'], 5)
+        # Totals should include all filtered items (none filtered → all)
+        totals = resp1.data['totals']
+        # GBP expense 15.50, USD expense 2.50; GBP income 27.00
+        def cur(arr, code):
+            for r in arr:
+                if r['currency'] == code:
+                    return r['sum']
+            return None
+        self.assertEqual(cur(totals['expense'], 'GBP'), '15.50')
+        self.assertEqual(cur(totals['expense'], 'USD'), '2.50')
+        self.assertEqual(cur(totals['income'], 'GBP'), '27.00')
+
+        # Page 2
+        resp2 = self.client.get('/api/v1/transactions/?limit=2&offset=2&sort=date&order=asc')
+        self.assertEqual(resp2.status_code, 200, resp2.content)
+        self.assertTrue(resp2.data['page']['hasNext'])
+        self.assertTrue(resp2.data['page']['hasPrev'])
+
+        # Filter by type=expense, totals should reflect only expenses
+        resp_exp = self.client.get('/api/v1/transactions/?type=expense&limit=50&offset=0')
+        self.assertEqual(resp_exp.status_code, 200, resp_exp.content)
+        totals_exp = resp_exp.data['totals']
+        self.assertIsNone(cur(totals_exp['income'], 'GBP'))
+        self.assertEqual(cur(totals_exp['expense'], 'GBP'), '15.50')
+        self.assertEqual(cur(totals_exp['expense'], 'USD'), '2.50')
+
+    def test_categories_endpoint(self):
+        resp = self.client.get('/api/v1/categories/')
+        self.assertEqual(resp.status_code, 200, resp.content)
+        self.assertTrue(resp.data.get('success'))
+        cats = resp.data.get('categories')
+        self.assertIsInstance(cats, list)
+        self.assertIn('transport', cats)
+
     @patch('application.receipts.use_cases.ReceiptReprocessUseCase.execute')
     def test_reprocess_normal_path(self, mock_execute):
         mock_execute.return_value = {

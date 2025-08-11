@@ -25,6 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-change-me-in-production')
 
 # Application definition
+# Summary cache TTL (seconds) for transactions summary endpoint
+SUMMARY_CACHE_TTL = int(os.environ.get('SUMMARY_CACHE_TTL', '60'))
 DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

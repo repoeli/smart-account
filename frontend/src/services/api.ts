@@ -275,6 +275,38 @@ class ApiClient {
     return response.data;
   }
 
+  async updateTransactionCategory(txId: string, category: string | null): Promise<{ success: boolean; message?: string }>{
+    const response = await this.client.patch(`/transactions/${txId}/`, { category: category || '' });
+    return response.data;
+  }
+
+  async hasTransactionForReceipt(receiptId: string): Promise<{ exists: boolean; transaction_id?: string }>{
+    try {
+      const response = await this.client.get('/transactions/', {
+        params: {
+          receipt_id: receiptId,
+          limit: 1,
+          offset: 0,
+        },
+      });
+      const data: any = response.data || {};
+      const items = Array.isArray(data.items)
+        ? data.items
+        : Array.isArray(data.data?.items)
+          ? data.data.items
+          : Array.isArray(data.results)
+            ? data.results
+            : [];
+      if (items.length > 0) {
+        const txId = items[0]?.id ? String(items[0].id) : undefined;
+        return { exists: true, transaction_id: txId };
+      }
+      return { exists: false };
+    } catch {
+      return { exists: false };
+    }
+  }
+
   async suggestCategory(params: { receiptId?: string; merchant?: string }): Promise<{ success: boolean; category?: string }>{
     try {
       const response = await this.client.get('/categories/suggest/', { params });

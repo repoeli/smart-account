@@ -108,6 +108,49 @@ cd frontend
 npm test
 ```
 
+## 📡 API – Transactions
+
+### Endpoints
+
+- POST `/api/v1/transactions/` – Create a transaction
+  - Body: `{ description, amount, currency?, type: income|expense, transaction_date (YYYY-MM-DD), receipt_id?, category? }`
+  - Returns: `{ success, transaction_id }`
+
+- GET `/api/v1/transactions/` – List with filters, sorting, pagination, and totals
+  - Query params:
+    - `dateFrom`, `dateTo`: YYYY-MM-DD
+    - `type`: `income` or `expense` (comma-separated permitted)
+    - `category`: category name(s), comma-separated
+    - `sort`: `date` | `amount` | `category` (default `date`)
+    - `order`: `asc` | `desc` (default `desc`)
+    - `limit`: page size (default 50)
+    - `offset`: page offset (default 0)
+  - Response:
+    - `items`: `{ id, description, merchant?, amount, currency, type, transaction_date, receipt_id?, category }[]`
+    - `page`: `{ limit, offset, totalCount, hasNext, hasPrev }`
+    - `totals`: `{ income: [{ currency, sum }], expense: [{ currency, sum }] }`
+
+- GET `/api/v1/categories/` – List available transaction categories
+  - Returns: `{ success, categories: string[] }`
+
+- GET `/api/v1/transactions/summary/` – Totals-only with optional grouping
+  - Query params: `dateFrom`, `dateTo`, optional `type`, `category`, `groupBy` (comma-separated: `month`, `category`)
+  - Response: `{ success, totals: { income:[{currency,sum}], expense:[{currency,sum}] }, byMonth?, byCategory? }`
+
+### Examples
+
+List expenses in January 2024, 50 per page, sorted by amount ascending:
+
+```
+GET /api/v1/transactions/?type=expense&dateFrom=2024-01-01&dateTo=2024-01-31&sort=amount&order=asc&limit=50&offset=0
+```
+
+Next page:
+
+```
+GET /api/v1/transactions/?type=expense&dateFrom=2024-01-01&dateTo=2024-01-31&sort=amount&order=asc&limit=50&offset=50
+```
+
 ## 📚 Documentation
 
 Comprehensive documentation is available in the `docs/` directory:

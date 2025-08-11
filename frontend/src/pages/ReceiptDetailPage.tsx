@@ -9,6 +9,8 @@ const ReceiptDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<any>(null);
+  const [hasTransaction, setHasTransaction] = useState<boolean>(false);
+  const [linkedTransactionId, setLinkedTransactionId] = useState<string | null>(null);
   const cloudinaryAssetUrl = React.useMemo(() => {
     const r = receipt;
     if (!r) return null;
@@ -42,6 +44,22 @@ const ReceiptDetailPage: React.FC = () => {
         setIsLoading(true);
         const r = await apiClient.getReceipt(id!);
         setReceipt(r);
+        // Prefer API-provided has_transaction if available
+        if (typeof r?.has_transaction === 'boolean') setHasTransaction(!!r.has_transaction);
+        // Fallback check to also get transaction id for link
+        try {
+          const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+          const url = new URL(`${apiBase}/transactions/`);
+          url.searchParams.set('limit', '1');
+          url.searchParams.set('offset', '0');
+          url.searchParams.set('receipt_id', id!);
+          const res = await fetch(url.toString(), { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` } });
+          const data = await res.json();
+          if (res.ok && data?.success && Array.isArray(data.items) && data.items.length > 0) {
+            setHasTransaction(true);
+            setLinkedTransactionId(String(data.items[0].id));
+          }
+        } catch {}
       } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || 'Failed to load receipt';
         setError(msg);
@@ -141,8 +159,10 @@ const ReceiptDetailPage: React.FC = () => {
             <button className="btn-outline" onClick={() => apiClient.reprocessReceipt(id!, 'paddle_ocr').then(() => window.location.reload())}>Reprocess (Paddle)</button>
             <button className="btn-outline" onClick={() => apiClient.reprocessReceipt(id!, 'openai_vision').then(() => window.location.reload())}>Reprocess (OpenAI)</button>
             <button
-              className="btn-primary"
+              className={`btn-primary ${hasTransaction ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={hasTransaction}
               onClick={async () => {
+                if (hasTransaction) return;
                 try {
                   const desc = receipt.merchant_name ? `${receipt.merchant_name} receipt` : 'Receipt expense';
                   const payload = {
@@ -167,6 +187,23 @@ const ReceiptDetailPage: React.FC = () => {
                 }
               }}
             >Create Transaction</button>
+            {hasTransaction && (
+              <span className="ml-2 text-xs text-gray-600" title="This receipt already has a transaction">
+                Already converted{linkedTransactionId ? ' · ' : ''}
+                {linkedTransactionId ? (
+                  <a
+                    className="link"
+                    href={`/transactions?receipt_id=${encodeURIComponent(id!)}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.href = `/transactions?receipt_id=${encodeURIComponent(id!)}`;
+                    }}
+                  >
+                    View transaction
+                  </a>
+                ) : null}
+              </span>
+            )}
             {receipt?.ocr_latency_ms && (
               <span className="text-xs text-gray-500">OCR latency: {receipt.ocr_latency_ms} ms</span>
             )}

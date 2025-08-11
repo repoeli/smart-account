@@ -332,6 +332,7 @@ class ReceiptSearchItemSerializer(serializers.Serializer):
     confidence = serializers.FloatField()
     provider = serializers.CharField()
     thumbnailUrl = serializers.CharField()
+    has_transaction = serializers.BooleanField(required=False)
 
 
 class ReceiptSearchPageInfoSerializer(serializers.Serializer):
@@ -427,6 +428,9 @@ class TransactionCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError('Amount must be greater than 0')
         return value
 
+
+class TransactionUpdateSerializer(serializers.Serializer):
+    category = serializers.CharField(max_length=100, required=False, allow_blank=True)
 
 class ReceiptCategorizeResponseSerializer(serializers.Serializer):
     """

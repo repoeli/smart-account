@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiClient } from '../services/api';
 import type { ReceiptSearchResponseDTO } from '../types/api';
@@ -8,6 +8,7 @@ const ReceiptsPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [convertedMap, setConvertedMap] = useState<Record<string, { exists: boolean; txId?: string }>>({});
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -157,6 +158,34 @@ const ReceiptsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId]);
 
+  // Background check: mark receipts that already have a linked transaction
+  useEffect(() => {
+    let canceled = false;
+    const run = async () => {
+      if (!receipts.length) return;
+      const idsToCheck = receipts
+        .map((r) => r.id)
+        .filter((id) => convertedMap[id] === undefined);
+      await Promise.all(
+        idsToCheck.map(async (id) => {
+          try {
+            const res = await apiClient.hasTransactionForReceipt(id);
+            if (!canceled) {
+              setConvertedMap((prev) => ({ ...prev, [id]: { exists: !!res.exists, txId: res.transaction_id } }));
+            }
+          } catch {
+            if (!canceled) setConvertedMap((prev) => ({ ...prev, [id]: { exists: false } }));
+          }
+        })
+      );
+    };
+    run();
+    return () => {
+      canceled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receipts]);
+
   // Debounced search (query + applied filters + sorting) – resets pagination and clears cursor
   useEffect(() => {
     if (!accountId) return;
@@ -214,6 +243,14 @@ const ReceiptsPage = () => {
             storage_provider: it.provider as any,
           }));
           setReceipts(mapped);
+          // Prime convertedMap from API when provided
+          const nextConverted: Record<string, { exists: boolean; txId?: string }> = {};
+          resp.items.forEach((it) => {
+            if (typeof (it as any).has_transaction === 'boolean') {
+              nextConverted[it.id] = { exists: (it as any).has_transaction };
+            }
+          });
+          if (Object.keys(nextConverted).length) setConvertedMap((prev) => ({ ...prev, ...nextConverted }));
           setNextCursor(resp.pageInfo.nextCursor);
           setPrevCursor(resp.pageInfo.prevCursor);
           setHasNext(resp.pageInfo.hasNext);
@@ -269,7 +306,7 @@ const ReceiptsPage = () => {
           const r = await apiClient.searchReceiptsCursor(params, controller.signal);
           return r;
         };
-        lastActionRef.current = run;
+        lastActionRef.current = async () => { await run(); };
         const resp: ReceiptSearchResponseDTO = await run();
         const mapped: Receipt[] = resp.items.map((it) => ({
           id: it.id,
@@ -287,6 +324,13 @@ const ReceiptsPage = () => {
           storage_provider: it.provider as any,
         }));
         setReceipts(mapped);
+        const nextConverted: Record<string, { exists: boolean; txId?: string }> = {};
+        resp.items.forEach((it) => {
+          if (typeof (it as any).has_transaction === 'boolean') {
+            nextConverted[it.id] = { exists: (it as any).has_transaction };
+          }
+        });
+        if (Object.keys(nextConverted).length) setConvertedMap((prev) => ({ ...prev, ...nextConverted }));
         setNextCursor(resp.pageInfo.nextCursor);
         setPrevCursor(resp.pageInfo.prevCursor);
         setHasNext(resp.pageInfo.hasNext);
@@ -323,7 +367,7 @@ const ReceiptsPage = () => {
         cursor,
       };
       const run = async () => apiClient.searchReceiptsCursor(params, controller.signal);
-      lastActionRef.current = () => fetchWithCursor(cursor, direction);
+      lastActionRef.current = async () => { await fetchWithCursor(cursor, direction); };
       const resp = await run();
       const mapped: Receipt[] = resp.items.map((it) => ({
         id: it.id,
@@ -341,6 +385,13 @@ const ReceiptsPage = () => {
         storage_provider: it.provider as any,
       }));
       setReceipts(mapped);
+      const nextConverted: Record<string, { exists: boolean; txId?: string }> = {};
+      resp.items.forEach((it: any) => {
+        if (typeof it.has_transaction === 'boolean') {
+          nextConverted[it.id] = { exists: it.has_transaction };
+        }
+      });
+      if (Object.keys(nextConverted).length) setConvertedMap((prev) => ({ ...prev, ...nextConverted }));
       setNextCursor(resp.pageInfo.nextCursor);
       setPrevCursor(resp.pageInfo.prevCursor);
       setHasNext(resp.pageInfo.hasNext);
@@ -710,7 +761,7 @@ const ReceiptsPage = () => {
                     <span className={`px-2 py-0.5 rounded border ${
                       r.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
                       r.status === 'processed' ? 'bg-green-50 text-green-700 border-green-200' :
-                      r.status === 'needs_review' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-gray-50 text-gray-600 border-gray-200'
+                      r.needs_review ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-gray-50 text-gray-600 border-gray-200'
                     }`}>{r.status}</span>
                   )}
                   {r.confidence_score !== undefined && (
@@ -721,6 +772,9 @@ const ReceiptsPage = () => {
                   )}
           {r.needs_review && (
             <span className="px-2 py-0.5 rounded border bg-yellow-50 text-yellow-700 border-yellow-200">needs review</span>
+          )}
+          {convertedMap[r.id]?.exists && (
+            <span className="px-2 py-0.5 rounded border bg-blue-50 text-blue-700 border-blue-200">Converted</span>
           )}
           {typeof (r as any).ocr_latency_ms === 'number' && (
             <span className="text-gray-400">{`${(r as any).ocr_latency_ms} ms`}</span>

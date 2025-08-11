@@ -5,6 +5,8 @@
 - Stabilized OCR flow to prefer the running Paddle FastAPI service (HTTP adapter) and reduced over‑strict validation that caused false failures.
 - Tightened environment/config loading so your backend/.env is always respected.
 
+- Transactions list enhanced end-to-end: server-side filters/sorting, totals by currency, pagination metadata; frontend controls with URL sync, Intl currency formatting, and links back to source receipts.
+
 #### Backend changes (files edited)
 - `backend/application/receipts/use_cases.py`
   - Cloudinary‑first upload: now uses `CloudinaryStorageAdapter.upload(file_bytes=..., resource_type=auto)` when Cloudinary keys are present; persists `secure_url` as `file_url`.
@@ -33,6 +35,8 @@
 - New uploads will be sent to Cloudinary (when keys exist) and `file_url` will be a Cloudinary HTTPS URL, so thumbnails render directly from the CDN.
 - Receipts no longer default to failed solely due to low confidence; processing status should move to processed with data populated (merchant/date/total) when available.
 
+- Transactions now supports practical ledger exploration: filter by date/type/category, sort by date/amount/category, view income/expense totals grouped by currency, and paginate through large lists without losing filter context.
+
 #### Configuration expectations
 - Ensure in `backend/.env`:
   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
@@ -47,6 +51,37 @@
 4. In Cloudinary console, the file should appear under the configured folder (default `receipts`).
 5. If OCR output seems off, reprocess a receipt: `POST /api/v1/receipts/{id}/reprocess/ {"ocr_method":"paddle_ocr"}`.
 
+6. Create a transaction from a receipt (Receipt Detail → Create Transaction). You should be redirected to `/transactions` and see the new row.
+7. On `/transactions`, adjust Date/Type/Category and Sort controls; rows and totals should update; URL should reflect state.
+8. Use Previous/Next to paginate; the range and total count update, and filters remain applied.
+
+#### Backend changes (Transactions)
+- `backend/interfaces/api/views.py`
+  - `GET /api/v1/transactions/` now supports:
+    - Filters: `dateFrom`, `dateTo`, `type`, `category`
+    - Sorting: `sort` in {date, amount, category}, `order` in {asc, desc}
+    - Pagination: `limit`, `offset` and returns `page` object: `{limit, offset, totalCount, hasNext, hasPrev}`
+    - Totals: `totals` object containing `income` and `expense` arrays grouped by `currency`, with decimal-safe sums.
+    - Optional filter: `receipt_id=<uuid>` to fetch transactions for a specific receipt (used by UI to guard 1:1 create).
+  - Still returns each item with `merchant` resolved from linked `Receipt` (if any) for quick context.
+
+#### Frontend changes (Transactions)
+- `frontend/src/pages/TransactionsPage.tsx`
+  - Added filter controls (date range, type, category) and sort controls with asc/desc toggle.
+  - Added totals banner (income/expense by currency) with Intl.NumberFormat for currency display.
+  - Added pagination controls (Previous/Next) using `limit`/`offset` and shows a results range summary.
+  - Keeps state in URL (`useSearchParams`) so share/refresh preserves the current view.
+  - Merchant names link back to the source `receipts/:id` when a receipt is attached.
+  - Added optional category dropdown fed by `/api/v1/categories/`; falls back to free-text.
+  - Introduced a small TypeScript `TransactionCategory` union for better DX and type safety across the app.
+  - UI 1:1 guard: on `ReceiptDetailPage` the “Create Transaction” button is disabled if `/transactions/?receipt_id=<id>&limit=1` returns an item; shows “Already converted”. No DB constraint yet.
+
+#### Frontend changes (Dashboard)
+- `frontend/src/pages/DashboardPage.tsx`
+  - Uses `/api/v1/transactions/summary/` to display current month totals: Income, Expenses, and Net per currency, formatted via Intl.
+  - Added simple charts for by-month and category breakdown; added Top Merchants chart using new `groupBy=merchant` support.
+  - Added error banner to gracefully handle summary load failures; falls back to empty visuals.
+
 #### Notes
 - A “PaddleOCR not available” warning can still appear from the in‑process initializer; the actual OCR path uses the FastAPI HTTP service when running.
 
@@ -54,12 +89,15 @@
 
 #### New since last push
 - Backend
+  - Transactions summary: added `groupBy=merchant`, added timing logs, and made cache TTL configurable via `SUMMARY_CACHE_TTL` (default 60s).
   - Receipt telemetry: persist `metadata.custom_fields.storage_provider` and `metadata.custom_fields.cloudinary_public_id` on upload (Cloudinary vs local visibility per receipt).
   - Added diagnostics API `GET /api/v1/files/info/?url=...` to verify Cloudinary/local assets and return metadata (public_id, format, width/height, bytes, created_at).
   - Relaxed receipt ownership checks in development for detail/update/reprocess/validate flows to prevent 400s while data is normalized.
   - Reprocess behavior: always persist OCR data on success. If validation fails, mark `needs_review=true` and attach `validation_errors` instead of returning 400; response includes `warnings`.
 
 - Frontend
+  - TransactionsPage: Inline category editor with optimistic update + toasts; PATCH to `/transactions/:id` wired.
+  - ReceiptsPage: Converted badge now hydrated via `has_transaction` from list API.
   - Receipts list (`ReceiptsPage.tsx`): shows storage origin badge (cloudinary/local) and OCR confidence percentage. Mapping updated to read `metadata.custom_fields`.
   - Receipt detail page (`ReceiptDetailPage.tsx`): implemented fully. Displays thumbnail, merchant, total, date, confidence, storage provider, Cloudinary public_id. Adds actions to reprocess with Paddle or OpenAI and to open the OCR results page.
   - API client (`api.ts`): `getReceipt` now normalizes backend shape (nested `ocr_data`, `metadata.custom_fields`) into the frontend `Receipt` type.
@@ -286,8 +324,11 @@ User Stories mapping
 - Frontend
   - Receipt Detail “Create Transaction” now calls real endpoint.
   - Added Transactions list page and navigation after success.
+  - Added UI 1:1 guard on the list: Receipts grid shows a "Converted" badge for receipts that already have a linked transaction. This currently performs a lightweight background check per visible receipt via `GET /api/v1/transactions/?receipt_id=<id>&limit=1`; planned optimization is to enrich list items with `has_transaction` from the backend.
+  - Inline category edit on `TransactionsPage.tsx` with optimistic update and server PATCH; dropdown hydrates from `/api/v1/categories/` when available.
 - Tests (next)
   - Integration: POST create returns transaction_id and persists; GET list shows it.
   - E2E: click CTA → success toast → redirected to list with new row.
+  - Verify receipts grid shows “Converted” for already-converted receipts and that the `ReceiptDetailPage` shows “Already converted · View transaction”.
 - User Story mapping
   - US‑006, US‑008/009 – persistence of transactions and creation from receipt now functional.
