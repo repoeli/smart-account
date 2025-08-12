@@ -2693,6 +2693,20 @@ class TransactionCreateView(APIView):
         except Exception as e:
             return Response({'success': False, 'error': 'update_error', 'message': str(e)}, status=500)
 
+    def delete(self, request, tx_id=None):
+        """Delete a transaction owned by the current user (US-008/US-009)."""
+        try:
+            if not tx_id:
+                return Response({'success': False, 'error': 'missing_id'}, status=400)
+            from infrastructure.database.models import Transaction as TxModel
+            obj = TxModel.objects.filter(id=tx_id, user_id=request.user.id).first()
+            if not obj:
+                return Response({'success': False, 'error': 'not_found'}, status=404)
+            obj.delete()
+            return Response({'success': True}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'error': 'delete_error', 'message': str(e)}, status=500)
+
     def get(self, request):
         try:
             import time

@@ -393,6 +393,7 @@ const DashboardPage = () => {
               ));
             })()}
           </div>
+          <div className="mt-3 text-xs text-gray-500">Legend: <span className="inline-block w-3 h-3 bg-green-500 align-middle mr-1"></span>Income <span className="inline-block w-3 h-3 bg-yellow-500 align-middle mx-1"></span>Expense</div>
         </div>
         <div className="card p-4">
           <h3 className="font-semibold mb-3">Category Breakdown</h3>
@@ -416,6 +417,7 @@ const DashboardPage = () => {
               ));
             })()}
           </div>
+          <div className="mt-3 text-xs text-gray-500">Legend: <span className="inline-block w-3 h-3 bg-blue-500 align-middle mr-1"></span>Total</div>
         </div>
         <div className="card p-4 lg:col-span-2">
           <h3 className="font-semibold mb-3">Top Merchants</h3>

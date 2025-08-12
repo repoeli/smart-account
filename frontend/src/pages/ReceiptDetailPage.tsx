@@ -356,9 +356,7 @@ const ReceiptDetailPage: React.FC = () => {
               disabled={hasTransaction || !canCreateTransaction}
               onClick={async () => {
                 if (hasTransaction || !canCreateTransaction) {
-                  if (!canCreateTransaction) {
-                    toast.error('Amount and date are required. Open OCR Results to fix data.');
-                  }
+                  toast.error(hasTransaction ? 'A transaction already exists for this receipt.' : 'Amount and date are required. Open OCR Results to fix data.');
                   return;
                 }
                 try {
@@ -386,7 +384,7 @@ const ReceiptDetailPage: React.FC = () => {
               }}
             >Create Transaction</button>
             {hasTransaction && (
-              <span className="ml-2 text-xs text-gray-600" title="This receipt already has a transaction">
+              <span className="ml-2 text-xs text-gray-600" title="One transaction per receipt is supported.">
                 Already converted{linkedTransactionId ? ' · ' : ''}
                 {linkedTransactionId ? (
                   <a

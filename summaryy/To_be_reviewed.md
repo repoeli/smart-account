@@ -23,6 +23,8 @@ Next steps queued:
   - [US-008][US-009] Transactions filter chips: verify removing chips updates URL and results; Clear-all resets offset and empties chips; totals banner always present.
   - [US-008][US-009] Transactions CSV export: verify `export.csv` reflects active filters/sort; headers match; at least one row for seeded data; merchant field populated when linked receipt exists.
   - [US-005] Transactions row deep-link: E2E that “Open OCR” navigates to `/receipts/:id/ocr` for rows with `receipt_id`.
+  - [US-008][US-009] Delete transaction: E2E for optimistic delete with rollback on simulated failure; backend unit test for ownership enforcement.
+  - [US-008][US-009] Duplicate to new: UI test to create a transaction from a duplicate modal and verify it appears in the list; values match with editable fields.
   - [US-008][US-009][US-010] Dashboard widgets: verify `/transactions/summary/` usage shows correct monthly Income/Expense/Net totals across currencies; add E2E.
   - [US-010] Summary grouping by month: regression test for `TruncMonth` output being `date` vs `datetime` (no AttributeError); verify keys are `YYYY-MM`.
   - [US-010] Dashboard summary retry: simulate first 500 then 200; verify UI shows banner then recovers after retry; “Retry” button triggers reload.

@@ -311,6 +311,11 @@ class ApiClient {
     return response.data;
   }
 
+   async deleteTransaction(txId: string): Promise<{ success: boolean; message?: string }>{
+     const response = await this.client.delete(`/transactions/${txId}/`);
+     return response.data;
+   }
+
   async hasTransactionForReceipt(receiptId: string): Promise<{ exists: boolean; transaction_id?: string }>{
     try {
       const response = await this.client.get('/transactions/', {

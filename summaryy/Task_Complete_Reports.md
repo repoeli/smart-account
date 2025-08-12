@@ -111,6 +111,8 @@
   - UI 1:1 guard: on `ReceiptDetailPage` the “Create Transaction” button is disabled if `/transactions/?receipt_id=<id>&limit=1` returns an item; shows “Already converted”. No DB constraint yet.
   - [US-008][US-009] Polish: totals banner always renders (zeros fallback) to avoid layout shift, quick filter chips with remove/clear-all, clearer empty state (“No results for selected filters”).
   - [US-005] Added quick deep-link from Transactions rows to “Open OCR Results” when a `receipt_id` exists.
+  - [US-008][US-009] Added Delete action with confirmation and optimistic update; rollback on error.
+  - [US-008][US-009] Added “Duplicate to new” modal to quickly create a new transaction prefilled from an existing row.
 
 #### Frontend changes (Dashboard)
 - `frontend/src/pages/DashboardPage.tsx`
@@ -122,6 +124,7 @@
   - [US-005] Dashboard shows OCR engine status pill (Paddle/OpenAI/Unavailable) using `/ocr/health/` for quick visibility.
   - [US-010] Added lightweight shimmer placeholders while summary is being fetched to improve perceived performance.
   - [US-010] KPI deep links: clicking a month bar filters `/transactions` to that month; clicking a category bar filters to that category within the current date range.
+  - [US-008][US-009] Receipt→Transaction UI guard refined: on `ReceiptDetailPage`, disabled Create button shows a clear notice and tooltip explaining one transaction per receipt; deep link to view existing transaction retained.
 
 #### Notes
 - A “PaddleOCR not available” warning can still appear from the in‑process initializer; the actual OCR path uses the FastAPI HTTP service when running.
@@ -132,6 +135,7 @@
 - Backend
   - Transactions summary: added `groupBy=merchant`, added timing logs, and made cache TTL configurable via `SUMMARY_CACHE_TTL` (default 60s).
   - [US-008][US-009] Added CSV export endpoint `GET /api/v1/transactions/export.csv` honoring current filters/sort; streams rows with `date, description, merchant, type, amount, currency, category, receipt_id`.
+  - [US-008][US-009] Added DELETE `/api/v1/transactions/:id` to remove a transaction with ownership enforcement.
   - Transactions list: added timing logs for performance tracking.
   - Receipts upload: hardened `POST /api/v1/receipts/upload/` with a last-resort fallback that saves the file (Cloudinary or local) and persists a minimal `Receipt` row to avoid 500s; includes storage telemetry in `metadata.custom_fields`.
   - Receipt telemetry: persist `metadata.custom_fields.storage_provider` and `metadata.custom_fields.cloudinary_public_id` on upload (Cloudinary vs local visibility per receipt).

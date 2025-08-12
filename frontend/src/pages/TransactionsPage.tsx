@@ -32,6 +32,7 @@ const TransactionsPage: React.FC = () => {
   const [pageInfo, setPageInfo] = useState<{limit:number;offset:number;totalCount:number;hasNext:boolean;hasPrev:boolean}>({limit:50,offset:0,totalCount:0,hasNext:false,hasPrev:false});
   const [totals, setTotals] = useState<{income:{currency:string;sum:string}[];expense:{currency:string;sum:string}[]}>({income:[], expense:[]});
   const [categories, setCategories] = useState<string[]>([]);
+  const [duplicateDraft, setDuplicateDraft] = useState<TxItem | null>(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -281,12 +282,17 @@ const TransactionsPage: React.FC = () => {
           <div>
             <label className="block text-xs text-gray-600 mb-1">Category</label>
             {categories.length > 0 ? (
-              <select value={category} onChange={(e) => handleCategory({ target: { value: e.target.value } } as any)} className="input input-bordered w-full">
+              <div className="flex items-center gap-2">
+                <select value={category} onChange={(e) => handleCategory({ target: { value: e.target.value } } as any)} className="input input-bordered w-full">
                 <option value="">All</option>
                 {categories.map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
-              </select>
+                </select>
+                {category && (
+                  <button className="btn btn-xs btn-outline" onClick={() => removeChip('category')} title="Clear category">Clear</button>
+                )}
+              </div>
             ) : (
               <input type="text" value={category} onChange={handleCategory} placeholder="e.g., transport" className="input input-bordered w-full" />
             )}
@@ -380,6 +386,28 @@ const TransactionsPage: React.FC = () => {
                     ) : (
                       <span className="text-gray-400">—</span>
                     )}
+                    <button
+                      className="btn btn-xs btn-outline ml-2"
+                      onClick={() => setDuplicateDraft(tx)}
+                      title="Duplicate to new"
+                    >Duplicate</button>
+                    <button
+                      className="btn btn-xs btn-outline ml-2"
+                      onClick={async () => {
+                        if (!confirm('Delete this transaction?')) return;
+                        const prev = items;
+                        setItems(items.filter(it => it.id !== tx.id));
+                        try {
+                          const res = await apiClient.deleteTransaction(tx.id);
+                          if (!res?.success) throw new Error(res?.message || 'Failed');
+                          toast.success('Transaction deleted');
+                        } catch (e: any) {
+                          setItems(prev);
+                          toast.error(e?.message || 'Failed to delete');
+                        }
+                      }}
+                      title="Delete transaction"
+                    >🗑</button>
                   </td>
                 </tr>
               ))}
@@ -394,6 +422,18 @@ const TransactionsPage: React.FC = () => {
           </div>
         </div>
       </div>
+      {duplicateDraft && (
+        <DuplicateModal
+          draft={duplicateDraft}
+          onClose={() => setDuplicateDraft(null)}
+          onCreated={() => {
+            setDuplicateDraft(null);
+            // trigger refresh
+            const sp = new URLSearchParams(searchParams);
+            setSearchParams(sp, { replace: true });
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -446,6 +486,96 @@ const InlineCategoryEditor: React.FC<{
         />
       )}
       <button className="btn btn-xs" onClick={submit} disabled={saving} aria-label="Save category">{saving ? 'Saving…' : 'Save'}</button>
+    </div>
+  );
+};
+
+// Duplicate modal component (lightweight, reuses create endpoint)
+const DuplicateModal: React.FC<{
+  draft: TxItem;
+  onClose: () => void;
+  onCreated: () => void;
+}> = ({ draft, onClose, onCreated }) => {
+  const [saving, setSaving] = useState(false);
+  const [description, setDescription] = useState<string>(`${draft.description}`);
+  const [amount, setAmount] = useState<string>(String(draft.amount));
+  const [currency, setCurrency] = useState<string>(draft.currency || 'GBP');
+  const [type, setType] = useState<'income'|'expense'>(draft.type);
+  const [date, setDate] = useState<string>(draft.transaction_date.slice(0,10));
+  const [category, setCategory] = useState<string>(draft.category || '');
+
+  const submit = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const res = await apiClient.createTransaction({
+        description,
+        amount,
+        currency,
+        type,
+        transaction_date: date,
+        receipt_id: undefined,
+        category: category || undefined,
+      });
+      if (!res?.success) throw new Error(res?.message || 'Failed');
+      onCreated();
+      toast.success('Transaction created');
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to create');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true">
+      <div className="card p-4 w-full max-w-md bg-white">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold">Duplicate Transaction</h3>
+          <button className="btn btn-xs btn-outline" onClick={onClose}>✕</button>
+        </div>
+        <div className="space-y-3 text-sm">
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Description</label>
+            <input className="input input-bordered w-full" value={description} onChange={(e)=>setDescription(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Amount</label>
+              <input className="input input-bordered w-full" value={amount} onChange={(e)=>setAmount(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Currency</label>
+              <select className="input input-bordered w-full" value={currency} onChange={(e)=>setCurrency(e.target.value)}>
+                <option value="GBP">GBP</option>
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Type</label>
+              <select className="input input-bordered w-full" value={type} onChange={(e)=>setType(e.target.value as any)}>
+                <option value="income">income</option>
+                <option value="expense">expense</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Date</label>
+              <input type="date" className="input input-bordered w-full" value={date} onChange={(e)=>setDate(e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Category</label>
+            <input className="input input-bordered w-full" value={category} onChange={(e)=>setCategory(e.target.value)} placeholder="optional" />
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-4">
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={submit} disabled={saving}>{saving ? 'Saving…' : 'Create'}</button>
+        </div>
+      </div>
     </div>
   );
 };
