@@ -209,6 +209,11 @@ class ReceiptReprocessSerializer(serializers.Serializer):
     )
 
 
+class ReceiptReplaceSerializer(serializers.Serializer):
+    """Serializer for replacing a receipt's file (US-004)."""
+    file = serializers.FileField(allow_empty_file=False)
+    reprocess = serializers.BooleanField(required=False, default=True)
+
 class ReceiptValidateSerializer(serializers.Serializer):
     """
     Serializer for receipt validation and correction.

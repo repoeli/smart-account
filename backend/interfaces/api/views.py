@@ -974,6 +974,26 @@ class ReceiptReprocessView(APIView):
             response_serializer = ReceiptReprocessResponseSerializer(data=result)
             response_serializer.is_valid()
             
+            # Audit history for reprocess
+            try:
+                from infrastructure.database.models import UserAuditLog
+                event = {
+                    'receipt_id': str(receipt_id),
+                    'engine': ocr_method_param,
+                    'success': bool(result.get('success')),
+                    'latency_ms': (result.get('ocr_data') or {}).get('additional_data', {}).get('latency_ms') if isinstance(result.get('ocr_data'), dict) else None,
+                    'error': result.get('error'),
+                }
+                UserAuditLog.objects.create(
+                    user=request.user,
+                    event_type='receipt_reprocess',
+                    event_data=event,
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    user_agent=request.META.get('HTTP_USER_AGENT'),
+                )
+            except Exception:
+                pass
+
             return Response(
                 response_serializer.data,
                 status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
@@ -989,6 +1009,78 @@ class ReceiptReprocessView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+
+class ReceiptStorageMigrateView(APIView):
+    """
+    US-004/US-005: Migrate an existing receipt file to Cloudinary and update storage telemetry.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, receipt_id: str):
+        from django.conf import settings
+        from pathlib import Path
+        from infrastructure.database.models import Receipt as ReceiptModel
+        try:
+            r = ReceiptModel.objects.filter(id=receipt_id, user_id=request.user.id).first()
+            if not r:
+                return Response({'success': False, 'error': 'not_found'}, status=404)
+
+            md = r.metadata or {}
+            cf = (md.get('custom_fields') or {})
+            provider = cf.get('storage_provider') or 'local'
+            # Short-circuit if already Cloudinary
+            if provider == 'cloudinary' and cf.get('cloudinary_public_id') and 'res.cloudinary.com' in (r.file_url or ''):
+                return Response({'success': True, 'receipt_id': str(r.id), 'file_url': r.file_url, 'cloudinary_public_id': cf.get('cloudinary_public_id')}, status=200)
+
+            # Load bytes from local MEDIA_ROOT when file_url is relative or provider!=cloudinary
+            file_bytes = None
+            filename = r.filename or 'receipt.jpg'
+            try:
+                file_url = r.file_url or ''
+                if file_url.startswith('/'):  # relative /media/...
+                    media_root = Path(getattr(settings, 'MEDIA_ROOT'))
+                    # remove leading slash
+                    rel = file_url[1:]
+                    file_path = (media_root / Path(rel).relative_to(Path(getattr(settings, 'MEDIA_URL', '/media/').strip('/')))).resolve()
+                    with open(file_path, 'rb') as f:
+                        file_bytes = f.read()
+                else:
+                    # remote URL: download
+                    import requests
+                    resp = requests.get(file_url, timeout=30)
+                    resp.raise_for_status()
+                    file_bytes = resp.content
+            except Exception:
+                pass
+
+            if not file_bytes:
+                return Response({'success': False, 'error': 'file_unavailable'}, status=400)
+
+            # Upload to Cloudinary
+            try:
+                from infrastructure.storage.adapters.cloudinary_store import CloudinaryStorageAdapter
+                cloud = CloudinaryStorageAdapter()
+                asset = cloud.upload(file_bytes=file_bytes, filename=filename, mime=r.mime_type)
+            except Exception as e:
+                return Response({'success': False, 'error': f'cloudinary_upload_failed: {str(e)}'}, status=502)
+
+            # Persist updates
+            r.file_url = asset.secure_url
+            md = r.metadata or {}
+            cf = (md.get('custom_fields') or {})
+            cf['storage_provider'] = 'cloudinary'
+            if asset.public_id:
+                cf['cloudinary_public_id'] = asset.public_id
+            md['custom_fields'] = cf
+            r.metadata = md
+            try:
+                r.save(update_fields=['file_url', 'metadata', 'updated_at'])
+            except Exception:
+                r.save()
+
+            return Response({'success': True, 'receipt_id': str(r.id), 'file_url': r.file_url, 'cloudinary_public_id': cf.get('cloudinary_public_id')}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'error': 'migrate_error', 'message': str(e)}, status=500)
 
 class ReceiptValidateView(APIView):
     """
@@ -1126,6 +1218,237 @@ class ReceiptValidateView(APIView):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
 
+
+class OCRHealthView(APIView):
+    """
+    US-005: OCR health endpoint. Reports reachability/latency for Paddle HTTP and OpenAI.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        import time
+        import os
+        import requests
+        from django.conf import settings
+
+        result = {
+            'success': True,
+            'engines': {
+                'paddle': {
+                    'configured': False,
+                    'reachable': False,
+                    'status_code': None,
+                    'latency_ms': None,
+                    'error': None,
+                },
+                'openai': {
+                    'configured': False,
+                    'reachable': False,
+                    'status_code': None,
+                    'latency_ms': None,
+                    'error': None,
+                }
+            }
+        }
+
+        # Paddle FastAPI health
+        try:
+            base = os.getenv('PADDLE_API_BASE', getattr(settings, 'PADDLE_API_BASE', None))
+            by_url = os.getenv('PADDLE_OCR_URL_BY_URL', getattr(settings, 'PADDLE_OCR_URL_BY_URL', None))
+            target = base or (by_url.rsplit('/ocr/', 1)[0] if by_url and '/ocr/' in by_url else by_url)
+            if target:
+                result['engines']['paddle']['configured'] = True
+                t0 = time.time()
+                try:
+                    health_url = target.rstrip('/') + '/health'
+                    try:
+                        resp = requests.get(health_url, timeout=5)
+                    except Exception:
+                        resp = requests.head(target, timeout=5)
+                    latency_ms = int((time.time() - t0) * 1000)
+                    result['engines']['paddle']['latency_ms'] = latency_ms
+                    result['engines']['paddle']['status_code'] = getattr(resp, 'status_code', None)
+                    result['engines']['paddle']['reachable'] = True if getattr(resp, 'status_code', None) else False
+                except Exception as e:
+                    result['engines']['paddle']['error'] = str(e)
+        except Exception as e:
+            result['engines']['paddle']['error'] = str(e)
+
+        # OpenAI health
+        try:
+            key = os.getenv('OPENAI_API_KEY', getattr(settings, 'OPENAI_API_KEY', None))
+            if key:
+                result['engines']['openai']['configured'] = True
+                t0 = time.time()
+                try:
+                    resp = requests.get('https://api.openai.com/v1/models', headers={'Authorization': f'Bearer {key}'}, timeout=5)
+                    latency_ms = int((time.time() - t0) * 1000)
+                    result['engines']['openai']['latency_ms'] = latency_ms
+                    result['engines']['openai']['status_code'] = resp.status_code
+                    result['engines']['openai']['reachable'] = True
+                except Exception as e:
+                    result['engines']['openai']['error'] = str(e)
+        except Exception as e:
+            result['engines']['openai']['error'] = str(e)
+
+        return Response(result, status=200)
+
+class ReceiptReplaceView(APIView):
+    """US-004/US-005: Replace a receipt's file with a new upload, optionally reprocess OCR."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, receipt_id: str):
+        from infrastructure.database.models import Receipt as ReceiptModel, UserAuditLog
+        from infrastructure.storage.adapters.cloudinary_store import CloudinaryStorageAdapter
+        from infrastructure.ocr.services import OCRService, OCRMethod
+        from .serializers import ReceiptReplaceSerializer
+        serializer = ReceiptReplaceSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({'success': False, 'error': 'validation_error', 'validation_errors': serializer.errors}, status=400)
+
+        try:
+            r = ReceiptModel.objects.filter(id=receipt_id, user_id=request.user.id).first()
+            if not r:
+                return Response({'success': False, 'error': 'not_found'}, status=404)
+
+            f = request.FILES.get('file')
+            if not f:
+                return Response({'success': False, 'error': 'file_missing'}, status=400)
+
+            # Upload to Cloudinary
+            cloud = CloudinaryStorageAdapter()
+            asset = cloud.upload(file_bytes=f.read(), filename=f.name, mime=getattr(f, 'content_type', None))
+
+            md = r.metadata or {}
+            cf = (md.get('custom_fields') or {})
+            cf['storage_provider'] = 'cloudinary'
+            if asset.public_id:
+                cf['cloudinary_public_id'] = asset.public_id
+            md['custom_fields'] = cf
+            r.metadata = md
+            r.file_url = asset.secure_url
+            r.mime_type = getattr(f, 'content_type', r.mime_type)
+            r.filename = f.name or r.filename
+            r.file_size = getattr(f, 'size', r.file_size)
+            r.status = 'uploaded'
+            # Compute checksum (US-004)
+            try:
+                import hashlib
+                f.seek(0)
+                sha256 = hashlib.sha256(f.read()).hexdigest()
+                cf['sha256'] = sha256
+                md['custom_fields'] = cf
+                r.metadata = md
+                f.seek(0)
+            except Exception:
+                pass
+            r.save(update_fields=['file_url', 'metadata', 'mime_type', 'filename', 'file_size', 'status', 'updated_at'])
+
+            # Optional reprocess
+            if serializer.validated_data.get('reprocess', True):
+                svc = OCRService()
+                ok, ocr_data, err = svc.extract_receipt_data_from_url(r.file_url, OCRMethod.PADDLE_OCR)
+                if not ok:
+                    ok, ocr_data, err = svc.extract_receipt_data_from_url(r.file_url, OCRMethod.OPENAI_VISION)
+                if ok and ocr_data:
+                    r.ocr_data = {
+                        'merchant_name': ocr_data.merchant_name,
+                        'total_amount': str(ocr_data.total_amount) if ocr_data.total_amount is not None else None,
+                        'currency': ocr_data.currency,
+                        'date': ocr_data.date.isoformat() if getattr(ocr_data, 'date', None) else None,
+                        'confidence_score': ocr_data.confidence_score,
+                        'raw_text': ocr_data.raw_text,
+                        'additional_data': getattr(ocr_data, 'additional_data', {}),
+                    }
+                    r.status = 'processed'
+                    r.save(update_fields=['ocr_data', 'status', 'updated_at'])
+                else:
+                    cf['needs_review'] = True
+                    md['custom_fields'] = cf
+                    r.metadata = md
+                    r.status = 'failed'
+                    r.save(update_fields=['metadata', 'status', 'updated_at'])
+
+            try:
+                UserAuditLog.objects.create(
+                    user=request.user,
+                    event_type='receipt_replace',
+                    event_data={'receipt_id': str(r.id), 'filename': r.filename, 'storage_provider': 'cloudinary'},
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    user_agent=request.META.get('HTTP_USER_AGENT')
+                )
+            except Exception:
+                pass
+
+            return Response({'success': True, 'receipt_id': str(r.id), 'file_url': r.file_url, 'cloudinary_public_id': (r.metadata or {}).get('custom_fields', {}).get('cloudinary_public_id')}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'error': 'replace_error', 'message': str(e)}, status=500)
+
+
+class ReceiptReprocessHistoryView(APIView):
+    """US-005: Return recent reprocess attempts for a receipt from audit logs."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, receipt_id: str):
+        from infrastructure.database.models import UserAuditLog
+        try:
+            limit_param = request.query_params.get('limit')
+            try:
+                limit = max(1, min(50, int(limit_param))) if limit_param else 10
+            except Exception:
+                limit = 10
+            qs = UserAuditLog.objects.filter(
+                user=request.user,
+                event_type='receipt_reprocess',
+                event_data__receipt_id=str(receipt_id),
+            ).order_by('-created_at')[:limit]
+            items = []
+            for row in qs:
+                data = row.event_data or {}
+                items.append({
+                    'at': row.created_at.isoformat(),
+                    'engine': data.get('engine'),
+                    'success': bool(data.get('success')),
+                    'latency_ms': data.get('latency_ms'),
+                    'error': data.get('error'),
+                })
+            return Response({'success': True, 'items': items}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'error': 'history_error', 'message': str(e)}, status=500)
+
+
+class AuditLogsView(APIView):
+    """List recent user audit logs with optional filters (eventType, receipt_id)."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from infrastructure.database.models import UserAuditLog
+        try:
+            event_type = request.query_params.get('eventType')
+            receipt_id = request.query_params.get('receipt_id')
+            limit_param = request.query_params.get('limit')
+            try:
+                limit = max(1, min(100, int(limit_param))) if limit_param else 20
+            except Exception:
+                limit = 20
+            qs = UserAuditLog.objects.filter(user=request.user)
+            if event_type:
+                qs = qs.filter(event_type=event_type)
+            if receipt_id:
+                qs = qs.filter(event_data__receipt_id=str(receipt_id))
+            qs = qs.order_by('-created_at')[:limit]
+            items = []
+            for row in qs:
+                d = row.event_data or {}
+                items.append({
+                    'at': row.created_at.isoformat(),
+                    'type': row.event_type,
+                    'receipt_id': d.get('receipt_id'),
+                    'data': d,
+                })
+            return Response({'success': True, 'items': items}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'error': 'audit_error', 'message': str(e)}, status=500)
 
 class ReceiptCategorizeView(APIView):
     """
@@ -2138,12 +2461,26 @@ class TransactionsSummaryView(APIView):
 
         # Grouping: month
         if 'month' in group_tokens:
-            monthly = qs.annotate(m=TruncMonth('transaction_date')).values('m', 'currency', 'type').annotate(total=Sum('amount')).order_by('m')
+            monthly = (
+                qs.annotate(m=TruncMonth('transaction_date'))
+                  .values('m', 'currency', 'type')
+                  .annotate(total=Sum('amount'))
+                  .order_by('m')
+            )
             # Build per month per currency income/expense
             from collections import defaultdict
             acc = defaultdict(lambda: {'income': 0, 'expense': 0})
             for row in monthly:
-                key = f"{row['m'].date().isoformat()[:7]}|{row['currency']}"
+                m_val = row['m']
+                try:
+                    from datetime import date as _date, datetime as _datetime
+                    if isinstance(m_val, _datetime) or isinstance(m_val, _date):
+                        month_key = m_val.strftime('%Y-%m')
+                    else:
+                        month_key = str(m_val)[:7]
+                except Exception:
+                    month_key = str(m_val)[:7]
+                key = f"{month_key}|{row['currency']}"
                 acc[key][row['type']] = float(row['total'] or 0)
             by_month = []
             for key, vals in sorted(acc.items()):

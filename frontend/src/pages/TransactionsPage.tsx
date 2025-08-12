@@ -138,6 +138,18 @@ const TransactionsPage: React.FC = () => {
     setSearchParams(searchParams, { replace: true });
   };
 
+  const filtersActive = !!(dateFrom || dateTo || type || category);
+  const chips: Array<{ key: string; label: string; value: string }> = [];
+  if (dateFrom) chips.push({ key: 'dateFrom', label: 'From', value: dateFrom });
+  if (dateTo) chips.push({ key: 'dateTo', label: 'To', value: dateTo });
+  if (type) chips.push({ key: 'type', label: 'Type', value: type });
+  if (category) chips.push({ key: 'category', label: 'Category', value: category });
+  const removeChip = (k: string) => {
+    searchParams.delete(k);
+    searchParams.set('offset', '0');
+    setSearchParams(searchParams, { replace: true });
+  };
+
   // Persist filter/sort state
   useEffect(() => {
     const state = { sort, order, dateFrom, dateTo, type, category, limit: pageLimit, offset: pageOffset };
@@ -170,30 +182,30 @@ const TransactionsPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-bold mb-4">Transactions</h1>
 
-      {totals && (totals.income.length > 0 || totals.expense.length > 0) && (
-        <div className="card p-4 mb-4" aria-label="Transactions totals">
-          <div className="flex flex-wrap gap-6">
-            <div>
-              <div className="text-xs text-gray-600">Total Income</div>
-              <div className="font-semibold">
-                {totals.income.map(t => (
-                  <span key={`inc-${t.currency}`} className="mr-4">{formatMoney(t.sum, t.currency)}</span>
-                ))}
-                {totals.income.length === 0 && <span>-</span>}
-              </div>
+      <div className="card p-4 mb-4" aria-label="Transactions totals">
+        <div className="flex flex-wrap gap-6">
+          <div>
+            <div className="text-xs text-gray-600">Total Income</div>
+            <div className="font-semibold">
+              {totals.income.length
+                ? totals.income.map(t => (
+                    <span key={`inc-${t.currency}`} className="mr-4">{formatMoney(t.sum, t.currency)}</span>
+                  ))
+                : <span>{formatMoney('0', 'GBP')}</span>}
             </div>
-            <div>
-              <div className="text-xs text-gray-600">Total Expense</div>
-              <div className="font-semibold">
-                {totals.expense.map(t => (
-                  <span key={`exp-${t.currency}`} className="mr-4">{formatMoney(t.sum, t.currency)}</span>
-                ))}
-                {totals.expense.length === 0 && <span>-</span>}
-              </div>
+          </div>
+          <div>
+            <div className="text-xs text-gray-600">Total Expense</div>
+            <div className="font-semibold">
+              {totals.expense.length
+                ? totals.expense.map(t => (
+                    <span key={`exp-${t.currency}`} className="mr-4">{formatMoney(t.sum, t.currency)}</span>
+                  ))
+                : <span>{formatMoney('0', 'GBP')}</span>}
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       <div className="card p-4 mb-4" aria-label="Transactions filters">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
@@ -249,11 +261,31 @@ const TransactionsPage: React.FC = () => {
           </div>
           <div className="flex items-end"><button onClick={clearFilters} className="btn btn-outline w-full">Clear</button></div>
         </div>
+        {chips.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2 text-xs" aria-label="Active filters">
+            {chips.map(c => (
+              <span key={c.key} className="inline-flex items-center px-2 py-1 rounded bg-gray-100 border border-gray-200">
+                <span className="text-gray-700 mr-2">{c.label}: {c.value}</span>
+                <button className="text-gray-500 hover:text-gray-700" aria-label={`Remove ${c.label}`} onClick={() => removeChip(c.key)}>×</button>
+              </span>
+            ))}
+            <button className="btn btn-xs btn-outline" onClick={clearFilters}>Clear all</button>
+          </div>
+        )}
       </div>
 
       <div className="card p-4">
         {items.length === 0 ? (
-          <div className="text-center text-gray-500">No transactions yet.</div>
+          <div className="text-center text-gray-500">
+            {filtersActive ? (
+              <div>
+                <div>No results for selected filters.</div>
+                <button className="btn btn-outline mt-2" onClick={clearFilters}>Clear filters</button>
+              </div>
+            ) : (
+              'No transactions yet.'
+            )}
+          </div>
         ) : (
           <table className="w-full text-sm" aria-label="Transactions list">
             <thead>

@@ -1,5 +1,38 @@
 ### Smart Accounts – Work Completed Since Last Commit
 
+#### New (US-004, US-005, US-010)
+- Backend
+  - [US-004][US-005] Added POST ` /api/v1/receipts/{id}/storage/migrate/ ` to move an existing local/remote asset to Cloudinary. Persists `metadata.custom_fields.storage_provider='cloudinary'` and `cloudinary_public_id`, and updates `file_url` to the Cloudinary `secure_url`. Handles local relative `/media/...` and remote download cases.
+  - [US-005] Added GET ` /api/v1/ocr/health/ ` reporting Paddle FastAPI and OpenAI availability with latency; non-invasive and cached by browser naturally.
+  - [US-005] Hardened OCR pipeline: always attempt Paddle HTTP (by-URL → by-file) before OpenAI, then legacy. Normalizes relative URLs to absolute using `PUBLIC_BASE_URL` so OCR services can fetch images reliably.
+  - [US-005] Validate fallback improved to persist edits (including currency) and avoid 500s while marking `needs_review=true` if strict validation fails.
+  - [US-004][US-005] Added POST ` /api/v1/receipts/{id}/replace/ ` to upload a new file for an existing receipt (Cloudinary-first) and optionally reprocess. Persists storage telemetry and updates `file_url`.
+  - [US-004] File integrity: compute and store `metadata.custom_fields.sha256` on upload/replace for integrity tracing.
+  - [US-005] Added GET ` /api/v1/audit/logs/ ` to list recent `UserAuditLog` entries with optional `eventType` and `receipt_id` filters.
+  - [US-010] Fixed dashboard summary 500 for `groupBy=month,category,merchant`. `TruncMonth(...)` can return a `date`; we now build month keys with `strftime('%Y-%m')` for both `date` and `datetime` objects.
+
+- Frontend
+  - [US-005] `ReceiptDetailPage.tsx`: added OCR status pill (green Paddle, yellow OpenAI, red Unavailable) using the new health endpoint; tooltip shows latencies.
+  - [US-004] Added “Move to Cloudinary” button when storage is not Cloudinary; calls `migrateReceiptToCloudinary` and refreshes detail on success.
+  - [US-004][US-005] Added “Replace File” control on `ReceiptDetailPage` (accepts image/PDF). On success, refreshes receipt and triggers reprocess by default.
+  - [US-005] `ReceiptDetailPage` shows a lightweight Reprocess History list populated from `/receipts/{id}/reprocess/history/`.
+  - [US-004] `ReceiptDetailPage` surfaces file integrity with a checksum (SHA-256) display and copy-to-clipboard.
+  - [US-005] OCR Results edit form now uses DD/MM/YYYY text input; Save includes `currency` and normalizes date formats; Create Transaction guarded until amount/date are valid.
+  - [US-005] `api.getReceipt` normalizes relative `file_url` to absolute so previews and Copy URL work even for local storage.
+  - [US-010] Dashboard: added a safe retry with backoff for `GET /transactions/summary/` and a Retry button in the banner to recover gracefully from transient errors.
+
+- Configuration
+  - [US-004] If using local storage in dev, set `PUBLIC_BASE_URL=http://127.0.0.1:8000` so newly saved local files get absolute URLs.
+
+#### Impact
+- Reprocess and validate flows are resilient; images reliably reach OCR services; UI remains responsive (no full page reloads) and shows engine availability.
+- Dashboard summary loads without 500s; empty datasets render cleanly.
+ - Dashboard handles transient failures with a quick retry and user-invoked Retry.
+
+#### Minor
+- [US-005] Reprocess actions now write an audit entry (`receipt_reprocess`) with `{engine, success, latency_ms?, error?}`.
+
+
 #### Overview
 - Implemented Cloudinary-first storage for receipt uploads with resilient local fallback.
 - Stabilized OCR flow to prefer the running Paddle FastAPI service (HTTP adapter) and reduced over‑strict validation that caused false failures.
@@ -75,6 +108,7 @@
   - Added optional category dropdown fed by `/api/v1/categories/`; falls back to free-text.
   - Introduced a small TypeScript `TransactionCategory` union for better DX and type safety across the app.
   - UI 1:1 guard: on `ReceiptDetailPage` the “Create Transaction” button is disabled if `/transactions/?receipt_id=<id>&limit=1` returns an item; shows “Already converted”. No DB constraint yet.
+  - [US-008][US-009] Polish: totals banner always renders (zeros fallback) to avoid layout shift, quick filter chips with remove/clear-all, clearer empty state (“No results for selected filters”).
 
 #### Frontend changes (Dashboard)
 - `frontend/src/pages/DashboardPage.tsx`
@@ -82,6 +116,8 @@
   - Added simple charts for by-month and category breakdown; added Top Merchants chart using new `groupBy=merchant` support.
   - Added error banner to gracefully handle summary load failures; falls back to empty visuals.
   - Added date range presets with Custom option (date pickers) and persisted selection to `localStorage`.
+  - [US-010] Added a single safe retry with a Retry button for summary loading; added trend lines on KPI cards comparing to previous period.
+  - [US-005] Dashboard shows OCR engine status pill (Paddle/OpenAI/Unavailable) using `/ocr/health/` for quick visibility.
 
 #### Notes
 - A “PaddleOCR not available” warning can still appear from the in‑process initializer; the actual OCR path uses the FastAPI HTTP service when running.

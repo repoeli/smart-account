@@ -130,6 +130,13 @@ class ReceiptUploadUseCase:
                 receipt.metadata.custom_fields["storage_provider"] = storage_provider
                 if cloudinary_public_id:
                     receipt.metadata.custom_fields["cloudinary_public_id"] = cloudinary_public_id
+                # Compute and store SHA-256 checksum for integrity (US-004)
+                try:
+                    import hashlib
+                    sha256 = hashlib.sha256(file_data).hexdigest()
+                    receipt.metadata.custom_fields["sha256"] = sha256
+                except Exception:
+                    pass
             except Exception:
                 pass
             

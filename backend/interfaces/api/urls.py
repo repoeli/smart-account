@@ -11,7 +11,7 @@ from .views import (
     PasswordResetRequestView, PasswordResetConfirmView,
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView, ReceiptManualCreateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
-    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionCreateView, ReceiptsCountView,
+    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView,
 )
 from .management_views import (
     CreateFolderView, FolderDetailView, FolderListView, SearchReceiptsView,
@@ -50,6 +50,11 @@ urlpatterns = [
     path('receipts/<str:receipt_id>/reprocess/', ReceiptReprocessView.as_view(), name='receipt-reprocess'),
     path('receipts/<str:receipt_id>/validate/', ReceiptValidateView.as_view(), name='receipt-validate'),
     path('receipts/<str:receipt_id>/categorize/', ReceiptCategorizeView.as_view(), name='receipt-categorize'),
+    path('receipts/<str:receipt_id>/storage/migrate/', ReceiptStorageMigrateView.as_view(), name='receipt-storage-migrate'),
+    path('receipts/<str:receipt_id>/replace/', ReceiptReplaceView.as_view(), name='receipt-replace'),
+    path('receipts/<str:receipt_id>/reprocess/history/', ReceiptReprocessHistoryView.as_view(), name='receipt-reprocess-history'),
+    path('audit/logs/', AuditLogsView.as_view(), name='audit-logs'),
+    path('ocr/health/', OCRHealthView.as_view(), name='ocr-health'),
     path('receipts/statistics/', ReceiptStatisticsView.as_view(), name='receipt-statistics'),
     # Sprint 2.2 endpoints (temporary stub implementations for UI wiring)
     path('categories/suggest/', CategorySuggestView.as_view(), name='category-suggest'),

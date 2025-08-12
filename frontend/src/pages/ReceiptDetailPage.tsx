@@ -12,6 +12,8 @@ const ReceiptDetailPage: React.FC = () => {
   const [isReprocessing, setIsReprocessing] = useState<boolean>(false);
   const [hasTransaction, setHasTransaction] = useState<boolean>(false);
   const [linkedTransactionId, setLinkedTransactionId] = useState<string | null>(null);
+  const [ocrHealth, setOcrHealth] = useState<any>(null);
+  const [history, setHistory] = useState<Array<{at:string;engine:string;success:boolean;latency_ms?:number;error?:string}>>([]);
   const formatDisplayDate = React.useCallback((value?: string) => {
     if (!value) return '-';
     // Accept DD/MM/YYYY and display as-is; else try ISO/parsable
@@ -98,6 +100,19 @@ const ReceiptDetailPage: React.FC = () => {
             setLinkedTransactionId(String(data.items[0].id));
           }
         } catch {}
+        // Fetch OCR health in parallel (best-effort)
+        try {
+          const h = await apiClient.getOCRHealth();
+          setOcrHealth(h);
+        } catch {}
+        // Load recent reprocess history (best-effort)
+        try {
+          const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+          const url = new URL(`${apiBase}/receipts/${id}/reprocess/history/`);
+          const hres = await fetch(url.toString(), { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` } });
+          const hdata = await hres.json().catch(() => ({}));
+          if (hres.ok && hdata?.success && Array.isArray(hdata.items)) setHistory(hdata.items);
+        } catch {}
       } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || 'Failed to load receipt';
         setError(msg);
@@ -125,6 +140,20 @@ const ReceiptDetailPage: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Receipt Details</h1>
         <div className="space-x-2">
+          {ocrHealth && (
+            <span
+              className={`px-2 py-1 rounded text-xs border ${
+                ocrHealth.engines?.paddle?.reachable
+                  ? 'bg-green-50 text-green-700 border-green-200'
+                  : ocrHealth.engines?.openai?.reachable
+                  ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                  : 'bg-red-50 text-red-700 border-red-200'
+              }`}
+              title={`Paddle: ${ocrHealth.engines?.paddle?.reachable ? 'up' : 'down'} (${ocrHealth.engines?.paddle?.latency_ms ?? '-'} ms); OpenAI: ${ocrHealth.engines?.openai?.reachable ? 'up' : 'down'} (${ocrHealth.engines?.openai?.latency_ms ?? '-'} ms)`}
+            >
+              OCR: {ocrHealth.engines?.paddle?.reachable ? 'Paddle' : ocrHealth.engines?.openai?.reachable ? 'OpenAI' : 'Unavailable'}
+            </span>
+          )}
           <button className="btn-outline" onClick={() => navigate(`/receipts/${id}/ocr`)}>Open OCR Results</button>
           <button className="btn-outline" onClick={() => navigate('/receipts')}>Back to List</button>
         </div>
@@ -180,6 +209,13 @@ const ReceiptDetailPage: React.FC = () => {
                 >Copy File URL</button>
               )}
             </div>
+            {receipt.checksum_sha256 && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">Checksum (SHA-256):</span>
+                <span className="truncate max-w-[280px]" title={receipt.checksum_sha256}>{receipt.checksum_sha256}</span>
+                <button className="btn-xs btn-outline" onClick={() => { navigator.clipboard.writeText(receipt.checksum_sha256!); toast.success('Checksum copied'); }}>Copy</button>
+              </div>
+            )}
             <div>
               <span className="text-gray-500">Cloudinary ID:</span> {receipt.cloudinary_public_id || '-'}
               {receipt.storage_provider === 'cloudinary' && receipt.cloudinary_public_id && cloudinaryAssetUrl && (
@@ -209,6 +245,52 @@ const ReceiptDetailPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="font-semibold">Actions</div>
           <div className="space-x-2">
+            {(!receipt.storage_provider || receipt.storage_provider !== 'cloudinary') && (
+              <button
+                className="btn-outline"
+                onClick={async () => {
+                  try {
+                    toast.loading('Moving to Cloudinary...');
+                    const res = await apiClient.migrateReceiptToCloudinary(id!);
+                    toast.dismiss();
+                    if ((res as any)?.success) {
+                      toast.success('Image moved to Cloudinary');
+                      const fresh = await apiClient.getReceipt(id!);
+                      setReceipt(fresh);
+                    } else {
+                      toast.error((res as any)?.message || 'Migration failed');
+                    }
+                  } catch (e: any) {
+                    toast.dismiss();
+                    toast.error(e?.message || 'Migration failed');
+                  }
+                }}
+              >Move to Cloudinary</button>
+            )}
+            <label className="btn-outline cursor-pointer">
+              <input type="file" accept="image/*,application/pdf" className="hidden" onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                try {
+                  toast.loading('Replacing file...');
+                  const res = await apiClient.replaceReceiptFile(id!, f, true);
+                  toast.dismiss();
+                  if ((res as any)?.success) {
+                    toast.success('File replaced');
+                    const fresh = await apiClient.getReceipt(id!);
+                    setReceipt(fresh);
+                  } else {
+                    toast.error((res as any)?.message || 'Replace failed');
+                  }
+                } catch (err: any) {
+                  toast.dismiss();
+                  toast.error(err?.message || 'Replace failed');
+                } finally {
+                  e.currentTarget.value = '';
+                }
+              }} />
+              Replace File
+            </label>
             <button
               className="btn-outline"
               disabled={isReprocessing}
@@ -220,6 +302,14 @@ const ReceiptDetailPage: React.FC = () => {
                     // Refresh details asynchronously
                     const fresh = await apiClient.getReceipt(id!);
                     setReceipt(fresh);
+                    // Reload history
+                    try {
+                      const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+                      const url = new URL(`${apiBase}/receipts/${id}/reprocess/history/`);
+                      const hres = await fetch(url.toString(), { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` } });
+                      const hdata = await hres.json().catch(() => ({}));
+                      if (hres.ok && hdata?.success && Array.isArray(hdata.items)) setHistory(hdata.items);
+                    } catch {}
                     toast.success('Reprocessed with Paddle');
                   } else {
                     toast.error(res?.message || 'Reprocess failed');
@@ -242,6 +332,13 @@ const ReceiptDetailPage: React.FC = () => {
                   if (res?.success) {
                     const fresh = await apiClient.getReceipt(id!);
                     setReceipt(fresh);
+                    try {
+                      const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+                      const url = new URL(`${apiBase}/receipts/${id}/reprocess/history/`);
+                      const hres = await fetch(url.toString(), { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` } });
+                      const hdata = await hres.json().catch(() => ({}));
+                      if (hres.ok && hdata?.success && Array.isArray(hdata.items)) setHistory(hdata.items);
+                    } catch {}
                     toast.success('Reprocessed with OpenAI Vision');
                   } else {
                     toast.error(res?.message || 'Reprocess failed');
@@ -314,6 +411,20 @@ const ReceiptDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+      {history.length > 0 && (
+        <div className="mt-4 card p-4">
+          <div className="font-semibold mb-2">Reprocess history</div>
+          <ul className="text-xs text-gray-600 space-y-1">
+            {history.map((h, idx) => (
+              <li key={idx}>
+                <span className={h.success ? 'text-green-700' : 'text-red-700'}>{h.success ? '✓' : '✗'}</span>
+                {' '} {h.engine} · {h.latency_ms != null ? `${h.latency_ms} ms` : '-'} · {new Date(h.at).toLocaleString()}
+                {h.error ? ` · ${h.error}` : ''}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

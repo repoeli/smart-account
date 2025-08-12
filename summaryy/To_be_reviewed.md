@@ -9,10 +9,22 @@ Next steps queued:
   - [US-005] Validation success/failure and needs_review propagation (unit/integration).
   - [US-005] Audit creation on validate/update (UserAuditLog).
   - [US-005] Reprocess endpoint integration tests: normal path and fallback path both persist without 500s.
+  - [US-005] Reprocess audit: assert `UserAuditLog` row created with `event_type='receipt_reprocess'` and expected payload (engine/success/latency_ms/error).
+  - [US-004] Storage migration: POST `/receipts/{id}/storage/migrate/` uploads to Cloudinary and updates telemetry; assert local `/media/...` and remote URLs both succeed; verify `file_url` becomes Cloudinary `secure_url` and `cloudinary_public_id` populated.
+  - [US-004][US-005] Replace file flow: POST `/receipts/{id}/replace/` accepts image/PDF multipart; on success, `file_url` updated (Cloudinary), telemetry populated; when `reprocess=true` (default), OCR data persisted or `needs_review` set; audit row `receipt_replace` created.
+  - [US-004] SHA-256 integrity: assert checksum is stored on upload/replace; optional test to compare client-computed checksum vs stored.
+  - [US-005] Reprocess history endpoint: GET `/receipts/{id}/reprocess/history/?limit=10` returns latest entries; verify shape `{at, engine, success, latency_ms?, error?}` and ordering desc.
+  - [US-005] Audit logs endpoint: GET `/audit/logs/?eventType=receipt_validate` returns recent logs; filter by `receipt_id` works; pagination (limit) respected.
+  - [US-005] OCR health: GET `/ocr/health/` returns structured status; mock up/down states; ensure latency fields present (optional snapshot tolerance).
   - [US-006][US-008][US-009] Transactions flow: POST create succeeds and GET list contains the new item; E2E from Receipt Detail navigates to Transactions list.
   - [US-008][US-009] Transactions list totals: verify income/expense totals per currency respect active filters (date/type/category) and remain consistent across pages.
   - [US-008][US-009] Transactions list sorting/pagination: verify limit/offset/hasNext/hasPrev correctness; E2E Previous/Next keep filters/sort in URL and update results.
+  - [US-008][US-009] Transactions filter chips: verify removing chips updates URL and results; Clear-all resets offset and empties chips; totals banner always present.
   - [US-008][US-009][US-010] Dashboard widgets: verify `/transactions/summary/` usage shows correct monthly Income/Expense/Net totals across currencies; add E2E.
+  - [US-010] Summary grouping by month: regression test for `TruncMonth` output being `date` vs `datetime` (no AttributeError); verify keys are `YYYY-MM`.
+  - [US-010] Dashboard summary retry: simulate first 500 then 200; verify UI shows banner then recovers after retry; “Retry” button triggers reload.
+  - [US-010] KPI trend: with synthetic data, verify previous-period comparison computes correct diff for Income, Expense, and Net.
+  - [US-005] Dashboard OCR health pill: mock up/down states and ensure pill text/color reflect engine availability.
   - [US-006] Categories: E2E category dropdown hydrates from `/categories/`, falls back gracefully; ensure selected category filters list and persists via URL/localStorage.
   - [US-008][US-009] Receipt→Transaction 1:1 guard (no duplicates):
     - UI: disable "Create Transaction" button on `ReceiptDetailPage` when a transaction already exists for the receipt; surface a tooltip/explanatory note. Do NOT change DB yet.

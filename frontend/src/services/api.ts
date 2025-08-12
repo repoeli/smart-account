@@ -220,6 +220,7 @@ class ApiClient {
       metadata: r.metadata,
       storage_provider: r.metadata?.custom_fields?.storage_provider,
       cloudinary_public_id: r.metadata?.custom_fields?.cloudinary_public_id,
+      checksum_sha256: r.metadata?.custom_fields?.sha256,
       ocr_latency_ms: r.ocr_data?.additional_data?.latency_ms || r.metadata?.custom_fields?.latency_ms,
       needs_review: r.metadata?.custom_fields?.needs_review || r.ocr_data?.additional_data?.needs_review,
     } as unknown as Receipt;
@@ -234,6 +235,30 @@ class ApiClient {
     const response = await this.client.post<ApiResponse>(`/receipts/${id}/reprocess/`, {
       ocr_method: ocrMethod,
     });
+    return response.data;
+  }
+
+  async migrateReceiptToCloudinary(id: string): Promise<{ success: boolean; file_url?: string; cloudinary_public_id?: string; message?: string }>{
+    const response = await this.client.post(`/receipts/${id}/storage/migrate/`);
+    return response.data;
+  }
+
+  async getOCRHealth(): Promise<{
+    success: boolean;
+    engines: {
+      paddle: { configured: boolean; reachable: boolean; status_code?: number; latency_ms?: number | null; error?: string | null };
+      openai: { configured: boolean; reachable: boolean; status_code?: number; latency_ms?: number | null; error?: string | null };
+    };
+  }>{
+    const response = await this.client.get('/ocr/health/');
+    return response.data;
+  }
+
+  async replaceReceiptFile(id: string, file: File, reprocess = true): Promise<{ success: boolean; receipt_id?: string; file_url?: string; cloudinary_public_id?: string; message?: string }>{
+    const form = new FormData();
+    form.append('file', file);
+    form.append('reprocess', String(reprocess));
+    const response = await this.client.post(`/receipts/${id}/replace/`, form, { headers: { 'Content-Type': 'multipart/form-data' } });
     return response.data;
   }
 
