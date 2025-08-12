@@ -118,6 +118,7 @@
   - Added date range presets with Custom option (date pickers) and persisted selection to `localStorage`.
   - [US-010] Added a single safe retry with a Retry button for summary loading; added trend lines on KPI cards comparing to previous period.
   - [US-005] Dashboard shows OCR engine status pill (Paddle/OpenAI/Unavailable) using `/ocr/health/` for quick visibility.
+  - [US-010] Added lightweight shimmer placeholders while summary is being fetched to improve perceived performance.
 
 #### Notes
 - A “PaddleOCR not available” warning can still appear from the in‑process initializer; the actual OCR path uses the FastAPI HTTP service when running.

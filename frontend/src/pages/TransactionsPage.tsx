@@ -138,6 +138,20 @@ const TransactionsPage: React.FC = () => {
     setSearchParams(searchParams, { replace: true });
   };
 
+  const resetDefaults = () => {
+    // Sort defaults
+    const sp = new URLSearchParams(searchParams);
+    sp.set('sort', 'date');
+    sp.set('order', 'desc');
+    // Filters cleared
+    ['dateFrom','dateTo','type','category'].forEach(k => sp.delete(k));
+    // Pagination defaults
+    sp.set('limit', '50');
+    sp.set('offset', '0');
+    setSearchParams(sp, { replace: true });
+    try { localStorage.removeItem('tx_filters'); } catch {}
+  };
+
   const filtersActive = !!(dateFrom || dateTo || type || category);
   const chips: Array<{ key: string; label: string; value: string }> = [];
   if (dateFrom) chips.push({ key: 'dateFrom', label: 'From', value: dateFrom });
@@ -259,7 +273,10 @@ const TransactionsPage: React.FC = () => {
               <option value={100}>100</option>
             </select>
           </div>
-          <div className="flex items-end"><button onClick={clearFilters} className="btn btn-outline w-full">Clear</button></div>
+          <div className="flex items-end gap-2">
+            <button onClick={clearFilters} className="btn btn-outline w-full">Clear</button>
+            <button onClick={resetDefaults} className="btn btn-secondary w-full" title="Reset sorting, filters, and page size to defaults">Reset</button>
+          </div>
         </div>
         {chips.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2 text-xs" aria-label="Active filters">
