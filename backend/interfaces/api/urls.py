@@ -11,7 +11,7 @@ from .views import (
     PasswordResetRequestView, PasswordResetConfirmView,
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView, ReceiptManualCreateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
-    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView,
+    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionsExportCSVView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView,
 )
 from .management_views import (
     CreateFolderView, FolderDetailView, FolderListView, SearchReceiptsView,
@@ -60,6 +60,7 @@ urlpatterns = [
     path('categories/suggest/', CategorySuggestView.as_view(), name='category-suggest'),
     path('categories/', CategoriesListView.as_view(), name='categories-list'),
     path('transactions/summary/', TransactionsSummaryView.as_view(), name='transactions-summary'),
+    path('transactions/export.csv', TransactionsExportCSVView.as_view(), name='transactions-export'),
     path('transactions/', TransactionCreateView.as_view(), name='transaction-create'),
     path('transactions/<str:tx_id>/', TransactionCreateView.as_view(), name='transaction-update'),
     

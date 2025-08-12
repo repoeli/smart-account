@@ -20,6 +20,7 @@
   - [US-005] OCR Results edit form now uses DD/MM/YYYY text input; Save includes `currency` and normalizes date formats; Create Transaction guarded until amount/date are valid.
   - [US-005] `api.getReceipt` normalizes relative `file_url` to absolute so previews and Copy URL work even for local storage.
   - [US-010] Dashboard: added a safe retry with backoff for `GET /transactions/summary/` and a Retry button in the banner to recover gracefully from transient errors.
+  - [US-005] Added `AuditPage` to view recent audit logs with filters (`eventType`, `receipt_id`, `limit`), consuming `/api/v1/audit/logs/`.
 
 - Configuration
   - [US-004] If using local storage in dev, set `PUBLIC_BASE_URL=http://127.0.0.1:8000` so newly saved local files get absolute URLs.
@@ -109,6 +110,7 @@
   - Introduced a small TypeScript `TransactionCategory` union for better DX and type safety across the app.
   - UI 1:1 guard: on `ReceiptDetailPage` the “Create Transaction” button is disabled if `/transactions/?receipt_id=<id>&limit=1` returns an item; shows “Already converted”. No DB constraint yet.
   - [US-008][US-009] Polish: totals banner always renders (zeros fallback) to avoid layout shift, quick filter chips with remove/clear-all, clearer empty state (“No results for selected filters”).
+  - [US-005] Added quick deep-link from Transactions rows to “Open OCR Results” when a `receipt_id` exists.
 
 #### Frontend changes (Dashboard)
 - `frontend/src/pages/DashboardPage.tsx`
@@ -119,6 +121,7 @@
   - [US-010] Added a single safe retry with a Retry button for summary loading; added trend lines on KPI cards comparing to previous period.
   - [US-005] Dashboard shows OCR engine status pill (Paddle/OpenAI/Unavailable) using `/ocr/health/` for quick visibility.
   - [US-010] Added lightweight shimmer placeholders while summary is being fetched to improve perceived performance.
+  - [US-010] KPI deep links: clicking a month bar filters `/transactions` to that month; clicking a category bar filters to that category within the current date range.
 
 #### Notes
 - A “PaddleOCR not available” warning can still appear from the in‑process initializer; the actual OCR path uses the FastAPI HTTP service when running.
@@ -128,6 +131,7 @@
 #### New since last push
 - Backend
   - Transactions summary: added `groupBy=merchant`, added timing logs, and made cache TTL configurable via `SUMMARY_CACHE_TTL` (default 60s).
+  - [US-008][US-009] Added CSV export endpoint `GET /api/v1/transactions/export.csv` honoring current filters/sort; streams rows with `date, description, merchant, type, amount, currency, category, receipt_id`.
   - Transactions list: added timing logs for performance tracking.
   - Receipts upload: hardened `POST /api/v1/receipts/upload/` with a last-resort fallback that saves the file (Cloudinary or local) and persists a minimal `Receipt` row to avoid 500s; includes storage telemetry in `metadata.custom_fields`.
   - Receipt telemetry: persist `metadata.custom_fields.storage_provider` and `metadata.custom_fields.cloudinary_public_id` on upload (Cloudinary vs local visibility per receipt).

@@ -24,6 +24,20 @@ const DashboardPage = () => {
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [prevTotals, setPrevTotals] = useState<Totals | null>(null);
   const [ocrHealth, setOcrHealth] = useState<any>(null);
+  const navigateToMonth = (ym: string) => {
+    // ym is YYYY-MM
+    const [y, m] = ym.split('-').map(Number);
+    if (!y || !m) return;
+    const start = new Date(y, m - 1, 1).toISOString().slice(0, 10);
+    const end = new Date(y, m, 0).toISOString().slice(0, 10);
+    navigate(`/transactions?dateFrom=${start}&dateTo=${end}`);
+  };
+  const navigateToCategory = (cat: string) => {
+    if (!cat) return;
+    const df = dateFrom || '';
+    const dt = dateTo || '';
+    navigate(`/transactions?${df ? `dateFrom=${df}&` : ''}${dt ? `dateTo=${dt}&` : ''}category=${encodeURIComponent(cat)}`);
+  };
   const navigate = useNavigate();
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
@@ -369,7 +383,7 @@ const DashboardPage = () => {
               const rows = Object.entries(acc).sort((a,b)=>a[0].localeCompare(b[0]));
               const maxVal = rows.reduce((m, [,v])=>Math.max(m, v.income, v.expense), 0) || 1;
               return rows.map(([m, v]) => (
-                <div key={m} className="text-xs">
+                <div key={m} className="text-xs cursor-pointer" onClick={() => navigateToMonth(m)} title={`View transactions for ${m}`}>
                   <div className="flex justify-between mb-1"><span>{m}</span><span>{formatMoney(v.income - v.expense, 'GBP')}</span></div>
                   <div className="h-3 bg-gray-100 rounded">
                     <div className="h-3 bg-green-500 rounded-l inline-block" style={{width: `${(v.income/maxVal)*100}%`}} title={`Income ${v.income.toFixed(2)}`}></div>
@@ -393,7 +407,7 @@ const DashboardPage = () => {
               const rows = Object.entries(acc).sort((a,b)=>b[1].total - a[1].total).slice(0,8);
               const maxVal = rows.reduce((m, [,v])=>Math.max(m, v.total), 1);
               return rows.map(([cat, v]) => (
-                <div key={cat} className="text-xs">
+                <div key={cat} className="text-xs cursor-pointer" onClick={() => navigateToCategory(cat)} title={`View transactions in ${cat}`}>
                   <div className="flex justify-between mb-1"><span>{cat}</span><span>{formatMoney(v.total, 'GBP')}</span></div>
                   <div className="h-3 bg-gray-100 rounded">
                     <div className="h-3 bg-blue-500 rounded" style={{width: `${(v.total/maxVal)*100}%`}}></div>

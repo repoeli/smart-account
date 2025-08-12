@@ -164,6 +164,32 @@ const TransactionsPage: React.FC = () => {
     setSearchParams(searchParams, { replace: true });
   };
 
+  const handleExport = async () => {
+    const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+    const url = new URL(`${apiBase}/transactions/export.csv`);
+    if (dateFrom) url.searchParams.set('dateFrom', dateFrom);
+    if (dateTo) url.searchParams.set('dateTo', dateTo);
+    if (type) url.searchParams.set('type', type);
+    if (category) url.searchParams.set('category', category);
+    if (sort) url.searchParams.set('sort', sort);
+    if (order) url.searchParams.set('order', order);
+    try {
+      const res = await fetch(url.toString(), {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }
+      });
+      if (!res.ok) throw new Error('Export failed');
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'transactions_export.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to export');
+    }
+  };
+
   // Persist filter/sort state
   useEffect(() => {
     const state = { sort, order, dateFrom, dateTo, type, category, limit: pageLimit, offset: pageOffset };
@@ -276,6 +302,7 @@ const TransactionsPage: React.FC = () => {
           <div className="flex items-end gap-2">
             <button onClick={clearFilters} className="btn btn-outline w-full">Clear</button>
             <button onClick={resetDefaults} className="btn btn-secondary w-full" title="Reset sorting, filters, and page size to defaults">Reset</button>
+            <button onClick={handleExport} className="btn btn-primary w-full" title="Export current view as CSV">Export CSV</button>
           </div>
         </div>
         {chips.length > 0 && (
@@ -345,7 +372,14 @@ const TransactionsPage: React.FC = () => {
                     />
                   </td>
                   <td className="py-2 text-right">
-                    {tx.receipt_id ? <Link className="btn btn-xs" to={`/receipts/${tx.receipt_id}`}>Open receipt</Link> : <span className="text-gray-400">—</span>}
+                    {tx.receipt_id ? (
+                      <div className="inline-flex gap-2">
+                        <Link className="btn btn-xs" to={`/receipts/${tx.receipt_id}`}>Open receipt</Link>
+                        <Link className="btn btn-xs btn-outline" to={`/receipts/${tx.receipt_id}/ocr`} title="Open OCR Results">Open OCR</Link>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
                   </td>
                 </tr>
               ))}

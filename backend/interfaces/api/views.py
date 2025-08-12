@@ -2547,6 +2547,81 @@ class TransactionsSummaryView(APIView):
         return Response(response, status=200)
 
 
+class TransactionsExportCSVView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from infrastructure.database.models import Transaction as TxModel
+        import csv
+        from django.http import StreamingHttpResponse
+
+        qs = TxModel.objects.filter(user_id=request.user.id)
+        date_from = request.query_params.get('dateFrom')
+        date_to = request.query_params.get('dateTo')
+        type_param = request.query_params.get('type')
+        category_param = request.query_params.get('category')
+        sort = request.query_params.get('sort') or 'date'
+        order = request.query_params.get('order') or 'desc'
+
+        if date_from:
+            qs = qs.filter(transaction_date__gte=date_from)
+        if date_to:
+            qs = qs.filter(transaction_date__lte=date_to)
+        if type_param:
+            types = [t.strip() for t in type_param.split(',') if t.strip()]
+            qs = qs.filter(type__in=types)
+        if category_param:
+            cats = [c.strip() for c in category_param.split(',') if c.strip()]
+            qs = qs.filter(category__in=cats)
+
+        order_map = {
+            'date': 'transaction_date',
+            'amount': 'amount',
+            'category': 'category',
+        }
+        field = order_map.get(sort, 'transaction_date')
+        if order == 'desc':
+            field = f'-{field}'
+        qs = qs.order_by(field, '-created_at')
+
+        # Streaming CSV generator
+        def row_iter():
+            header = ['date', 'description', 'merchant', 'type', 'amount', 'currency', 'category', 'receipt_id']
+            yield header
+            # prefetch merchant from receipt when available (best-effort)
+            for tx in qs.select_related('receipt').iterator():
+                merchant = None
+                try:
+                    merchant = (tx.receipt.ocr_data or {}).get('merchant_name') if tx.receipt else None
+                except Exception:
+                    merchant = None
+                yield [
+                    getattr(tx, 'transaction_date').isoformat(),
+                    tx.description,
+                    merchant or '',
+                    tx.type,
+                    str(tx.amount),
+                    tx.currency,
+                    tx.category or '',
+                    str(tx.receipt_id) if tx.receipt_id else '',
+                ]
+
+        class Echo:
+            def write(self, value):
+                return value
+
+        pseudo_buffer = Echo()
+        writer = csv.writer(pseudo_buffer)
+
+        def streaming():
+            for row in row_iter():
+                yield writer.writerow(row)
+
+        resp = StreamingHttpResponse(streaming(), content_type='text/csv')
+        resp['Content-Disposition'] = 'attachment; filename="transactions_export.csv"'
+        return resp
+
+
 class TransactionCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
