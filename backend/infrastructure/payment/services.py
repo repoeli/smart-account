@@ -57,6 +57,9 @@ class StripePaymentService:
                 line_items=[{ 'price': pid, 'quantity': 1 }],
                 success_url=settings.PUBLIC_BASE_URL + '/subscription/success',
                 cancel_url=settings.PUBLIC_BASE_URL + '/subscription/cancel',
+                subscription_data={
+                    'metadata': { 'user_id': user_id }
+                },
                 metadata={ 'user_id': user_id },
             )
             return { 'success': True, 'url': session.url }
@@ -74,8 +77,51 @@ class StripePaymentService:
                 sig_header=sig_header,
                 secret=self.config.webhook_secret,
             )
-            # Minimal handling; application layer can be wired later
-            return { 'success': True, 'event_type': event['type'] }
+            etype = event['type']
+            data_obj = event['data']['object'] if event.get('data') else None
+            user_id = None
+            price_id = None
+            plan = None
+            try:
+                # Try to derive user_id and plan information for subscription events
+                if etype.startswith('customer.subscription.') and data_obj:
+                    metadata = getattr(data_obj, 'metadata', None) or data_obj.get('metadata') if isinstance(data_obj, dict) else None
+                    user_id = (metadata or {}).get('user_id')
+                    # Expand price info if not present
+                    sub_id = getattr(data_obj, 'id', None) or data_obj.get('id')
+                    if sub_id:
+                        sub = stripe.Subscription.retrieve(sub_id, expand=['items.data.price.product'])
+                        item = sub.items.data[0] if getattr(sub.items, 'data', None) else None
+                        price = getattr(item, 'price', None)
+                        price_id = getattr(price, 'id', None)
+                        plan = {
+                            'id': price_id,
+                            'nickname': getattr(price, 'nickname', None) or getattr(getattr(price, 'product', None), 'name', None),
+                            'currency': getattr(price, 'currency', None),
+                            'unit_amount': getattr(price, 'unit_amount', None),
+                            'interval': getattr(getattr(price, 'recurring', None), 'interval', None),
+                        }
+                elif etype == 'checkout.session.completed' and data_obj:
+                    # Checkout session contains metadata.user_id and subscription id
+                    metadata = getattr(data_obj, 'metadata', None) or data_obj.get('metadata') if isinstance(data_obj, dict) else None
+                    user_id = (metadata or {}).get('user_id')
+                    sub_id = getattr(data_obj, 'subscription', None) or data_obj.get('subscription')
+                    if sub_id:
+                        sub = stripe.Subscription.retrieve(sub_id, expand=['items.data.price.product'])
+                        item = sub.items.data[0] if getattr(sub.items, 'data', None) else None
+                        price = getattr(item, 'price', None)
+                        price_id = getattr(price, 'id', None)
+                        plan = {
+                            'id': price_id,
+                            'nickname': getattr(price, 'nickname', None) or getattr(getattr(price, 'product', None), 'name', None),
+                            'currency': getattr(price, 'currency', None),
+                            'unit_amount': getattr(price, 'unit_amount', None),
+                            'interval': getattr(getattr(price, 'recurring', None), 'interval', None),
+                        }
+            except Exception:
+                # Best-effort enrichment only
+                pass
+            return { 'success': True, 'event_type': etype, 'user_id': user_id, 'price_id': price_id, 'plan': plan }
         except Exception as e:
             return { 'success': False, 'message': str(e) }
 

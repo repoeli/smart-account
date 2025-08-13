@@ -11,6 +11,8 @@ const ClientsPage: React.FC = () => {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [companyName, setCompanyName] = useState<string>('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [edit, setEdit] = useState<{ name?: string; email?: string; company_name?: string }>({});
 
   const load = async () => {
     try {
@@ -75,14 +77,60 @@ const ClientsPage: React.FC = () => {
                 <th className="py-2">Name</th>
                 <th className="py-2">Email</th>
                 <th className="py-2">Company</th>
+                <th className="py-2" style={{width:120}}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {items.map(c => (
                 <tr key={c.id} className="border-b last:border-0">
-                  <td className="py-2">{c.name}</td>
-                  <td className="py-2">{c.email || '-'}</td>
-                  <td className="py-2">{c.company_name || '-'}</td>
+                  <td className="py-2">
+                    {editingId === c.id ? (
+                      <input className="input input-bordered w-full" value={edit.name ?? c.name} onChange={(e)=>setEdit(prev=>({...prev, name:e.target.value}))} />
+                    ) : c.name}
+                  </td>
+                  <td className="py-2">
+                    {editingId === c.id ? (
+                      <input className="input input-bordered w-full" value={edit.email ?? c.email ?? ''} onChange={(e)=>setEdit(prev=>({...prev, email:e.target.value}))} />
+                    ) : (c.email || '-')}
+                  </td>
+                  <td className="py-2">
+                    {editingId === c.id ? (
+                      <input className="input input-bordered w-full" value={edit.company_name ?? c.company_name ?? ''} onChange={(e)=>setEdit(prev=>({...prev, company_name:e.target.value}))} />
+                    ) : (c.company_name || '-')}
+                  </td>
+                  <td className="py-2">
+                    {editingId === c.id ? (
+                      <div className="flex gap-2">
+                        <button className="btn btn-sm btn-primary" onClick={async()=>{
+                          try{
+                            const payload:any = {};
+                            if (edit.name !== undefined) payload.name = edit.name;
+                            if (edit.email !== undefined) payload.email = edit.email;
+                            if (edit.company_name !== undefined) payload.company_name = edit.company_name;
+                            const res = await apiClient.updateClient(c.id, payload);
+                            if(!res?.success) throw new Error(res?.message || 'Failed');
+                            toast.success('Client updated');
+                            setEditingId(null); setEdit({});
+                            load();
+                          }catch(e:any){ toast.error(e?.message || 'Update failed'); }
+                        }}>Save</button>
+                        <button className="btn btn-sm" onClick={()=>{ setEditingId(null); setEdit({}); }}>Cancel</button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <button className="btn btn-sm" onClick={()=>{ setEditingId(c.id); setEdit({ name:c.name, email:c.email, company_name:c.company_name }); }}>Edit</button>
+                        <button className="btn btn-sm btn-error" onClick={async()=>{
+                          if(!confirm('Delete this client?')) return;
+                          try{
+                            const res = await apiClient.deleteClient(c.id);
+                            if(!res?.success) throw new Error(res?.message || 'Failed');
+                            toast.success('Client deleted');
+                            load();
+                          }catch(e:any){ toast.error(e?.message || 'Delete failed'); }
+                        }}>Delete</button>
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

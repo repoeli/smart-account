@@ -14,6 +14,8 @@ const DashboardPage = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [totals, setTotals] = useState<Totals>({ income: [], expense: [] });
   const [receiptsCount, setReceiptsCount] = useState<number>(0);
+  const [clientsCount, setClientsCount] = useState<number>(0);
+  const [subscription, setSubscription] = useState<{ tier?: string; status?: string } | null>(null);
   const [range, setRange] = useState<'this_month' | 'last_month' | 'this_year' | 'custom'>('this_month');
   // removed unused loading state to avoid linter warning
   const [dateFrom, setDateFrom] = useState<string>('');
@@ -167,6 +169,20 @@ const DashboardPage = () => {
           setReceiptsCount(rdata.count);
         }
       } catch {}
+      // Fetch clients count
+      try {
+        const url = new URL(`${apiBase}/clients/count/`);
+        const r = await fetch(url.toString(), { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` } });
+        const d = await r.json().catch(()=>null);
+        if (r.ok && d?.success && typeof d?.count === 'number') setClientsCount(d.count);
+      } catch {}
+      // Fetch subscription status
+      try {
+        const url = new URL(`${apiBase}/subscriptions/status/`);
+        const r = await fetch(url.toString(), { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` } });
+        const d = await r.json().catch(()=>null);
+        if (r.ok && d?.success && d?.subscription) setSubscription({ tier: d.subscription.tier, status: d.subscription.status });
+      } catch {}
     } finally {
       setIsFetching(false);
     }
@@ -234,6 +250,18 @@ const DashboardPage = () => {
               OCR: {ocrHealth.engines?.paddle?.reachable ? 'Paddle' : ocrHealth.engines?.openai?.reachable ? 'OpenAI' : 'Unavailable'}
             </span>
           )}
+          {subscription && (
+            <span
+              className={`px-2 py-1 rounded text-xs border ${
+                (subscription.status || '').toLowerCase() === 'active'
+                  ? 'bg-blue-50 text-blue-700 border-blue-200'
+                  : 'bg-gray-50 text-gray-700 border-gray-200'
+              }`}
+              title={`Your current plan is ${subscription.tier || 'basic'} (${subscription.status || 'unknown'})`}
+            >
+              Plan: {(subscription.tier || 'basic').toString()} · {(subscription.status || 'unknown').toString()}
+            </span>
+          )}
         </div>
         <div className="flex gap-2">
           <button className={`btn btn-outline ${range==='this_month'?'btn-active':''}`} onClick={() => setRange('this_month')}>This month</button>
@@ -266,6 +294,20 @@ const DashboardPage = () => {
             <div className="ml-4">
               <h3 className="text-sm font-medium text-gray-500">Total Receipts</h3>
               <p className="text-2xl font-semibold text-gray-900">{receiptsCount}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card cursor-pointer" onClick={() => navigate('/clients')}>
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="h-8 w-8 bg-cyan-500 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-medium">👥</span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-500">Clients</h3>
+              <p className="text-2xl font-semibold text-gray-900">{clientsCount}</p>
             </div>
           </div>
         </div>

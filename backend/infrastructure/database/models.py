@@ -70,6 +70,11 @@ class User(AbstractUser):
         choices=SUBSCRIPTION_TIER_CHOICES, 
         default='basic'
     )
+    # Stripe linkage (US-013/US-014): optional and filled via webhook processing
+    stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
+    stripe_subscription_id = models.CharField(max_length=255, blank=True, null=True)
+    subscription_status = models.CharField(max_length=50, blank=True, null=True)
+    subscription_price_id = models.CharField(max_length=255, blank=True, null=True)
     
     # Verification and login tracking
     is_verified = models.BooleanField(default=False)

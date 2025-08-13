@@ -52,7 +52,15 @@ Next steps queued:
   - [US-008][US-009] Tests: Frontend E2E → Create transaction from Receipt Detail, reload detail, assert “Create Transaction” is disabled and shows explanatory note; verify only one row appears in `/transactions`.
   - [US-008][US-009] Optional UX: show a small “Converted” badge on receipts that already have a transaction. Implement via detail enrichment (`has_transaction`) or list-row check using `/transactions/?receipt_id` on demand.
   - [US-013][US-014] Stripe wiring: unit/integration tests to return no-op when keys missing; when keys present (mocked), verify Checkout URL is returned; webhook signature verification success/failure cases.
+  - Add tests for `GET /subscriptions/plans/`: with Stripe mocked, verify recurring prices listed with fields (id, nickname, currency, unit_amount, interval); when Stripe disabled, env price IDs are returned. Ensure `publishable_key` included.
+  - Frontend E2E: Subscription plan list renders; clicking Subscribe for a plan opens Checkout URL; default checkout works when no plans are listed.
+  - Webhook persistence: unit/integration tests that `checkout.session.completed` and `customer.subscription.*` events update `User.subscription_status`, `subscription_tier` (mapped by env price ids), and Stripe linkage fields (`stripe_customer_id`, `stripe_subscription_id`, `subscription_price_id`).
+  - Add endpoint test for `GET /subscriptions/status/` returning current user’s tier/status and ids.
+  - Frontend E2E: Subscription page shows current status and updates after webhook-simulated state change.
+  - Dashboard E2E: Clients KPI shows count from `/clients/count/` and navigates to `/clients`; subscription chip reflects status and tier; OCR pill remains.
   - [US-015] Clients: backend tests for `GET/POST /clients/` (ownership scoping, validation errors, creation success); migration applied and model present.
+  - Add tests for `GET/PATCH/DELETE /clients/:id` (ownership scoping, validation, deletion) and UI flows once wired on the ClientsPage.
+  - Frontend E2E: ClientsPage inline edit saves and reflects changes; delete removes the row with confirmation; error paths show toasts.
   - [US-015] Future tasks: add update/delete endpoints and tie clients into receipts/transactions scoping in later iterations.
   - [US-015] ClientsPage E2E: list renders, create form validates name, successful create reloads list and shows toast; error banner on 500.
   - [US-015][US-008][US-009] Transactions client link: tests that `client_id` is persisted on create/update, filterability later (future), and ownership enforced.

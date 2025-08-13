@@ -11,7 +11,7 @@ from .views import (
     PasswordResetRequestView, PasswordResetConfirmView,
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView, ReceiptManualCreateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
-    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionsExportCSVView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView, SubscriptionCheckoutView, StripeWebhookView, SubscriptionPortalView, ClientsView, SubscriptionPlansView,
+    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionsExportCSVView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView, SubscriptionCheckoutView, StripeWebhookView, SubscriptionPortalView, ClientsView, SubscriptionPlansView, ClientDetailView, SubscriptionStatusView, ClientsCountView,
 )
 from .management_views import (
     CreateFolderView, FolderDetailView, FolderListView, SearchReceiptsView,
@@ -68,8 +68,11 @@ urlpatterns = [
     path('subscriptions/stripe/webhook/', StripeWebhookView.as_view(), name='stripe-webhook'),
     path('subscriptions/portal/', SubscriptionPortalView.as_view(), name='subscription-portal'),
     path('subscriptions/plans/', SubscriptionPlansView.as_view(), name='subscription-plans'),
-    # Clients (US-015 minimal)
+    path('subscriptions/status/', SubscriptionStatusView.as_view(), name='subscription-status'),
+    # Clients (US-015 minimal) – put count BEFORE detail to avoid matching as client_id
     path('clients/', ClientsView.as_view(), name='clients'),
+    path('clients/count/', ClientsCountView.as_view(), name='clients-count'),
+    path('clients/<str:client_id>/', ClientDetailView.as_view(), name='client-detail'),
     
     # US-006: Receipt Management and Organization endpoints
     path('folders/', FolderListView.as_view(), name='folder-list'),

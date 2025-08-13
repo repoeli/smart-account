@@ -131,6 +131,7 @@
   - [US-005] Dashboard shows OCR engine status pill (Paddle/OpenAI/Unavailable) using `/ocr/health/` for quick visibility.
   - [US-010] Added lightweight shimmer placeholders while summary is being fetched to improve perceived performance.
   - [US-010] KPI deep links: clicking a month bar filters `/transactions` to that month; clicking a category bar filters to that category within the current date range.
+  - [US-013][US-015][US-010] Dashboard enhancements: added subscription plan/status chip in quick stats (reads `/subscriptions/status/`), Clients KPI card linking to `/clients` (reads `/clients/count/`).
   - [US-006][US-008][US-010] Category polish: added quick category chips above the Category Breakdown that deep-link to `/transactions` with the same active date range; added no-data overlays for Month/Category/Merchants when the range yields no results; added legends for the bar visuals.
   - [US-008][US-009] Receipt→Transaction UI guard refined: on `ReceiptDetailPage`, disabled Create button shows a clear notice and tooltip explaining one transaction per receipt; deep link to view existing transaction retained.
 
@@ -154,6 +155,9 @@
   - [US-008][US-009] Core editing: `PATCH /api/v1/transactions/:id` now allows updating `description, amount, currency, type, transaction_date, category` with validation and ownership checks.
   - [US-013][US-014] Subscription/Stripe wiring: added optional endpoints `POST /subscriptions/checkout/` (returns Stripe Checkout URL or no-op when not configured) and `POST /subscriptions/stripe/webhook/` (verifies and returns event type). Keys are read from settings; safe when absent.
   - [US-013][US-014] Added `POST /subscriptions/portal/` to open Stripe Billing Portal (no-op when not configured). Service encapsulated in `infrastructure.payment.services` with env-guard.
+  - [US-013][US-014] Plans retrieval: added `GET /subscriptions/plans/` to list active recurring prices from Stripe (Basic/Premium/Platinum supported). Falls back to env price IDs when SDK or network is unavailable. Returns `publishable_key`.
+  - [US-013][US-014] Webhook enrichment and persistence: webhook handler now extracts `user_id`, `price_id`, and plan details. Minimal persistence wired to update the requesting user's `subscription_tier`, `subscription_status`, and Stripe linkage fields (`stripe_customer_id`, `stripe_subscription_id`, `subscription_price_id`) based on events like `checkout.session.completed` and `customer.subscription.*`.
+  - [US-015] Clients detail endpoints: added `GET /clients/:id`, `PATCH /clients/:id`, `DELETE /clients/:id` with ownership checks and validation via `ClientSerializer`.
   - [US-015] Client minimal CRUD (list/create): `GET /clients/` (owner-scoped), `POST /clients/` (validate and create). Added `Client` model (owner, name, email, company_name) with basic indexes.
   - Migration: added `0005_client.py` to create `clients` table and indexes.
   - [US-015][US-008][US-009] Transactions can optionally reference a client: added `client` FK on transactions plus index. Migration `0006_transaction_client.py`. Create/Update endpoints accept `client_id` (optional).
@@ -168,13 +172,16 @@
   - Receipt detail page (`ReceiptDetailPage.tsx`): implemented fully. Displays thumbnail, merchant, total, date, confidence, storage provider, Cloudinary public_id. Adds actions to reprocess with Paddle or OpenAI and to open the OCR results page.
   - API client (`api.ts`): `getReceipt` now normalizes backend shape (nested `ocr_data`, `metadata.custom_fields`) into the frontend `Receipt` type; `createTransaction` surfaces 409 duplicate as a user-friendly message. Added `updateTransaction`, and [US-013][US-014] `startSubscriptionCheckout`/`openBillingPortal` methods; [US-015] `getClients`/`createClient` methods.
   - [US-015][US-008][US-009] Transactions page: added `client_id` filter input and the list now displays `client_name` when available.
-  - [US-015] ClientsPage: minimal list/create UI added at `/clients` consuming the new endpoints.
-  - [US-013][US-014] SubscriptionPage: minimal page at `/subscription` with actions to start checkout and open billing portal; both no-op gracefully when backend not configured.
+  - [US-015] ClientsPage: list/create/edit/delete wired to `/clients` and `/clients/:id` with inline editing and confirmation on delete.
+  - [US-013][US-014] SubscriptionPage: plan picker wired to `GET /subscriptions/plans/` and "Subscribe" per plan posting to `POST /subscriptions/checkout/` with `price_id`; portal button retained; default checkout fallback when no plans.
+  - [US-013][US-014] API client: added `getSubscriptionPlans()` and extended `startSubscriptionCheckout(priceId?)` to accept a specific plan.
+  - [US-013][US-014] Added `getSubscriptionStatus()` and surfaced current tier/status on `/subscription` page.
   - Types (`types/api.ts`): aligned `receipt_type` union with backend; added optional `storage_provider` and `cloudinary_public_id` fields.
 
 - Settings/Config
   - Ensured `.env` is loaded from `backend/.env` explicitly.
   - `CLOUDINARY_RECEIPTS_FOLDER` also reads `CLOUDINARY_UPLOAD_FOLDER` if present.
+  - Stripe env alignment respected: `STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and plan price ids `STRIPE_PRICE_BASIC`, `STRIPE_PRICE_PREMIUM`, `STRIPE_PRICE_PLATINUM`.
 
 - Impact
   - New uploads render from Cloudinary with visible provenance; details and reprocess actions work without 400s. Low‑confidence OCR is saved and flagged for review rather than failing.

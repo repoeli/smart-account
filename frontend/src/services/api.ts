@@ -332,13 +332,23 @@ class ApiClient {
   }
 
   // Subscriptions (optional)
-  async startSubscriptionCheckout(): Promise<{ success: boolean; url?: string; message?: string }>{
-    const response = await this.client.post('/subscriptions/checkout/', {});
+  async startSubscriptionCheckout(priceId?: string): Promise<{ success: boolean; url?: string; message?: string }>{
+    const response = await this.client.post('/subscriptions/checkout/', priceId ? { price_id: priceId } : {});
     return response.data;
   }
 
   async openBillingPortal(): Promise<{ success: boolean; url?: string; message?: string }>{
     const response = await this.client.post('/subscriptions/portal/', {});
+    return response.data;
+  }
+
+  async getSubscriptionPlans(): Promise<{ success: boolean; items: Array<{ id: string; nickname?: string; currency?: string; unit_amount?: number; interval?: string }>; publishable_key?: string; message?: string }>{
+    const response = await this.client.get('/subscriptions/plans/');
+    return response.data;
+  }
+
+  async getSubscriptionStatus(): Promise<{ success: boolean; subscription?: { tier?: string; status?: string; price_id?: string; customer_id?: string; subscription_id?: string } }>{
+    const response = await this.client.get('/subscriptions/status/');
     return response.data;
   }
 
@@ -350,6 +360,16 @@ class ApiClient {
 
   async createClient(payload: { name: string; email?: string; company_name?: string }): Promise<{ success: boolean; id?: string; message?: string }>{
     const response = await this.client.post('/clients/', payload);
+    return response.data;
+  }
+
+  async updateClient(clientId: string, payload: { name?: string; email?: string; company_name?: string }): Promise<{ success: boolean; message?: string }>{
+    const response = await this.client.patch(`/clients/${clientId}/`, payload);
+    return response.data;
+  }
+
+  async deleteClient(clientId: string): Promise<{ success: boolean; message?: string }>{
+    const response = await this.client.delete(`/clients/${clientId}/`);
     return response.data;
   }
 

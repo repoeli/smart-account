@@ -2469,7 +2469,61 @@ class StripeWebhookView(APIView):
     def post(self, request):
         try:
             sig = request.META.get('HTTP_STRIPE_SIGNATURE', '')
-            result = StripePaymentService().handle_webhook(request.body, sig)
+            svc = StripePaymentService()
+            result = svc.handle_webhook(request.body, sig)
+            # Persist minimal subscription linkage if available (US-013/US-014)
+            try:
+                user_id = result.get('user_id')
+                price_id = result.get('price_id')
+                event_type = result.get('event_type')
+                from infrastructure.database.models import User
+                from django.db import transaction as dbtx
+                if user_id and event_type:
+                    with dbtx.atomic():
+                        user = User.objects.filter(id=user_id).first()
+                        if user:
+                            # Map plan to tier by env-configured price ids
+                            from django.conf import settings
+                            price_basic = getattr(settings, 'STRIPE_PRICE_BASIC', '')
+                            price_premium = getattr(settings, 'STRIPE_PRICE_PREMIUM', '')
+                            price_platinum = getattr(settings, 'STRIPE_PRICE_PLATINUM', '')
+                            tier = user.subscription_tier
+                            if price_id:
+                                if price_id == price_basic:
+                                    tier = 'basic'
+                                elif price_id == price_premium:
+                                    tier = 'premium'
+                                elif price_id == price_platinum:
+                                    tier = 'enterprise'
+                            # Status mapping for subscription events
+                            status = user.subscription_status
+                            if event_type in ('checkout.session.completed', 'customer.subscription.created', 'customer.subscription.updated'):
+                                status = 'active'
+                            elif event_type in ('customer.subscription.deleted', 'customer.subscription.canceled'):
+                                status = 'canceled'
+                            # Opportunistically set subscription ids if present in payload
+                            sub_id = None
+                            try:
+                                import json
+                                payload_json = json.loads(request.body.decode('utf-8'))
+                                data_obj = (payload_json or {}).get('data', {}).get('object', {})
+                                sub_id = data_obj.get('subscription') or data_obj.get('id')
+                                cust_id = data_obj.get('customer')
+                            except Exception:
+                                sub_id = None
+                                cust_id = None
+                            user.subscription_tier = tier
+                            user.subscription_status = status
+                            if price_id:
+                                user.subscription_price_id = price_id
+                            if sub_id:
+                                user.stripe_subscription_id = sub_id
+                            if cust_id:
+                                user.stripe_customer_id = cust_id
+                            user.save(update_fields=['subscription_tier', 'subscription_status', 'subscription_price_id', 'stripe_subscription_id', 'stripe_customer_id', 'updated_at'])
+            except Exception:
+                # Do not fail the webhook on persistence issues; logs can be added later
+                pass
             return Response(result, status=200 if result.get('success') else 400)
         except Exception as e:
             return Response({'success': False, 'message': str(e)}, status=400)
@@ -2492,6 +2546,24 @@ class SubscriptionPlansView(APIView):
         svc = StripePaymentService()
         result = svc.list_plans()
         return Response(result, status=200 if result.get('success') else 400)
+
+
+class SubscriptionStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            u = request.user
+            data = {
+                'tier': getattr(u, 'subscription_tier', None),
+                'status': getattr(u, 'subscription_status', None),
+                'price_id': getattr(u, 'subscription_price_id', None),
+                'customer_id': getattr(u, 'stripe_customer_id', None),
+                'subscription_id': getattr(u, 'stripe_subscription_id', None),
+            }
+            return Response({'success': True, 'subscription': data}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
 
 
 class ClientsView(APIView):
@@ -2523,6 +2595,69 @@ class ClientsView(APIView):
         except Exception as e:
             return Response({'success': False, 'message': str(e)}, status=500)
 
+
+class ClientsCountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            from infrastructure.database.models import Client
+            cnt = Client.objects.filter(owner_id=request.user.id).count()
+            return Response({'success': True, 'count': cnt}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+
+class ClientDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, request, client_id):
+        from infrastructure.database.models import Client
+        try:
+            return Client.objects.get(id=client_id, owner_id=request.user.id)
+        except Exception:
+            return None
+
+    def get(self, request, client_id):
+        try:
+            obj = self.get_object(request, client_id)
+            if not obj:
+                return Response({'success': False, 'message': 'Not found'}, status=404)
+            return Response({'success': True, 'item': {
+                'id': str(obj.id),
+                'name': obj.name,
+                'email': obj.email,
+                'company_name': obj.company_name,
+            }}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+    def patch(self, request, client_id):
+        try:
+            obj = self.get_object(request, client_id)
+            if not obj:
+                return Response({'success': False, 'message': 'Not found'}, status=404)
+            from .serializers import ClientSerializer
+            ser = ClientSerializer(data=request.data, partial=True)
+            if not ser.is_valid():
+                return Response({'success': False, 'error': 'validation_error', 'validation_errors': ser.errors}, status=400)
+            for field in ['name', 'email', 'company_name']:
+                if field in ser.validated_data:
+                    setattr(obj, field, ser.validated_data.get(field))
+            obj.save(update_fields=['name', 'email', 'company_name', 'updated_at'])
+            return Response({'success': True}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+    def delete(self, request, client_id):
+        try:
+            obj = self.get_object(request, client_id)
+            if not obj:
+                return Response({'success': False, 'message': 'Not found'}, status=404)
+            obj.delete()
+            return Response({'success': True}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
 
 class TransactionsSummaryView(APIView):
     permission_classes = [IsAuthenticated]
