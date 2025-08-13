@@ -13623,3 +13623,1443 @@ INFO 2025-08-13 02:15:43,355 basehttp 5400 9092 "GET /api/v1/receipts/count/ HTT
 INFO 2025-08-13 02:15:43,427 basehttp 5400 9092 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
 INFO 2025-08-13 02:15:43,837 basehttp 5400 22296 "GET /api/v1/ocr/health/ HTTP/1.1" 200 216
 INFO 2025-08-13 02:15:44,565 basehttp 5400 22296 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 02:25:39,826 basehttp 5400 14016 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 02:25:39,899 basehttp 5400 41552 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 02:25:39,985 basehttp 5400 14016 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 02:25:40,035 basehttp 5400 41552 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 02:25:40,128 basehttp 5400 37492 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 02:25:40,164 basehttp 5400 41552 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 02:25:40,252 basehttp 5400 14016 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:25:40,269 basehttp 5400 37492 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 02:25:40,281 basehttp 5400 41552 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 02:25:40,357 basehttp 5400 37492 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 02:25:40,380 basehttp 5400 41552 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 02:25:40,391 basehttp 5400 14016 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:25:40,426 basehttp 5400 37492 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 02:25:40,471 basehttp 5400 14016 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:25:40,516 basehttp 5400 37492 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 02:25:40,554 basehttp 5400 14016 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:25:40,622 basehttp 5400 14016 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:25:40,650 basehttp 5400 19848 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 02:25:41,168 basehttp 5400 19848 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 02:25:41,888 basehttp 5400 19848 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 02:25:42,807 basehttp 5400 19848 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 02:27:25,453 autoreload 5400 42048 C:\cursor\smart-account\backend\infrastructure\database\models.py changed, reloading.
+INFO 2025-08-13 02:27:39,348 autoreload 51548 22372 Watching for file changes with StatReloader
+INFO 2025-08-13 02:31:46,380 autoreload 51548 22372 C:\cursor\smart-account\backend\interfaces\api\serializers.py changed, reloading.
+INFO 2025-08-13 02:31:52,369 autoreload 26704 20880 Watching for file changes with StatReloader
+INFO 2025-08-13 02:33:32,419 autoreload 26704 20880 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 02:33:36,511 autoreload 47040 30680 Watching for file changes with StatReloader
+INFO 2025-08-13 02:35:31,250 autoreload 47040 30680 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 02:36:00,439 autoreload 17652 15636 Watching for file changes with StatReloader
+INFO 2025-08-13 02:39:41,590 autoreload 17652 15636 C:\cursor\smart-account\backend\interfaces\api\serializers.py changed, reloading.
+INFO 2025-08-13 02:39:44,124 autoreload 2548 32292 Watching for file changes with StatReloader
+WARNING 2025-08-13 02:41:29,879 log 2548 47284 Unauthorized: /api/v1/receipts/
+WARNING 2025-08-13 02:41:29,881 basehttp 2548 47284 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 401 183
+WARNING 2025-08-13 02:41:29,917 log 2548 47284 Unauthorized: /api/v1/receipts/
+WARNING 2025-08-13 02:41:29,918 basehttp 2548 47284 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 401 183
+INFO 2025-08-13 02:41:29,921 basehttp 2548 47284 "OPTIONS /api/v1/auth/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-08-13 02:41:29,924 basehttp 2548 47284 "OPTIONS /api/v1/auth/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-08-13 02:41:29,958 basehttp 2548 47284 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-13 02:41:29,995 basehttp 2548 47284 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-13 02:41:30,918 basehttp 2548 47284 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 02:41:31,369 basehttp 2548 36920 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+ERROR 2025-08-13 02:41:31,541 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:31,542 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:31,655 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:31,658 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:31,883 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:31,890 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:32,101 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:32,116 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:32,174 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:32,177 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:32,284 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:32,310 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:32,478 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:32,514 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:32,805 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:32,805 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:32,954 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:32,957 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:33,058 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:33,070 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:33,207 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:33,226 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:33,406 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:33,417 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:33,830 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:33,831 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:33,911 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:33,917 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:34,016 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:34,022 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:34,091 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:34,120 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:34,120 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:34,123 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:34,533 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:34,541 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:34,619 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:34,626 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:34,751 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:34,757 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:34,773 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:34,783 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:35,255 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:35,267 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:35,368 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:35,373 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:35,479 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:35,515 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:35,515 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:35,534 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:35,752 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:35,752 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:35,858 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:35,864 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:35,938 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:35,948 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:36,159 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:36,179 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:36,410 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:36,411 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:36,747 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:36,749 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:36,985 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:36,990 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:37,133 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:37,135 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:37,199 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:37,207 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:37,291 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:37,309 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:37,390 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:37,452 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:37,466 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:37,473 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:37,620 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:37,622 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:37,718 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:37,718 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:41:37,745 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:41:37,746 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 245
+INFO 2025-08-13 02:42:09,287 basehttp 2548 44184 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/ HTTP/1.1" 200 2863
+INFO 2025-08-13 02:42:09,600 basehttp 2548 44184 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/ HTTP/1.1" 200 2863
+ERROR 2025-08-13 02:42:09,734 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:09,734 basehttp 2548 36920 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:10,273 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:10,281 basehttp 2548 36920 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 500 245
+INFO 2025-08-13 02:42:10,897 basehttp 2548 44184 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 02:42:11,195 basehttp 2548 36920 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:42:11,488 basehttp 2548 36920 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+INFO 2025-08-13 02:42:12,223 basehttp 2548 44184 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 02:42:12,463 basehttp 2548 44184 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:42:12,746 basehttp 2548 44184 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+INFO 2025-08-13 02:42:21,043 basehttp 2548 44184 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 02:42:23,170 basehttp 2548 36920 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+ERROR 2025-08-13 02:42:27,905 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:27,981 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:33,322 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:33,325 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:34,285 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:34,521 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:36,486 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:36,515 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:37,637 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:37,783 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:38,682 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:38,767 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:38,807 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:38,848 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:42,497 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:42,507 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:44,721 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:44,876 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:46,464 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:46,671 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:46,884 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:47,023 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:47,048 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:48,481 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:49,013 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:49,807 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:50,791 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:51,393 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:55,991 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:56,163 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:42:56,549 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:42:56,704 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:00,368 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:00,383 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 245
+INFO 2025-08-13 02:43:01,615 basehttp 2548 4620 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/ HTTP/1.1" 200 2863
+ERROR 2025-08-13 02:43:02,173 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:02,447 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:02,516 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:04,019 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:05,580 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:05,881 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:05,963 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:06,005 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:09,113 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:09,490 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:09,687 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:09,889 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:10,311 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:11,262 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:13,127 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:14,500 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:18,889 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:19,105 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:19,191 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:19,826 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:19,961 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:19,987 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:22,168 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:22,412 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:22,958 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:23,098 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:24,150 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:25,316 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:28,646 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:28,676 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:32,849 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:33,202 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:34,066 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:34,322 log 2548 44184 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:35,035 basehttp 2548 44184 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:35,727 log 2548 43000 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:35,036 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:35,878 basehttp 2548 43000 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:36,933 log 2548 47284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:37,699 basehttp 2548 47284 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 245
+ERROR 2025-08-13 02:43:40,764 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:40,853 basehttp 2548 4620 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 245
+INFO 2025-08-13 02:43:43,486 basehttp 2548 43000 "GET /api/v1/ocr/health/ HTTP/1.1" 200 217
+ERROR 2025-08-13 02:43:44,202 log 2548 51948 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:44,688 basehttp 2548 51948 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 245
+INFO 2025-08-13 02:43:45,376 basehttp 2548 47284 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/ HTTP/1.1" 200 2863
+INFO 2025-08-13 02:43:45,649 basehttp 2548 44184 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+ERROR 2025-08-13 02:43:46,144 log 2548 36920 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:46,770 basehttp 2548 36920 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 245
+INFO 2025-08-13 02:43:47,082 basehttp 2548 43000 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 02:43:48,103 basehttp 2548 47284 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 02:43:48,520 basehttp 2548 51948 "GET /api/v1/ocr/health/ HTTP/1.1" 200 216
+INFO 2025-08-13 02:43:49,615 basehttp 2548 44184 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+ERROR 2025-08-13 02:43:50,918 log 2548 4620 Internal Server Error: /api/v1/transactions/
+INFO 2025-08-13 02:43:50,946 basehttp 2548 44184 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:43:51,115 basehttp 2548 51948 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+ERROR 2025-08-13 02:43:51,141 basehttp 2548 4620 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 500 245
+INFO 2025-08-13 02:43:52,652 basehttp 2548 44184 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:43:52,800 basehttp 2548 51948 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 02:43:53,785 basehttp 2548 51948 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:43:54,133 basehttp 2548 47284 "GET /api/v1/ocr/health/ HTTP/1.1" 200 216
+ERROR 2025-08-13 02:43:54,567 log 2548 4620 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:43:54,585 basehttp 2548 4620 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 500 245
+INFO 2025-08-13 02:43:55,277 basehttp 2548 47284 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:43:56,255 basehttp 2548 47284 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+INFO 2025-08-13 02:43:56,347 basehttp 2548 4620 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 02:43:57,045 basehttp 2548 4620 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:43:57,573 basehttp 2548 4620 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+INFO 2025-08-13 02:44:55,387 autoreload 2548 32292 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 02:46:57,559 autoreload 12480 50972 Watching for file changes with StatReloader
+INFO 2025-08-13 02:47:20,656 basehttp 12480 30280 "OPTIONS /api/v1/auth/login/ HTTP/1.1" 200 0
+INFO 2025-08-13 02:47:36,920 basehttp 12480 30280 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+INFO 2025-08-13 02:47:37,725 basehttp 12480 30280 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 02:47:39,927 basehttp 12480 14508 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 02:47:40,078 basehttp 12480 30280 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 02:47:40,838 basehttp 12480 30280 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 02:47:41,583 basehttp 12480 14508 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 02:47:41,779 basehttp 12480 53104 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 02:47:42,635 basehttp 12480 30280 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 02:47:43,097 basehttp 12480 14508 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:47:43,588 basehttp 12480 53104 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 02:47:45,345 basehttp 12480 53104 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 02:47:45,753 basehttp 12480 14508 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:47:46,895 basehttp 12480 14508 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:47:55,512 basehttp 12480 14508 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 02:47:56,396 basehttp 12480 53104 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+ERROR 2025-08-13 02:48:01,881 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:01,987 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:04,113 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:04,146 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:04,464 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:04,675 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:06,688 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:06,694 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:06,803 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:06,829 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:08,097 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:08,522 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:08,696 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:09,748 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:09,098 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:10,581 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:10,601 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:11,420 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:14,222 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:14,278 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:16,085 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:16,823 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:23,028 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:23,037 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:23,981 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:24,252 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:25,170 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:25,183 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:25,883 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:26,241 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:27,281 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:27,288 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:28,430 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:29,015 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:30,085 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:30,749 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:34,277 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:34,435 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:34,450 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:34,451 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:38,853 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:38,881 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:40,694 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:40,798 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:42,836 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:42,843 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:45,624 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:45,638 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:45,833 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:45,900 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:47,344 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:47,610 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:48,800 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:49,525 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:50,131 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:50,585 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:52,793 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:52,801 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:56,226 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:56,425 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:48:58,785 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:48:58,795 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:49:01,089 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:01,101 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:49:01,571 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:01,956 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:49:04,984 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:05,247 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:49:05,701 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:05,786 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:49:07,299 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:07,314 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:49:07,907 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:08,018 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:08,027 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:49:08,259 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+INFO 2025-08-13 02:49:10,252 basehttp 12480 46584 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/ HTTP/1.1" 200 2863
+INFO 2025-08-13 02:49:10,956 basehttp 12480 14508 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/ HTTP/1.1" 200 2863
+ERROR 2025-08-13 02:49:11,024 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:11,114 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:49:11,458 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:11,541 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:49:14,567 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:14,567 basehttp 12480 46584 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 500 237
+ERROR 2025-08-13 02:49:16,606 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:49:16,612 basehttp 12480 46584 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 500 237
+INFO 2025-08-13 02:49:16,759 basehttp 12480 37212 "GET /api/v1/ocr/health/ HTTP/1.1" 200 216
+INFO 2025-08-13 02:49:17,904 basehttp 12480 46584 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:49:18,385 basehttp 12480 37212 "GET /api/v1/ocr/health/ HTTP/1.1" 200 216
+INFO 2025-08-13 02:49:18,831 basehttp 12480 46584 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+INFO 2025-08-13 02:49:19,180 basehttp 12480 37212 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:49:20,038 basehttp 12480 37212 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+INFO 2025-08-13 02:50:57,914 basehttp 12480 37212 "OPTIONS /api/v1/categories/ HTTP/1.1" 200 0
+INFO 2025-08-13 02:50:58,112 basehttp 12480 37212 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 02:50:58,129 basehttp 12480 30280 "OPTIONS /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 200 0
+INFO 2025-08-13 02:50:58,150 basehttp 12480 46584 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 02:50:58,255 basehttp 12480 37212 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 02:50:58,371 basehttp 12480 46584 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+ERROR 2025-08-13 02:50:58,494 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:50:58,495 basehttp 12480 30280 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+INFO 2025-08-13 02:50:58,513 basehttp 12480 37212 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 02:50:58,640 basehttp 12480 37212 "GET /api/v1/categories/ HTTP/1.1" 200 241
+ERROR 2025-08-13 02:50:58,732 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:50:58,733 basehttp 12480 30280 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+ERROR 2025-08-13 02:50:58,917 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:50:58,927 basehttp 12480 30280 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+ERROR 2025-08-13 02:50:59,158 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:50:59,163 basehttp 12480 30280 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+INFO 2025-08-13 02:51:16,652 basehttp 12480 30280 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/ HTTP/1.1" 200 2863
+ERROR 2025-08-13 02:51:16,734 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:16,795 basehttp 12480 37212 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 500 237
+INFO 2025-08-13 02:51:16,966 basehttp 12480 30280 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/ HTTP/1.1" 200 2863
+INFO 2025-08-13 02:51:17,382 basehttp 12480 46584 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+ERROR 2025-08-13 02:51:17,484 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:17,566 basehttp 12480 37212 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 500 237
+INFO 2025-08-13 02:51:17,941 basehttp 12480 30280 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:51:18,321 basehttp 12480 30280 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+ERROR 2025-08-13 02:51:18,482 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:18,504 basehttp 12480 37212 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 500 237
+INFO 2025-08-13 02:51:18,594 basehttp 12480 46584 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 02:51:19,075 basehttp 12480 37212 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:51:19,253 basehttp 12480 37212 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+INFO 2025-08-13 02:51:19,904 basehttp 12480 46584 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 02:51:20,037 basehttp 12480 37212 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 02:51:20,252 basehttp 12480 37212 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 02:51:20,313 basehttp 12480 30280 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+INFO 2025-08-13 02:51:20,435 basehttp 12480 37212 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 02:51:20,612 basehttp 12480 46584 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+ERROR 2025-08-13 02:51:21,255 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:21,260 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:21,436 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:21,440 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:21,452 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:21,459 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:21,561 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:21,565 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:21,812 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:21,815 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:22,174 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:22,174 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:22,279 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:22,286 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:22,485 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:22,490 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:22,568 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:22,575 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:22,746 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:22,762 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:22,870 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:22,884 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:23,085 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:23,109 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:23,518 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:23,526 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:23,619 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:23,662 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:23,722 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:23,743 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:23,814 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:23,834 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:24,520 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:24,527 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:24,775 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:24,778 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:24,837 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:24,859 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+INFO 2025-08-13 02:51:24,933 basehttp 12480 46584 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+ERROR 2025-08-13 02:51:25,300 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:25,321 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:25,416 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:25,427 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:25,480 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:25,512 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:25,986 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:25,989 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:26,064 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:26,066 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:26,318 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:26,332 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:26,700 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:26,702 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:27,004 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:27,012 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:27,025 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:27,036 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:27,163 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:27,170 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:27,318 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:27,325 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:27,604 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:27,618 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:28,003 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:28,015 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:28,530 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:28,532 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:28,594 log 12480 14508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:28,596 basehttp 12480 14508 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:28,642 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:28,677 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:28,736 log 12480 37212 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:28,745 basehttp 12480 37212 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:28,849 log 12480 13436 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:28,869 basehttp 12480 13436 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:28,953 log 12480 46584 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:28,964 basehttp 12480 46584 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+INFO 2025-08-13 02:51:29,000 basehttp 12480 14508 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+ERROR 2025-08-13 02:51:29,234 log 12480 30280 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:29,248 log 12480 53104 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:51:29,250 basehttp 12480 30280 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:51:29,251 basehttp 12480 53104 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+INFO 2025-08-13 02:52:44,485 autoreload 12480 50972 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 02:52:49,942 autoreload 52864 13448 Watching for file changes with StatReloader
+INFO 2025-08-13 02:57:24,777 basehttp 52864 11792 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
+INFO 2025-08-13 02:57:24,777 basehttp 52864 38672 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 02:57:24,787 basehttp 52864 16020 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
+INFO 2025-08-13 02:57:24,787 basehttp 52864 49900 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 02:57:25,522 basehttp 52864 16020 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 02:57:25,522 basehttp 52864 11792 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 02:57:25,523 basehttp 52864 38672 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 02:57:25,536 basehttp 52864 49900 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 02:57:25,683 basehttp 52864 49900 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 02:57:25,782 basehttp 52864 38672 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+ERROR 2025-08-13 02:57:26,511 log 52864 16020 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:26,512 basehttp 52864 16020 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:26,558 log 52864 49900 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:26,560 basehttp 52864 49900 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:26,662 log 52864 44688 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:26,673 basehttp 52864 44688 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:26,805 log 52864 11792 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:26,816 basehttp 52864 11792 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:27,171 log 52864 52464 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:27,173 basehttp 52864 52464 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:27,232 log 52864 38672 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:27,237 basehttp 52864 38672 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:27,589 log 52864 16020 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:27,590 basehttp 52864 16020 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:27,814 log 52864 44688 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:27,840 basehttp 52864 44688 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:27,903 log 52864 11792 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:27,914 basehttp 52864 11792 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:28,225 log 52864 49900 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:28,237 basehttp 52864 49900 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:28,487 log 52864 52464 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:28,489 basehttp 52864 52464 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:28,535 log 52864 11792 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:28,553 basehttp 52864 11792 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:28,594 log 52864 38672 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:28,596 basehttp 52864 38672 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:29,196 log 52864 16020 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:29,196 basehttp 52864 16020 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:29,290 log 52864 52464 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:29,298 basehttp 52864 52464 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:29,404 log 52864 49900 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:29,422 basehttp 52864 49900 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:29,501 log 52864 38672 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:29,523 basehttp 52864 38672 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:29,772 log 52864 11792 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:29,788 basehttp 52864 11792 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:30,207 log 52864 16020 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:30,209 basehttp 52864 16020 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:30,456 log 52864 52464 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:30,460 basehttp 52864 52464 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:30,536 log 52864 49900 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:30,545 basehttp 52864 49900 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:30,599 log 52864 11792 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:30,622 basehttp 52864 11792 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:30,637 log 52864 44688 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:30,671 basehttp 52864 44688 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:30,888 log 52864 38672 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:30,916 basehttp 52864 38672 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:30,939 log 52864 16020 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:30,956 basehttp 52864 16020 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:31,587 log 52864 16020 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:31,588 basehttp 52864 16020 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:31,773 log 52864 49900 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:31,855 basehttp 52864 49900 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:32,040 log 52864 38672 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:32,049 basehttp 52864 38672 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:32,108 log 52864 44688 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:32,116 basehttp 52864 44688 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:32,436 log 52864 52464 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:32,454 basehttp 52864 52464 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:32,606 log 52864 16020 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:32,621 basehttp 52864 16020 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:32,676 log 52864 11792 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:32,684 basehttp 52864 11792 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:33,157 log 52864 38672 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:33,158 basehttp 52864 38672 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:33,284 log 52864 52464 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:33,286 basehttp 52864 52464 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:33,409 log 52864 49900 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:33,427 basehttp 52864 49900 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:33,528 log 52864 44688 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:33,531 basehttp 52864 44688 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:33,688 log 52864 38672 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:33,690 basehttp 52864 38672 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:33,775 log 52864 52464 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:33,776 basehttp 52864 52464 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:33,816 log 52864 16020 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:33,819 basehttp 52864 16020 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 02:57:33,832 log 52864 11792 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 02:57:33,834 basehttp 52864 11792 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+INFO 2025-08-13 03:06:32,212 autoreload 52864 13448 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 03:06:42,384 autoreload 24212 28528 Watching for file changes with StatReloader
+INFO 2025-08-13 03:09:48,986 basehttp 24212 15368 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:09:48,999 basehttp 24212 11288 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
+INFO 2025-08-13 03:09:49,001 basehttp 24212 43040 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
+INFO 2025-08-13 03:09:49,023 basehttp 24212 34952 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:09:50,498 basehttp 24212 43040 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:09:50,518 basehttp 24212 11288 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:09:50,561 basehttp 24212 34952 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:09:50,586 basehttp 24212 15368 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:09:50,999 basehttp 24212 15368 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:09:51,210 basehttp 24212 34952 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+ERROR 2025-08-13 03:09:52,716 log 24212 43040 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:52,720 basehttp 24212 43040 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:52,913 log 24212 11288 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:52,919 basehttp 24212 11288 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:53,151 log 24212 34952 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:53,167 basehttp 24212 34952 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:53,899 log 24212 488 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:53,915 basehttp 24212 488 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:54,227 log 24212 22740 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:54,262 basehttp 24212 22740 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:54,369 log 24212 15368 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:54,402 basehttp 24212 15368 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:54,663 log 24212 43040 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:54,676 basehttp 24212 43040 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:55,423 log 24212 11288 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:55,462 basehttp 24212 11288 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:55,932 log 24212 488 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:55,962 basehttp 24212 488 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:56,038 log 24212 22740 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:56,051 basehttp 24212 22740 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:56,117 log 24212 15368 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:56,123 basehttp 24212 15368 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:56,424 log 24212 34952 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:56,483 basehttp 24212 34952 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:56,998 log 24212 11288 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:57,049 log 24212 43040 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:57,135 basehttp 24212 43040 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:57,068 basehttp 24212 11288 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:57,743 log 24212 488 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:57,796 basehttp 24212 488 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:58,767 log 24212 15368 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:58,774 basehttp 24212 15368 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:59,312 log 24212 22740 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:59,400 log 24212 11288 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:09:59,649 basehttp 24212 22740 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:09:59,770 basehttp 24212 11288 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:00,103 log 24212 34952 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:00,186 log 24212 15368 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:00,191 basehttp 24212 34952 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:00,497 basehttp 24212 15368 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:01,261 log 24212 43040 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:01,695 basehttp 24212 43040 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:01,851 log 24212 22740 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:02,100 log 24212 488 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:02,525 basehttp 24212 22740 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:02,753 basehttp 24212 488 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:06,309 log 24212 15368 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:06,313 basehttp 24212 15368 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:06,836 log 24212 11288 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:06,859 basehttp 24212 11288 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:08,373 log 24212 34952 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:08,417 basehttp 24212 34952 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:10,020 log 24212 488 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:10,075 basehttp 24212 488 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:11,304 log 24212 43040 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:11,349 basehttp 24212 43040 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:12,123 log 24212 22740 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:12,547 basehttp 24212 22740 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:14,147 log 24212 34952 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:14,549 log 24212 15368 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:14,866 log 24212 11288 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:14,874 basehttp 24212 34952 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:15,723 basehttp 24212 15368 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:16,602 basehttp 24212 11288 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:23,081 log 24212 43040 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:23,228 log 24212 488 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:10:24,250 basehttp 24212 488 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:10:23,708 basehttp 24212 43040 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+INFO 2025-08-13 03:11:09,699 autoreload 42852 21704 Watching for file changes with StatReloader
+INFO 2025-08-13 03:11:58,323 basehttp 42852 15656 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
+INFO 2025-08-13 03:11:58,359 basehttp 42852 41300 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:11:58,431 basehttp 42852 32736 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:11:58,432 basehttp 42852 35484 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
+INFO 2025-08-13 03:12:00,649 basehttp 42852 41300 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:12:00,658 basehttp 42852 35484 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:12:00,663 basehttp 42852 15656 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:12:00,700 basehttp 42852 32736 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:12:01,519 basehttp 42852 32736 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:12:01,865 basehttp 42852 32736 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+ERROR 2025-08-13 03:12:04,096 log 42852 32736 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:04,100 basehttp 42852 32736 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:04,796 log 42852 41300 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:04,808 basehttp 42852 41300 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:04,963 log 42852 35484 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:04,969 basehttp 42852 35484 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:06,225 log 42852 15656 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:06,270 basehttp 42852 15656 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:06,359 log 42852 35536 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:06,392 basehttp 42852 35536 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:06,974 log 42852 35484 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:07,095 basehttp 42852 35484 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:07,538 log 42852 17204 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:07,544 basehttp 42852 17204 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:08,026 log 42852 41300 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:08,095 basehttp 42852 41300 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:09,279 log 42852 32736 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:09,288 basehttp 42852 32736 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:09,422 log 42852 35536 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:09,473 basehttp 42852 35536 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:10,093 log 42852 15656 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:10,119 basehttp 42852 15656 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:11,926 log 42852 32736 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:11,936 basehttp 42852 32736 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:12,061 log 42852 35484 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:12,072 basehttp 42852 35484 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:12,429 log 42852 17204 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:12,474 basehttp 42852 17204 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:12,844 log 42852 41300 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:12,895 basehttp 42852 41300 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:14,110 log 42852 35536 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:14,147 basehttp 42852 35536 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:14,343 log 42852 15656 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:14,404 basehttp 42852 15656 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:15,676 log 42852 41300 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:15,696 basehttp 42852 41300 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:16,331 log 42852 35484 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:16,345 basehttp 42852 35484 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:17,197 log 42852 15656 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:17,205 basehttp 42852 15656 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:17,451 log 42852 35536 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:17,464 basehttp 42852 35536 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:17,499 log 42852 32736 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:17,523 basehttp 42852 32736 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:17,877 log 42852 17204 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:17,897 basehttp 42852 17204 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:18,694 log 42852 35484 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:18,698 basehttp 42852 35484 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:18,990 log 42852 41300 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:19,037 basehttp 42852 41300 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:19,927 log 42852 35536 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:19,931 basehttp 42852 35536 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:20,319 log 42852 32736 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:20,339 basehttp 42852 32736 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:20,449 log 42852 15656 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:20,457 basehttp 42852 15656 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:20,975 log 42852 17204 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:20,983 basehttp 42852 17204 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:21,807 log 42852 35484 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:22,068 basehttp 42852 35484 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:22,291 log 42852 41300 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:22,339 basehttp 42852 41300 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:23,782 log 42852 17204 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:23,809 basehttp 42852 17204 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:24,359 log 42852 32736 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:24,374 basehttp 42852 32736 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:25,132 log 42852 35536 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:25,156 basehttp 42852 35536 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:25,523 log 42852 15656 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:25,555 basehttp 42852 15656 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:26,131 log 42852 41300 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:26,165 basehttp 42852 41300 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:26,568 log 42852 17204 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:26,583 basehttp 42852 17204 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:26,683 log 42852 35484 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:26,688 basehttp 42852 35484 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:26,937 log 42852 32736 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:26,974 basehttp 42852 32736 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:12:27,112 log 42852 35536 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:12:27,114 basehttp 42852 35536 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+INFO 2025-08-13 03:13:06,451 autoreload 19904 42328 Watching for file changes with StatReloader
+INFO 2025-08-13 03:13:17,948 basehttp 19904 15236 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
+INFO 2025-08-13 03:13:17,950 basehttp 19904 47772 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:13:17,951 basehttp 19904 13508 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
+INFO 2025-08-13 03:13:17,952 basehttp 19904 14164 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:13:18,874 basehttp 19904 15236 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:13:18,875 basehttp 19904 13508 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:13:18,887 basehttp 19904 47772 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:13:18,887 basehttp 19904 14164 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:13:19,068 basehttp 19904 14164 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:13:19,238 basehttp 19904 14164 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+ERROR 2025-08-13 03:13:19,984 log 19904 36896 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:19,991 basehttp 19904 36896 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:20,279 log 19904 18696 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:20,279 basehttp 19904 18696 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:20,368 log 19904 13508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:20,372 basehttp 19904 13508 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:20,519 log 19904 15236 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:20,522 basehttp 19904 15236 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:20,676 log 19904 47772 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:20,688 basehttp 19904 47772 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:20,918 log 19904 14164 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:20,965 basehttp 19904 14164 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:21,428 log 19904 36896 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:21,438 basehttp 19904 36896 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:21,696 log 19904 47772 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:21,699 basehttp 19904 47772 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:21,756 log 19904 13508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:21,768 basehttp 19904 13508 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:21,894 log 19904 15236 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:21,918 basehttp 19904 15236 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:22,029 log 19904 18696 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:22,049 basehttp 19904 18696 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:22,160 log 19904 14164 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:22,170 basehttp 19904 14164 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:22,854 log 19904 47772 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:22,862 basehttp 19904 47772 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:22,970 log 19904 36896 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:22,984 basehttp 19904 36896 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:23,113 log 19904 15236 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:23,123 basehttp 19904 15236 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:23,468 log 19904 13508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:23,470 basehttp 19904 13508 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:23,774 log 19904 15236 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:23,780 basehttp 19904 15236 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:23,863 log 19904 18696 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:23,882 basehttp 19904 18696 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:24,197 log 19904 47772 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:24,204 basehttp 19904 47772 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:24,983 log 19904 13508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:24,986 basehttp 19904 13508 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:25,126 log 19904 36896 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:25,151 basehttp 19904 36896 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:25,287 log 19904 47772 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:25,323 basehttp 19904 47772 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:25,404 log 19904 15236 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:25,421 log 19904 14164 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:25,439 basehttp 19904 15236 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:25,461 basehttp 19904 14164 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:25,954 log 19904 18696 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:25,964 basehttp 19904 18696 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:25,985 log 19904 13508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:26,047 basehttp 19904 13508 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:26,541 log 19904 15236 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:26,555 basehttp 19904 15236 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:26,736 log 19904 14164 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:26,771 basehttp 19904 14164 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:27,073 log 19904 18696 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:27,078 basehttp 19904 18696 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:27,255 log 19904 47772 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:27,285 basehttp 19904 47772 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:27,726 log 19904 36896 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:27,818 basehttp 19904 36896 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:27,739 log 19904 15236 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:28,006 log 19904 13508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:28,011 basehttp 19904 15236 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:28,014 basehttp 19904 13508 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:28,607 log 19904 14164 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:28,621 basehttp 19904 14164 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:28,937 log 19904 18696 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:28,939 basehttp 19904 18696 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:29,096 log 19904 47772 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:29,099 basehttp 19904 47772 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:29,438 log 19904 13508 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:29,441 basehttp 19904 13508 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:29,548 log 19904 36896 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:29,552 basehttp 19904 36896 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:29,562 log 19904 15236 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:29,567 basehttp 19904 15236 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 500 237
+ERROR 2025-08-13 03:13:29,618 log 19904 14164 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:13:29,620 basehttp 19904 14164 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 500 237
+INFO 2025-08-13 03:19:43,891 autoreload 19904 42328 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 03:20:25,955 autoreload 41736 28424 Watching for file changes with StatReloader
+INFO 2025-08-13 03:22:54,957 basehttp 41736 44808 "POST /api/v1/auth/login/ HTTP/1.1" 200 782
+INFO 2025-08-13 03:22:55,083 basehttp 41736 44808 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:22:55,379 basehttp 41736 44808 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:22:55,479 basehttp 41736 28148 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:22:55,697 basehttp 41736 42892 "GET /media/receipts/f205aa9573934fb291e005efd8012550.jpg HTTP/1.1" 304 0
+INFO 2025-08-13 03:22:55,758 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:55,803 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:55,919 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:56,042 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,164 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,190 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,209 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,276 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,315 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:56,366 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,445 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:56,480 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,544 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:56,562 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,629 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,679 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,739 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,809 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,840 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,901 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:56,929 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:57,007 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:57,079 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,103 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:57,157 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,173 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,263 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,474 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,504 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,567 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:57,605 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,717 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:57,737 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:22:57,803 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,850 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,907 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,913 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,939 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,982 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:22:57,993 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:07,278 basehttp 41736 30236 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/ HTTP/1.1" 200 2863
+INFO 2025-08-13 03:23:07,420 basehttp 41736 55284 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:07,444 basehttp 41736 30236 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/ HTTP/1.1" 200 2863
+INFO 2025-08-13 03:23:07,539 basehttp 41736 30236 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:08,321 basehttp 41736 55284 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 03:23:08,408 basehttp 41736 30236 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 03:23:08,490 basehttp 41736 30236 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+INFO 2025-08-13 03:23:09,265 basehttp 41736 55284 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 03:23:09,344 basehttp 41736 55284 "GET /api/v1/receipts/bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 03:23:09,425 basehttp 41736 55284 "GET /api/v1/categories/suggest/?receiptId=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&merchant=Starbucks HTTP/1.1" 200 44
+INFO 2025-08-13 03:23:15,947 basehttp 41736 55284 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:23:16,055 basehttp 41736 30236 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:23:16,304 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,348 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,378 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:16,393 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:16,425 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,456 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,545 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,579 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,626 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:16,648 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:16,679 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,726 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:16,790 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,861 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,893 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,954 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:16,982 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:17,036 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:17,093 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:17,161 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:17,186 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:17,250 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:17,321 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:17,438 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:17,511 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:17,588 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:17,675 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:17,760 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:17,817 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:17,829 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:17,880 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:18,021 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:18,108 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:18,166 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:18,188 basehttp 41736 30236 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:18,225 basehttp 41736 44808 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:18,256 basehttp 41736 28148 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:18,277 basehttp 41736 55284 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:18,309 basehttp 41736 19264 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:23:18,336 basehttp 41736 40096 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:20,063 basehttp 41736 40096 "OPTIONS /api/v1/receipts/14864dad-f2f0-4051-be52-0e8f0368c0d4/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:23:20,064 basehttp 41736 19264 "OPTIONS /api/v1/receipts/14864dad-f2f0-4051-be52-0e8f0368c0d4/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:23:20,177 basehttp 41736 19264 "GET /api/v1/receipts/14864dad-f2f0-4051-be52-0e8f0368c0d4/ HTTP/1.1" 200 1356
+INFO 2025-08-13 03:23:20,184 basehttp 41736 40096 "OPTIONS /api/v1/transactions/?limit=1&offset=0&receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4 HTTP/1.1" 200 0
+INFO 2025-08-13 03:23:20,281 basehttp 41736 40096 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:20,292 basehttp 41736 19264 "GET /api/v1/receipts/14864dad-f2f0-4051-be52-0e8f0368c0d4/ HTTP/1.1" 200 1356
+INFO 2025-08-13 03:23:20,363 basehttp 41736 19264 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4 HTTP/1.1" 200 185
+INFO 2025-08-13 03:23:21,255 basehttp 41736 40096 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 03:23:21,264 basehttp 41736 19264 "OPTIONS /api/v1/receipts/14864dad-f2f0-4051-be52-0e8f0368c0d4/reprocess/history/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:23:21,390 basehttp 41736 19264 "GET /api/v1/receipts/14864dad-f2f0-4051-be52-0e8f0368c0d4/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 03:23:21,398 basehttp 41736 19264 "OPTIONS /api/v1/categories/suggest/?receiptId=14864dad-f2f0-4051-be52-0e8f0368c0d4&merchant=ACCENT+MENS HTTP/1.1" 200 0
+INFO 2025-08-13 03:23:21,487 basehttp 41736 19264 "GET /api/v1/categories/suggest/?receiptId=14864dad-f2f0-4051-be52-0e8f0368c0d4&merchant=ACCENT+MENS HTTP/1.1" 200 32
+INFO 2025-08-13 03:23:21,976 basehttp 41736 40096 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 03:23:22,052 basehttp 41736 40096 "GET /api/v1/receipts/14864dad-f2f0-4051-be52-0e8f0368c0d4/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 03:23:22,133 basehttp 41736 40096 "GET /api/v1/categories/suggest/?receiptId=14864dad-f2f0-4051-be52-0e8f0368c0d4&merchant=ACCENT+MENS HTTP/1.1" 200 32
+INFO 2025-08-13 03:23:25,383 basehttp 41736 40096 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:23:25,509 basehttp 41736 19264 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:23:25,606 basehttp 41736 40096 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:23:25,729 basehttp 41736 19264 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:23:25,768 basehttp 41736 28148 "GET /api/v1/categories/ HTTP/1.1" 200 241
+ERROR 2025-08-13 03:23:25,786 log 41736 55284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:23:25,787 basehttp 41736 55284 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+INFO 2025-08-13 03:23:25,858 basehttp 41736 28148 "GET /api/v1/categories/ HTTP/1.1" 200 241
+ERROR 2025-08-13 03:23:25,978 log 41736 55284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:23:25,978 basehttp 41736 55284 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+ERROR 2025-08-13 03:23:26,125 log 41736 55284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:23:26,134 basehttp 41736 55284 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+ERROR 2025-08-13 03:23:26,281 log 41736 55284 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:23:26,282 basehttp 41736 55284 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+INFO 2025-08-13 03:28:42,535 autoreload 41736 28424 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 03:29:06,301 autoreload 38292 11756 Watching for file changes with StatReloader
+INFO 2025-08-13 03:37:02,393 basehttp 38292 2688 "OPTIONS /api/v1/categories/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:02,396 basehttp 38292 2688 "OPTIONS /api/v1/categories/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:02,397 basehttp 38292 24924 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:02,400 basehttp 38292 2688 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:03,116 basehttp 38292 24924 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:37:03,123 basehttp 38292 2688 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:37:03,172 basehttp 38292 37216 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:37:03,191 basehttp 38292 12996 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+ERROR 2025-08-13 03:37:03,375 log 38292 2688 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:37:03,376 basehttp 38292 2688 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+INFO 2025-08-13 03:37:03,396 basehttp 38292 12996 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:37:03,533 basehttp 38292 12996 "GET /api/v1/categories/ HTTP/1.1" 200 241
+ERROR 2025-08-13 03:37:03,564 log 38292 2688 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:37:03,564 basehttp 38292 2688 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+ERROR 2025-08-13 03:37:03,750 log 38292 2688 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:37:03,752 basehttp 38292 2688 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+ERROR 2025-08-13 03:37:03,994 log 38292 2688 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:37:03,994 basehttp 38292 2688 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+INFO 2025-08-13 03:37:20,817 autoreload 1824 6836 Watching for file changes with StatReloader
+INFO 2025-08-13 03:37:25,397 basehttp 1824 28912 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:37:25,585 basehttp 1824 28912 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:37:25,917 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:25,943 basehttp 1824 30532 "GET /media/receipts/3a6ebd2c7e354097a7ef7dc41b631eab.jpg HTTP/1.1" 304 0
+INFO 2025-08-13 03:37:26,093 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:26,277 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:26,428 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:26,464 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:26,554 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:26,588 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:26,646 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:26,728 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:26,796 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:26,844 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:26,917 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:26,951 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:27,011 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,064 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,113 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,173 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,238 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,271 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,339 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:27,398 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:27,492 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,513 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,546 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:27,626 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,694 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,746 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,798 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,865 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:27,901 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:27,956 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:28,016 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:28,093 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:28,120 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:28,199 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:28,234 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:28,258 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:28,287 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:28,319 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:28,327 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:34,100 basehttp 1824 28912 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:34,100 basehttp 1824 54684 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:34,101 basehttp 1824 15940 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:34,101 basehttp 1824 19836 "OPTIONS /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:34,330 basehttp 1824 19836 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:37:34,351 basehttp 1824 28912 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:37:34,393 basehttp 1824 15940 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:37:34,413 basehttp 1824 54684 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:37:34,656 basehttp 1824 54684 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:37:34,775 basehttp 1824 15940 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 03:37:35,118 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,118 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,153 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:35,191 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,271 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,282 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:35,412 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,469 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,525 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:35,562 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,672 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:35,704 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:35,753 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,824 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,871 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,919 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,920 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:35,944 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,025 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,087 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:36,132 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,147 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,210 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,234 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,262 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:36,327 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:36,392 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,440 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,501 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:36,538 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,591 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:36,666 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,692 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:36,760 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,803 basehttp 1824 19836 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,841 basehttp 1824 28912 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,870 basehttp 1824 15940 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,897 basehttp 1824 42912 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,920 basehttp 1824 17768 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 03:37:36,934 basehttp 1824 54684 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:39,824 basehttp 1824 54684 "OPTIONS /api/v1/receipts/edb275ff-5fdd-466b-b6af-4239cbcd4b5f/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:39,824 basehttp 1824 17768 "OPTIONS /api/v1/receipts/edb275ff-5fdd-466b-b6af-4239cbcd4b5f/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:39,931 basehttp 1824 17768 "GET /api/v1/receipts/edb275ff-5fdd-466b-b6af-4239cbcd4b5f/ HTTP/1.1" 200 1249
+INFO 2025-08-13 03:37:39,940 basehttp 1824 54684 "OPTIONS /api/v1/transactions/?limit=1&offset=0&receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:40,038 basehttp 1824 54684 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:40,054 basehttp 1824 17768 "GET /api/v1/receipts/edb275ff-5fdd-466b-b6af-4239cbcd4b5f/ HTTP/1.1" 200 1249
+INFO 2025-08-13 03:37:40,124 basehttp 1824 17768 "GET /api/v1/transactions/?limit=1&offset=0&receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f HTTP/1.1" 200 185
+INFO 2025-08-13 03:37:41,103 basehttp 1824 54684 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 03:37:41,113 basehttp 1824 17768 "OPTIONS /api/v1/receipts/edb275ff-5fdd-466b-b6af-4239cbcd4b5f/reprocess/history/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:41,239 basehttp 1824 17768 "GET /api/v1/receipts/edb275ff-5fdd-466b-b6af-4239cbcd4b5f/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 03:37:41,249 basehttp 1824 17768 "OPTIONS /api/v1/categories/suggest/?receiptId=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&merchant=FONTHILL+MINI+MARKET+LTD HTTP/1.1" 200 0
+INFO 2025-08-13 03:37:41,337 basehttp 1824 17768 "GET /api/v1/categories/suggest/?receiptId=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&merchant=FONTHILL+MINI+MARKET+LTD HTTP/1.1" 200 39
+INFO 2025-08-13 03:37:41,743 basehttp 1824 54684 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 03:37:41,830 basehttp 1824 54684 "GET /api/v1/receipts/edb275ff-5fdd-466b-b6af-4239cbcd4b5f/reprocess/history/ HTTP/1.1" 200 27
+INFO 2025-08-13 03:37:41,903 basehttp 1824 54684 "GET /api/v1/categories/suggest/?receiptId=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&merchant=FONTHILL+MINI+MARKET+LTD HTTP/1.1" 200 39
+INFO 2025-08-13 03:37:45,158 basehttp 1824 54684 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:37:45,200 basehttp 1824 17768 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:37:45,326 basehttp 1824 54684 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:37:45,376 basehttp 1824 17768 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+ERROR 2025-08-13 03:37:45,508 log 1824 42912 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:37:45,510 basehttp 1824 42912 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+INFO 2025-08-13 03:37:45,529 basehttp 1824 54684 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:37:45,723 basehttp 1824 54684 "GET /api/v1/categories/ HTTP/1.1" 200 241
+ERROR 2025-08-13 03:37:45,786 log 1824 42912 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:37:45,787 basehttp 1824 42912 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+ERROR 2025-08-13 03:37:45,926 log 1824 42912 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:37:45,927 basehttp 1824 42912 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+ERROR 2025-08-13 03:37:46,081 log 1824 42912 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:37:46,082 basehttp 1824 42912 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 237
+INFO 2025-08-13 03:42:26,046 autoreload 1824 6836 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 03:42:50,388 autoreload 51456 23064 Watching for file changes with StatReloader
+INFO 2025-08-13 03:43:14,513 basehttp 51456 44964 "OPTIONS /api/v1/categories/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:43:14,544 basehttp 51456 16372 "OPTIONS /api/v1/categories/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:43:14,565 basehttp 51456 43216 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:43:14,609 basehttp 51456 12820 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:43:20,177 basehttp 51456 44964 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:43:20,236 basehttp 51456 16372 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:43:20,321 basehttp 51456 12820 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:43:20,543 basehttp 51456 43216 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:43:21,539 basehttp 51456 43216 "GET /api/v1/categories/ HTTP/1.1" 200 241
+ERROR 2025-08-13 03:43:21,799 log 51456 44964 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:43:21,806 basehttp 51456 44964 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 245
+INFO 2025-08-13 03:43:22,099 basehttp 51456 43216 "GET /api/v1/categories/ HTTP/1.1" 200 241
+ERROR 2025-08-13 03:43:22,667 log 51456 44964 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:43:22,671 basehttp 51456 44964 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 245
+ERROR 2025-08-13 03:43:23,342 log 51456 44964 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:43:23,342 basehttp 51456 44964 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 245
+ERROR 2025-08-13 03:43:24,157 log 51456 44964 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:43:24,162 basehttp 51456 44964 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 245
+INFO 2025-08-13 03:45:24,341 basehttp 51456 44964 "OPTIONS /api/v1/categories/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:45:24,370 basehttp 51456 43216 "OPTIONS /api/v1/categories/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:45:24,445 basehttp 51456 12820 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:45:24,731 basehttp 51456 12820 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:45:25,456 basehttp 51456 44964 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:45:26,045 basehttp 51456 16372 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:45:26,195 basehttp 51456 43216 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:45:26,515 basehttp 51456 12820 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:45:26,937 basehttp 51456 43216 "GET /api/v1/categories/ HTTP/1.1" 200 241
+ERROR 2025-08-13 03:45:27,280 log 51456 44964 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:45:27,308 basehttp 51456 44964 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 245
+INFO 2025-08-13 03:45:27,633 basehttp 51456 43216 "GET /api/v1/categories/ HTTP/1.1" 200 241
+ERROR 2025-08-13 03:45:28,361 log 51456 44964 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:45:28,365 basehttp 51456 44964 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 245
+ERROR 2025-08-13 03:45:28,966 log 51456 44964 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:45:28,982 basehttp 51456 44964 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 245
+ERROR 2025-08-13 03:45:29,476 log 51456 44964 Internal Server Error: /api/v1/transactions/
+ERROR 2025-08-13 03:45:29,478 basehttp 51456 44964 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 500 245
+INFO 2025-08-13 03:49:28,362 autoreload 51456 23064 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 03:49:48,456 autoreload 42088 12236 Watching for file changes with StatReloader
+INFO 2025-08-13 03:49:55,531 basehttp 42088 33368 "OPTIONS /api/v1/categories/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:49:55,608 basehttp 42088 33368 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:49:55,757 basehttp 42088 34464 "OPTIONS /api/v1/categories/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:49:55,877 basehttp 42088 48280 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 03:50:01,224 basehttp 42088 34464 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:50:01,357 basehttp 42088 55008 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:50:01,618 basehttp 42088 48280 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:50:01,748 basehttp 42088 33368 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 03:50:02,760 basehttp 42088 33368 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:50:03,386 basehttp 42088 34464 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 200 2303
+INFO 2025-08-13 03:50:03,612 basehttp 42088 33368 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 03:50:04,460 basehttp 42088 34464 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 200 2303
+INFO 2025-08-13 03:50:05,460 basehttp 42088 33368 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 200 2303
+INFO 2025-08-13 03:50:07,636 basehttp 42088 33368 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 200 2303
+INFO 2025-08-13 04:05:43,630 autoreload 42088 12236 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 04:06:07,376 autoreload 23288 8084 Watching for file changes with StatReloader
+INFO 2025-08-13 04:09:15,230 autoreload 38404 35104 Watching for file changes with StatReloader
+INFO 2025-08-13 04:09:43,673 basehttp 38404 19736 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 04:09:43,713 basehttp 38404 13760 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 04:09:43,799 basehttp 38404 19736 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 04:09:43,832 basehttp 38404 13760 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 04:09:43,914 basehttp 38404 41236 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 200 2303
+INFO 2025-08-13 04:09:43,945 basehttp 38404 19736 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 04:09:44,020 basehttp 38404 19736 "GET /api/v1/categories/ HTTP/1.1" 200 241
+INFO 2025-08-13 04:09:44,038 basehttp 38404 41236 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 200 2303
+INFO 2025-08-13 04:09:44,125 basehttp 38404 41236 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 200 2303
+INFO 2025-08-13 04:09:44,217 basehttp 38404 41236 "GET /api/v1/transactions/?limit=50&offset=0&sort=date&order=desc HTTP/1.1" 200 2303
+INFO 2025-08-13 04:09:50,898 basehttp 38404 41236 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 04:09:51,002 basehttp 38404 41236 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 04:09:51,116 basehttp 38404 41236 "OPTIONS /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,142 basehttp 38404 41236 "OPTIONS /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,121 basehttp 38404 13760 "OPTIONS /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,116 basehttp 38404 19736 "OPTIONS /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,192 basehttp 38404 13760 "OPTIONS /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,219 basehttp 38404 19736 "OPTIONS /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,246 basehttp 38404 13760 "OPTIONS /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,318 basehttp 38404 13760 "OPTIONS /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,357 basehttp 38404 13760 "OPTIONS /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,400 basehttp 38404 13760 "OPTIONS /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,451 basehttp 38404 13760 "OPTIONS /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,471 basehttp 38404 13760 "OPTIONS /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,480 basehttp 38404 30912 "OPTIONS /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,483 basehttp 38404 13760 "OPTIONS /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,493 basehttp 38404 5204 "OPTIONS /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,498 basehttp 38404 30912 "OPTIONS /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,505 basehttp 38404 5204 "OPTIONS /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,508 basehttp 38404 13760 "OPTIONS /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,508 basehttp 38404 30912 "OPTIONS /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,532 basehttp 38404 5204 "OPTIONS /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,571 basehttp 38404 19736 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:51,715 basehttp 38404 41236 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:51,728 basehttp 38404 13760 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:51,821 basehttp 38404 6436 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:51,833 basehttp 38404 6436 "OPTIONS /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,839 basehttp 38404 6436 "OPTIONS /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,851 basehttp 38404 6436 "OPTIONS /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,852 basehttp 38404 19736 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:51,858 basehttp 38404 6436 "OPTIONS /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,865 basehttp 38404 19736 "OPTIONS /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,865 basehttp 38404 6436 "OPTIONS /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,869 basehttp 38404 19736 "OPTIONS /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,872 basehttp 38404 19736 "OPTIONS /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,873 basehttp 38404 6436 "OPTIONS /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,878 basehttp 38404 19736 "OPTIONS /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,887 basehttp 38404 6436 "OPTIONS /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:51,970 basehttp 38404 5204 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:52,019 basehttp 38404 30912 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,058 basehttp 38404 13760 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,137 basehttp 38404 19736 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:52,186 basehttp 38404 41236 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,246 basehttp 38404 6436 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:52,273 basehttp 38404 5204 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,332 basehttp 38404 30912 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:52,388 basehttp 38404 13760 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,430 basehttp 38404 41236 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,463 basehttp 38404 19736 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,525 basehttp 38404 6436 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,603 basehttp 38404 30912 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,639 basehttp 38404 13760 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:52,673 basehttp 38404 5204 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,714 basehttp 38404 41236 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:52,764 basehttp 38404 19736 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,844 basehttp 38404 6436 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,884 basehttp 38404 13760 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,914 basehttp 38404 30912 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:52,939 basehttp 38404 5204 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:53,028 basehttp 38404 19736 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:53,086 basehttp 38404 41236 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:53,149 basehttp 38404 5204 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:53,192 basehttp 38404 13760 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:53,224 basehttp 38404 30912 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:53,267 basehttp 38404 19736 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:53,314 basehttp 38404 6436 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:53,381 basehttp 38404 5204 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:53,430 basehttp 38404 41236 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:53,484 basehttp 38404 30912 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:53,501 basehttp 38404 13760 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:53,522 basehttp 38404 19736 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:53,551 basehttp 38404 5204 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:09:53,562 basehttp 38404 6436 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:09:59,131 basehttp 38404 6436 "OPTIONS /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:59,132 basehttp 38404 5204 "OPTIONS /api/v1/ocr/health/ HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:59,133 basehttp 38404 19736 "OPTIONS /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:59,139 basehttp 38404 5204 "OPTIONS /api/v1/ocr/health/ HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:59,348 basehttp 38404 19736 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:09:59,355 basehttp 38404 5204 "OPTIONS /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:59,433 basehttp 38404 19736 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:09:59,486 basehttp 38404 5204 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:09:59,498 basehttp 38404 13760 "OPTIONS /api/v1/receipts/count/ HTTP/1.1" 200 0
+INFO 2025-08-13 04:09:59,537 basehttp 38404 19736 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:09:59,596 basehttp 38404 13760 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:09:59,604 basehttp 38404 5204 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:09:59,671 basehttp 38404 5204 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:09:59,718 basehttp 38404 13760 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:09:59,773 basehttp 38404 13760 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:10:00,096 basehttp 38404 6436 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 04:10:00,808 basehttp 38404 6436 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 04:24:12,501 autoreload 38404 35104 C:\cursor\smart-account\backend\infrastructure\payment\services.py changed, reloading.
+INFO 2025-08-13 04:24:42,670 autoreload 42200 34692 Watching for file changes with StatReloader
+INFO 2025-08-13 04:26:31,990 autoreload 42200 34692 C:\cursor\smart-account\backend\interfaces\api\views.py changed, reloading.
+INFO 2025-08-13 04:27:00,875 autoreload 41564 34048 Watching for file changes with StatReloader
+INFO 2025-08-13 04:28:58,103 autoreload 41564 34048 C:\cursor\smart-account\backend\interfaces\api\urls.py changed, reloading.
+INFO 2025-08-13 04:29:06,581 autoreload 11000 40088 Watching for file changes with StatReloader
+INFO 2025-08-13 04:29:15,111 autoreload 11000 40088 C:\cursor\smart-account\backend\infrastructure\payment\services.py changed, reloading.
+INFO 2025-08-13 04:29:20,802 autoreload 3972 28548 Watching for file changes with StatReloader
+INFO 2025-08-13 04:30:15,628 basehttp 3972 26156 "OPTIONS /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 0
+INFO 2025-08-13 04:30:15,629 basehttp 3972 30988 "OPTIONS /api/v1/ocr/health/ HTTP/1.1" 200 0
+INFO 2025-08-13 04:30:15,635 basehttp 3972 50028 "OPTIONS /api/v1/ocr/health/ HTTP/1.1" 200 0
+INFO 2025-08-13 04:30:15,635 basehttp 3972 26156 "OPTIONS /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 0
+INFO 2025-08-13 04:30:15,636 basehttp 3972 52956 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 04:30:15,637 basehttp 3972 30988 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+WARNING 2025-08-13 04:30:15,945 log 3972 26156 Unauthorized: /api/v1/ocr/health/
+WARNING 2025-08-13 04:30:15,945 log 3972 52956 Unauthorized: /api/v1/transactions/summary/
+WARNING 2025-08-13 04:30:15,945 log 3972 37404 Unauthorized: /api/v1/users/profile/
+WARNING 2025-08-13 04:30:15,954 basehttp 3972 26156 "GET /api/v1/ocr/health/ HTTP/1.1" 401 183
+WARNING 2025-08-13 04:30:15,956 basehttp 3972 52956 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 401 183
+WARNING 2025-08-13 04:30:15,956 basehttp 3972 37404 "GET /api/v1/users/profile/ HTTP/1.1" 401 183
+WARNING 2025-08-13 04:30:15,960 log 3972 30988 Unauthorized: /api/v1/ocr/health/
+WARNING 2025-08-13 04:30:15,965 log 3972 50028 Unauthorized: /api/v1/transactions/summary/
+WARNING 2025-08-13 04:30:15,970 log 3972 46932 Unauthorized: /api/v1/users/profile/
+WARNING 2025-08-13 04:30:15,976 basehttp 3972 30988 "GET /api/v1/ocr/health/ HTTP/1.1" 401 183
+WARNING 2025-08-13 04:30:15,976 basehttp 3972 50028 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 401 183
+WARNING 2025-08-13 04:30:15,978 basehttp 3972 46932 "GET /api/v1/users/profile/ HTTP/1.1" 401 183
+INFO 2025-08-13 04:30:16,038 basehttp 3972 37404 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-13 04:30:16,053 basehttp 3972 46932 "POST /api/v1/auth/token/refresh/ HTTP/1.1" 200 582
+INFO 2025-08-13 04:30:16,826 basehttp 3972 37404 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 04:30:16,850 basehttp 3972 46932 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:30:16,986 basehttp 3972 37404 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 04:30:16,998 basehttp 3972 46932 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:30:17,081 basehttp 3972 46932 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:30:17,201 basehttp 3972 46932 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:30:17,270 basehttp 3972 37404 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:30:17,348 basehttp 3972 46932 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:30:17,431 basehttp 3972 30988 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:30:17,500 basehttp 3972 37404 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:30:17,611 basehttp 3972 30988 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:30:17,632 basehttp 3972 37404 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:30:17,749 basehttp 3972 37404 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:30:17,767 basehttp 3972 50028 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 04:30:17,796 basehttp 3972 30988 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:30:17,859 basehttp 3972 37404 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:30:17,893 basehttp 3972 30988 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:30:17,968 basehttp 3972 30988 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:30:18,751 basehttp 3972 50028 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 04:30:43,115 autoreload 12624 2552 Watching for file changes with StatReloader
+INFO 2025-08-13 04:31:08,922 basehttp 12624 25344 "OPTIONS /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 0
+INFO 2025-08-13 04:31:08,922 basehttp 12624 19380 "OPTIONS /api/v1/ocr/health/ HTTP/1.1" 200 0
+INFO 2025-08-13 04:31:08,925 basehttp 12624 25344 "OPTIONS /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 0
+INFO 2025-08-13 04:31:08,926 basehttp 12624 19380 "OPTIONS /api/v1/ocr/health/ HTTP/1.1" 200 0
+INFO 2025-08-13 04:31:08,930 basehttp 12624 25344 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 04:31:08,931 basehttp 12624 19380 "OPTIONS /api/v1/users/profile/ HTTP/1.1" 200 0
+INFO 2025-08-13 04:31:09,644 basehttp 12624 24456 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 04:31:09,666 basehttp 12624 39576 "GET /api/v1/users/profile/ HTTP/1.1" 200 737
+INFO 2025-08-13 04:31:09,752 basehttp 12624 25344 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:09,752 basehttp 12624 27372 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:09,837 basehttp 12624 27372 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:09,985 basehttp 12624 27372 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:10,089 basehttp 12624 25344 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:10,124 basehttp 12624 39576 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:10,206 basehttp 12624 25344 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:10,257 basehttp 12624 27372 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:10,257 basehttp 12624 30700 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 04:31:10,318 basehttp 12624 25344 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:10,384 basehttp 12624 39576 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:10,422 basehttp 12624 25344 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:10,493 basehttp 12624 27372 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:10,537 basehttp 12624 25344 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:10,574 basehttp 12624 19380 "GET /api/v1/ocr/health/ HTTP/1.1" 200 216
+INFO 2025-08-13 04:31:10,608 basehttp 12624 27372 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:10,682 basehttp 12624 27372 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:11,050 basehttp 12624 30700 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 04:31:11,946 basehttp 12624 30700 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 04:31:19,716 basehttp 12624 30700 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 04:31:19,809 basehttp 12624 30700 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 04:31:20,115 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:20,151 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:20,166 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:20,318 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:20,328 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:20,367 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:20,380 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:20,432 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:20,463 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:20,662 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:20,690 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:20,778 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:20,807 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:20,852 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:20,924 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:20,969 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,048 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,112 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,176 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:21,215 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,244 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,298 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:21,380 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,422 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:21,472 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,533 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,567 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,618 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,693 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,718 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:21,774 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:21,860 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,890 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:21,935 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:21,993 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:22,015 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:22,055 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:22,096 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:22,126 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:22,141 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:24,429 basehttp 12624 27372 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:24,553 basehttp 12624 27372 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:24,626 basehttp 12624 39576 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:24,697 basehttp 12624 27372 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:24,741 basehttp 12624 39576 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:24,786 basehttp 12624 24456 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:24,850 basehttp 12624 39576 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:24,898 basehttp 12624 24456 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:24,966 basehttp 12624 24456 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:25,219 basehttp 12624 19380 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 04:31:26,064 basehttp 12624 19380 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 04:31:26,855 basehttp 12624 19380 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:27,024 basehttp 12624 19380 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:27,052 basehttp 12624 39576 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:27,238 basehttp 12624 19380 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:27,273 basehttp 12624 39576 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:27,321 basehttp 12624 27372 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:27,392 basehttp 12624 39576 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:27,453 basehttp 12624 27372 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:27,551 basehttp 12624 27372 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:27,714 basehttp 12624 24456 "GET /api/v1/ocr/health/ HTTP/1.1" 200 215
+INFO 2025-08-13 04:31:28,422 basehttp 12624 24456 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 04:31:29,204 basehttp 12624 24456 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:29,306 basehttp 12624 24456 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:29,342 basehttp 12624 39576 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:29,416 basehttp 12624 24456 "GET /api/v1/transactions/summary/?dateFrom=2025-07-31&dateTo=2025-08-30&groupBy=month%2Ccategory%2Cmerchant HTTP/1.1" 200 340
+INFO 2025-08-13 04:31:29,463 basehttp 12624 39576 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:29,503 basehttp 12624 19380 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:29,565 basehttp 12624 39576 "GET /api/v1/transactions/summary/?dateFrom=2025-05-31&dateTo=2025-06-29 HTTP/1.1" 200 52
+INFO 2025-08-13 04:31:29,609 basehttp 12624 19380 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:29,684 basehttp 12624 19380 "GET /api/v1/receipts/count/ HTTP/1.1" 200 27
+INFO 2025-08-13 04:31:29,757 basehttp 12624 27372 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 04:31:30,496 basehttp 12624 27372 "GET /api/v1/ocr/health/ HTTP/1.1" 200 214
+INFO 2025-08-13 04:31:32,995 basehttp 12624 27372 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 04:31:33,143 basehttp 12624 27372 "GET /api/v1/receipts/?accountId=df9e9008-4923-43d3-a399-a971c81aba8b&sort=date&order=desc&limit=24 HTTP/1.1" 200 6258
+INFO 2025-08-13 04:31:33,591 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:33,685 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:33,705 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:33,772 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:33,920 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:33,956 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:34,105 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:34,168 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:34,242 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:34,360 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:34,502 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:34,566 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:34,598 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:34,610 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:34,882 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:35,064 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:35,095 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:35,141 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:35,203 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:35,236 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:35,306 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=bce4f37e-d6a9-40b3-b9ca-b6267fccfbfe&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:35,510 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=58e9cc6a-faf5-42e1-95e8-250da56de217&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:35,587 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=14864dad-f2f0-4051-be52-0e8f0368c0d4&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:35,730 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=323e0181-e5fc-4521-865a-ee37c552c4d0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:35,784 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=c3d1e1fd-2c3f-4d5b-bb22-198c9551c902&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:35,856 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=2805f7e7-1f86-4c91-9cb1-b941b21d66a0&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:36,026 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=edb275ff-5fdd-466b-b6af-4239cbcd4b5f&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:36,211 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=e344c30e-2b81-46fd-bddc-74be921e3416&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:36,269 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=d3ec0b56-1bb9-485e-be27-de88e9094cb9&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:36,402 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=c55514dd-3f16-41b9-99be-04e2fce1b804&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:36,512 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=29e03c3b-8883-496a-b75e-ab5ab974b68f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:36,600 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=3f30c182-806d-4af4-8be1-f411231ea34f&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:36,685 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=226e0ff2-cebb-4d1e-8ae2-9e29dd516496&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:36,814 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=569274b9-c0b0-418a-bae3-8b5f5d0364ee&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:36,844 basehttp 12624 27372 "GET /api/v1/transactions/?receipt_id=c7fd4d69-e178-4e29-b6fb-424f81702905&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:36,943 basehttp 12624 30700 "GET /api/v1/transactions/?receipt_id=559b53a9-de4c-487e-9bc5-747934baf711&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:37,126 basehttp 12624 25344 "GET /api/v1/transactions/?receipt_id=2b8e1f44-5d42-475e-9d13-02ae9b4400cb&limit=1&offset=0 HTTP/1.1" 200 185
+INFO 2025-08-13 04:31:37,145 basehttp 12624 24456 "GET /api/v1/transactions/?receipt_id=0fdd877e-101b-45db-966f-c87b751c7440&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:37,212 basehttp 12624 39576 "GET /api/v1/transactions/?receipt_id=7e74f4ca-3d2d-480a-9746-678f2e14e50c&limit=1&offset=0 HTTP/1.1" 200 140
+INFO 2025-08-13 04:31:37,237 basehttp 12624 19380 "GET /api/v1/transactions/?receipt_id=e4715b6c-b0e7-4e6c-9078-14ba9b227a37&limit=1&offset=0 HTTP/1.1" 200 140

@@ -13,6 +13,8 @@ interface TxItem {
   currency: string;
   category?: string | null;
   receipt_id?: string | null;
+  client_id?: string | null;
+  client_name?: string | null;
 }
 
 const formatMoney = (amount: string, currency: string) => {
@@ -43,6 +45,7 @@ const TransactionsPage: React.FC = () => {
   const dateTo = searchParams.get('dateTo') || '';
   const type = searchParams.get('type') || '';
   const category = searchParams.get('category') || '';
+  const clientId = searchParams.get('client_id') || '';
   const pageLimit = Number(searchParams.get('limit') || 50);
   const pageOffset = Number(searchParams.get('offset') || 0);
 
@@ -72,6 +75,7 @@ const TransactionsPage: React.FC = () => {
         if (dateTo) url.searchParams.set('dateTo', dateTo);
         if (type) url.searchParams.set('type', type);
         if (category) url.searchParams.set('category', category);
+        if (clientId) url.searchParams.set('client_id', clientId);
         const res: any = await fetch(url.toString(), {
           headers: {
             'Content-Type': 'application/json',
@@ -154,12 +158,13 @@ const TransactionsPage: React.FC = () => {
     try { localStorage.removeItem('tx_filters'); } catch {}
   };
 
-  const filtersActive = !!(dateFrom || dateTo || type || category);
+  const filtersActive = !!(dateFrom || dateTo || type || category || clientId);
   const chips: Array<{ key: string; label: string; value: string }> = [];
   if (dateFrom) chips.push({ key: 'dateFrom', label: 'From', value: dateFrom });
   if (dateTo) chips.push({ key: 'dateTo', label: 'To', value: dateTo });
   if (type) chips.push({ key: 'type', label: 'Type', value: type });
   if (category) chips.push({ key: 'category', label: 'Category', value: category });
+  if (clientId) chips.push({ key: 'client_id', label: 'Client', value: clientId });
   const removeChip = (k: string) => {
     searchParams.delete(k);
     searchParams.set('offset', '0');
@@ -297,6 +302,10 @@ const TransactionsPage: React.FC = () => {
             ) : (
               <input type="text" value={category} onChange={handleCategory} placeholder="e.g., transport" className="input input-bordered w-full" />
             )}
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Client ID</label>
+            <input type="text" value={clientId} onChange={(e)=>{ const v=e.target.value; if (v) searchParams.set('client_id', v); else searchParams.delete('client_id'); setSearchParams(searchParams, { replace: true }); }} placeholder="optional" className="input input-bordered w-full" />
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1">Page size</label>

@@ -2458,7 +2458,8 @@ class SubscriptionCheckoutView(APIView):
 
     def post(self, request):
         svc = StripePaymentService()
-        result = svc.create_checkout_session(user_id=str(request.user.id))
+        price_id = (request.data or {}).get('price_id') if hasattr(request, 'data') else None
+        result = svc.create_checkout_session(user_id=str(request.user.id), price_id=price_id)
         return Response(result, status=200 if result.get('success') else 400)
 
 
@@ -2481,6 +2482,15 @@ class SubscriptionPortalView(APIView):
         # Customer lookup can be wired when user billing is implemented
         svc = StripePaymentService()
         result = svc.create_billing_portal(customer_id=None, user_id=str(request.user.id))
+        return Response(result, status=200 if result.get('success') else 400)
+
+
+class SubscriptionPlansView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        svc = StripePaymentService()
+        result = svc.list_plans()
         return Response(result, status=200 if result.get('success') else 400)
 
 
@@ -2781,7 +2791,8 @@ class TransactionCreateView(APIView):
                         currency=data.get('currency') or 'GBP',
                         type=data['type'],
                         transaction_date=data['transaction_date'],
-                        category=(data.get('category') or None),
+                    category=(data.get('category') or None),
+                    client_id=str(data.get('client_id')) if data.get('client_id') else None,
                     )
                     return Response({'success': True, 'transaction_id': str(obj.id)}, status=200)
                 except Exception as db_ex:
@@ -2826,6 +2837,9 @@ class TransactionCreateView(APIView):
             if 'category' in data:
                 obj.category = data.get('category') or None
                 fields_to_update.append('category')
+            if 'client_id' in data:
+                obj.client_id = str(data.get('client_id')) if data.get('client_id') else None
+                fields_to_update.append('client_id')
             fields_to_update.append('updated_at')
             obj.save(update_fields=fields_to_update)
             return Response({'success': True}, status=200)
@@ -2862,8 +2876,9 @@ class TransactionCreateView(APIView):
             type_param = request.query_params.get('type')
             category_param = request.query_params.get('category')
             receipt_id_param = request.query_params.get('receipt_id')
+            client_id_param = request.query_params.get('client_id')
 
-            qs = TxModel.objects.filter(user_id=request.user.id).select_related('receipt')
+            qs = TxModel.objects.filter(user_id=request.user.id).select_related('receipt', 'client')
             if date_from:
                 qs = qs.filter(transaction_date__gte=date_from)
             if date_to:
@@ -2876,6 +2891,32 @@ class TransactionCreateView(APIView):
                 qs = qs.filter(category__in=cats)
             if receipt_id_param:
                 qs = qs.filter(receipt_id=receipt_id_param)
+            if client_id_param:
+                qs = qs.filter(client_id=client_id_param)
+
+            # Fast-path: when checking existence for a specific receipt (used by Receipts grid),
+            # avoid heavy joins/aggregation and return a minimal response.
+            if receipt_id_param and limit <= 1 and offset == 0:
+                # Build a fresh queryset without select_related joins to avoid touching optional tables
+                first_id = TxModel.objects.filter(
+                    user_id=request.user.id,
+                    receipt_id=receipt_id_param,
+                ).values_list('id', flat=True)[:1]
+                items = ([{'id': str(first_id[0])}] if first_id else [])
+                page = {
+                    'limit': limit,
+                    'offset': offset,
+                    'totalCount': 1 if first_id else 0,
+                    'hasNext': False,
+                    'hasPrev': False,
+                }
+                totals = {'income': [], 'expense': []}
+                resp = {'success': True, 'items': items, 'page': page, 'totals': totals}
+                try:
+                    logger.info('transactions.list existence-check', extra={'ms': int((time.perf_counter()-t0)*1000), 'user_id': str(request.user.id), 'receipt_id': receipt_id_param, 'found': bool(first_id)})
+                except Exception:
+                    pass
+                return Response(resp, status=200)
 
             total_count = qs.count()
 
@@ -2901,13 +2942,15 @@ class TransactionCreateView(APIView):
                 {
                     'id': str(t.id),
                     'description': t.description,
-                    'merchant': ((t.receipt.ocr_data or {}).get('merchant_name') if t.receipt and t.receipt.ocr_data else None),
+                    'merchant': (t.receipt.ocr_data.get('merchant_name') if (t.receipt and isinstance(getattr(t.receipt, 'ocr_data', None), dict)) else None),
                     'amount': str(t.amount),
                     'currency': t.currency,
                     'type': t.type,
                     'transaction_date': t.transaction_date.isoformat(),
                     'receipt_id': str(t.receipt_id) if t.receipt_id else None,
                     'category': t.category,
+                    'client_id': str(t.client_id) if t.client_id else None,
+                    'client_name': (t.client.name if getattr(t, 'client', None) else None),
                 }
                 for t in page_qs
             ]
@@ -2942,8 +2985,9 @@ class TransactionCreateView(APIView):
                 type_param = request.query_params.get('type')
                 category_param = request.query_params.get('category')
                 receipt_id_param = request.query_params.get('receipt_id')
+                client_id_param = request.query_params.get('client_id')
 
-                qs = TxModel.objects.filter(user_id=request.user.id).select_related('receipt')
+                qs = TxModel.objects.filter(user_id=request.user.id).select_related('receipt', 'client')
                 if date_from:
                     qs = qs.filter(transaction_date__gte=date_from)
                 if date_to:
@@ -2956,6 +3000,24 @@ class TransactionCreateView(APIView):
                     qs = qs.filter(category__in=cats)
                 if receipt_id_param:
                     qs = qs.filter(receipt_id=receipt_id_param)
+                if client_id_param:
+                    qs = qs.filter(client_id=client_id_param)
+                # Fast-path fallback for existence check
+                if receipt_id_param and limit <= 1 and offset == 0:
+                    first_id = TxModel.objects.filter(
+                        user_id=request.user.id,
+                        receipt_id=receipt_id_param,
+                    ).values_list('id', flat=True)[:1]
+                    items = ([{'id': str(first_id[0])}] if first_id else [])
+                    page = {
+                        'limit': limit,
+                        'offset': offset,
+                        'totalCount': 1 if first_id else 0,
+                        'hasNext': False,
+                        'hasPrev': False,
+                    }
+                    totals = {'income': [], 'expense': []}
+                    return Response({'success': True, 'items': items, 'page': page, 'totals': totals}, status=200)
                 total_count = qs.count()
                 income_by_currency = list(qs.filter(type='income').values('currency').annotate(total=Sum('amount')))
                 expense_by_currency = list(qs.filter(type='expense').values('currency').annotate(total=Sum('amount')))
@@ -2970,13 +3032,15 @@ class TransactionCreateView(APIView):
                     {
                         'id': str(t.id),
                         'description': t.description,
-                        'merchant': ((t.receipt.ocr_data or {}).get('merchant_name') if t.receipt and t.receipt.ocr_data else None),
+                        'merchant': (t.receipt.ocr_data.get('merchant_name') if (t.receipt and isinstance(getattr(t.receipt, 'ocr_data', None), dict)) else None),
                         'amount': str(t.amount),
                         'currency': t.currency,
                         'type': t.type,
                         'transaction_date': t.transaction_date.isoformat(),
                         'receipt_id': str(t.receipt_id) if t.receipt_id else None,
                         'category': t.category,
+                        'client_id': str(t.client_id) if t.client_id else None,
+                        'client_name': (t.client.name if getattr(t, 'client', None) else None),
                     }
                     for t in page_qs
                 ]

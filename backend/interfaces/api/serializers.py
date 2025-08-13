@@ -461,6 +461,7 @@ class TransactionCreateSerializer(serializers.Serializer):
     transaction_date = serializers.DateField()
     receipt_id = serializers.UUIDField(required=False)
     category = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    client_id = serializers.UUIDField(required=False)
 
     def validate_amount(self, value):
         if value <= 0:
@@ -475,6 +476,7 @@ class TransactionUpdateSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=['income', 'expense'], required=False)
     transaction_date = serializers.DateField(required=False)
     category = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    client_id = serializers.UUIDField(required=False)
 
     def validate_amount(self, value):
         if value <= 0:

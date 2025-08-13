@@ -11,7 +11,7 @@ from .views import (
     PasswordResetRequestView, PasswordResetConfirmView,
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView, ReceiptManualCreateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
-    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionsExportCSVView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView, SubscriptionCheckoutView, StripeWebhookView, SubscriptionPortalView, ClientsView,
+    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionsExportCSVView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView, SubscriptionCheckoutView, StripeWebhookView, SubscriptionPortalView, ClientsView, SubscriptionPlansView,
 )
 from .management_views import (
     CreateFolderView, FolderDetailView, FolderListView, SearchReceiptsView,
@@ -67,6 +67,7 @@ urlpatterns = [
     path('subscriptions/checkout/', SubscriptionCheckoutView.as_view(), name='subscription-checkout'),
     path('subscriptions/stripe/webhook/', StripeWebhookView.as_view(), name='stripe-webhook'),
     path('subscriptions/portal/', SubscriptionPortalView.as_view(), name='subscription-portal'),
+    path('subscriptions/plans/', SubscriptionPlansView.as_view(), name='subscription-plans'),
     # Clients (US-015 minimal)
     path('clients/', ClientsView.as_view(), name='clients'),
     

@@ -423,6 +423,8 @@ class Transaction(models.Model):
     type = models.CharField(max_length=10, choices=[('income', 'income'), ('expense', 'expense')])
     transaction_date = models.DateField()
     category = models.CharField(max_length=100, blank=True, null=True)
+    # Optional association to Client (US-015)
+    client = models.ForeignKey('Client', on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -433,6 +435,7 @@ class Transaction(models.Model):
             models.Index(fields=['transaction_date']),
             models.Index(fields=['type']),
             models.Index(fields=['category']),
+            models.Index(fields=['client']),
         ]
         ordering = ['-transaction_date', '-created_at']
 

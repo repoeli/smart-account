@@ -48,12 +48,14 @@ Next steps queued:
   - [US-008][US-009] Transaction editing: backend PATCH allows updating description, amount, currency, type, transaction_date, and category. Add unit/integration tests (ownership, validation, date normalization) and E2E happy path from Transactions table inline editing and a future edit form.
   - [US-008][US-009] Frontend Edit modal: E2E to open, change fields, save, see updated row; simulate validation error (amount<=0) and assert error toast/no state change.
   - [US-008][US-009] Tests: Backend `receipt_id` filter → verify 0/1 results on `/transactions/?receipt_id=<id>`; include mixed dataset cases.
+  - [US-008][US-009] Regression test: ensure `/transactions` list handles non-dict/nullable `receipt.ocr_data` without 500 and returns items with `merchant=null` gracefully.
   - [US-008][US-009] Tests: Frontend E2E → Create transaction from Receipt Detail, reload detail, assert “Create Transaction” is disabled and shows explanatory note; verify only one row appears in `/transactions`.
   - [US-008][US-009] Optional UX: show a small “Converted” badge on receipts that already have a transaction. Implement via detail enrichment (`has_transaction`) or list-row check using `/transactions/?receipt_id` on demand.
   - [US-013][US-014] Stripe wiring: unit/integration tests to return no-op when keys missing; when keys present (mocked), verify Checkout URL is returned; webhook signature verification success/failure cases.
   - [US-015] Clients: backend tests for `GET/POST /clients/` (ownership scoping, validation errors, creation success); migration applied and model present.
   - [US-015] Future tasks: add update/delete endpoints and tie clients into receipts/transactions scoping in later iterations.
   - [US-015] ClientsPage E2E: list renders, create form validates name, successful create reloads list and shows toast; error banner on 500.
+  - [US-015][US-008][US-009] Transactions client link: tests that `client_id` is persisted on create/update, filterability later (future), and ownership enforced.
 
 - [US-010] Dashboard Phase – next big tasks
   - Add date range presets (This month, Last month, This year, Custom) controlling `/transactions/summary/` queries.

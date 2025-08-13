@@ -156,6 +156,9 @@
   - [US-013][US-014] Added `POST /subscriptions/portal/` to open Stripe Billing Portal (no-op when not configured). Service encapsulated in `infrastructure.payment.services` with env-guard.
   - [US-015] Client minimal CRUD (list/create): `GET /clients/` (owner-scoped), `POST /clients/` (validate and create). Added `Client` model (owner, name, email, company_name) with basic indexes.
   - Migration: added `0005_client.py` to create `clients` table and indexes.
+  - [US-015][US-008][US-009] Transactions can optionally reference a client: added `client` FK on transactions plus index. Migration `0006_transaction_client.py`. Create/Update endpoints accept `client_id` (optional).
+  - [US-015][US-008][US-009] Transactions list endpoint supports filter `client_id` and returns `client_name` when present.
+  - [US-008][US-009] Bug fix: hardened `GET /api/v1/transactions/` so `merchant` extraction is safe when `t.receipt.ocr_data` is not a dict (e.g., null/empty string). This removes 500 errors seen from `hasTransactionForReceipt` checks on Receipts page.
 
 - Frontend
   - TransactionsPage: Inline category editor with optimistic update + toasts; PATCH to `/transactions/:id` wired.
@@ -164,6 +167,7 @@
   - Receipts list (`ReceiptsPage.tsx`): shows storage origin badge (cloudinary/local) and OCR confidence percentage. Mapping updated to read `metadata.custom_fields`.
   - Receipt detail page (`ReceiptDetailPage.tsx`): implemented fully. Displays thumbnail, merchant, total, date, confidence, storage provider, Cloudinary public_id. Adds actions to reprocess with Paddle or OpenAI and to open the OCR results page.
   - API client (`api.ts`): `getReceipt` now normalizes backend shape (nested `ocr_data`, `metadata.custom_fields`) into the frontend `Receipt` type; `createTransaction` surfaces 409 duplicate as a user-friendly message. Added `updateTransaction`, and [US-013][US-014] `startSubscriptionCheckout`/`openBillingPortal` methods; [US-015] `getClients`/`createClient` methods.
+  - [US-015][US-008][US-009] Transactions page: added `client_id` filter input and the list now displays `client_name` when available.
   - [US-015] ClientsPage: minimal list/create UI added at `/clients` consuming the new endpoints.
   - [US-013][US-014] SubscriptionPage: minimal page at `/subscription` with actions to start checkout and open billing portal; both no-op gracefully when backend not configured.
   - Types (`types/api.ts`): aligned `receipt_type` union with backend; added optional `storage_provider` and `cloudinary_public_id` fields.
