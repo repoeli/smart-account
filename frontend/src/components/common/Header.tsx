@@ -10,6 +10,7 @@ import { useAppSelector, useAppDispatch } from '../../store';
 import { logout } from '../../store/slices/authSlice';
 import { toggleSearch } from '../../store/slices/uiSlice';
 import { useNavigate } from 'react-router-dom';
+import React from 'react';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -19,6 +20,20 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.auth);
+  const [sub, setSub] = React.useState<{ tier?: string; status?: string } | null>(null);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+        const res = await fetch(`${apiBase}/subscriptions/status/`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` } });
+        const data = await res.json().catch(()=>null);
+        if (res.ok && data?.success && data?.subscription) {
+          setSub({ tier: data.subscription.tier, status: data.subscription.status });
+        }
+      } catch {}
+    })();
+  }, []);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -80,6 +95,18 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
               <span className="sr-only">Search</span>
               <MagnifyingGlassIcon className="h-6 w-6" aria-hidden="true" />
             </button>
+
+            {/* Subscription indicator */}
+            {sub && (
+              <span
+                className={`hidden md:inline-block px-2 py-1 rounded text-xs border ${
+                  (sub.status || '').toLowerCase() === 'active' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-gray-50 text-gray-700 border-gray-200'
+                }`}
+                title={`Plan ${sub.tier || 'basic'} · ${sub.status || 'unknown'}`}
+              >
+                {sub.tier || 'basic'} · {sub.status || 'unknown'}
+              </span>
+            )}
 
             {/* Notifications */}
             <button

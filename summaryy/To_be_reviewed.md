@@ -58,8 +58,11 @@ Next steps queued:
   - Add endpoint test for `GET /subscriptions/status/` returning current user’s tier/status and ids.
   - Frontend E2E: Subscription page shows current status and updates after webhook-simulated state change.
   - Dashboard E2E: Clients KPI shows count from `/clients/count/` and navigates to `/clients`; subscription chip reflects status and tier; OCR pill remains.
+  - Stripe customer continuity: tests to assert `create_checkout_session` and `create_billing_portal` pass a stable customer (found or created by email) and that returned `customer_id` surfaces.
+  - Header E2E: subscription chip renders for authenticated users; reflects mocked status changes.
   - [US-015] Clients: backend tests for `GET/POST /clients/` (ownership scoping, validation errors, creation success); migration applied and model present.
   - Add tests for `GET/PATCH/DELETE /clients/:id` (ownership scoping, validation, deletion) and UI flows once wired on the ClientsPage.
+  - Transactions filters: tests to ensure `client_id` filter narrows results, persists through pagination, and is included in CSV export.
   - Frontend E2E: ClientsPage inline edit saves and reflects changes; delete removes the row with confirmation; error paths show toasts.
   - [US-015] Future tasks: add update/delete endpoints and tie clients into receipts/transactions scoping in later iterations.
   - [US-015] ClientsPage E2E: list renders, create form validates name, successful create reloads list and shows toast; error banner on 500.

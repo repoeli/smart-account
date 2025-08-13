@@ -157,6 +157,7 @@
   - [US-013][US-014] Added `POST /subscriptions/portal/` to open Stripe Billing Portal (no-op when not configured). Service encapsulated in `infrastructure.payment.services` with env-guard.
   - [US-013][US-014] Plans retrieval: added `GET /subscriptions/plans/` to list active recurring prices from Stripe (Basic/Premium/Platinum supported). Falls back to env price IDs when SDK or network is unavailable. Returns `publishable_key`.
   - [US-013][US-014] Webhook enrichment and persistence: webhook handler now extracts `user_id`, `price_id`, and plan details. Minimal persistence wired to update the requesting user's `subscription_tier`, `subscription_status`, and Stripe linkage fields (`stripe_customer_id`, `stripe_subscription_id`, `subscription_price_id`) based on events like `checkout.session.completed` and `customer.subscription.*`.
+  - [US-013][US-014] Checkout/Portal customer handling: service now finds or creates Stripe Customer by user email to improve continuity in Checkout and Billing Portal flows; endpoints pass `customer_id`/`customer_email` when present.
   - [US-015] Clients detail endpoints: added `GET /clients/:id`, `PATCH /clients/:id`, `DELETE /clients/:id` with ownership checks and validation via `ClientSerializer`.
   - [US-015] Client minimal CRUD (list/create): `GET /clients/` (owner-scoped), `POST /clients/` (validate and create). Added `Client` model (owner, name, email, company_name) with basic indexes.
   - Migration: added `0005_client.py` to create `clients` table and indexes.
@@ -171,11 +172,12 @@
   - Receipts list (`ReceiptsPage.tsx`): shows storage origin badge (cloudinary/local) and OCR confidence percentage. Mapping updated to read `metadata.custom_fields`.
   - Receipt detail page (`ReceiptDetailPage.tsx`): implemented fully. Displays thumbnail, merchant, total, date, confidence, storage provider, Cloudinary public_id. Adds actions to reprocess with Paddle or OpenAI and to open the OCR results page.
   - API client (`api.ts`): `getReceipt` now normalizes backend shape (nested `ocr_data`, `metadata.custom_fields`) into the frontend `Receipt` type; `createTransaction` surfaces 409 duplicate as a user-friendly message. Added `updateTransaction`, and [US-013][US-014] `startSubscriptionCheckout`/`openBillingPortal` methods; [US-015] `getClients`/`createClient` methods.
-  - [US-015][US-008][US-009] Transactions page: added `client_id` filter input and the list now displays `client_name` when available.
+  - [US-015][US-008][US-009] Transactions page: added Client filter dropdown populated from `/clients/`; CSV export now honors `client_id`.
   - [US-015] ClientsPage: list/create/edit/delete wired to `/clients` and `/clients/:id` with inline editing and confirmation on delete.
   - [US-013][US-014] SubscriptionPage: plan picker wired to `GET /subscriptions/plans/` and "Subscribe" per plan posting to `POST /subscriptions/checkout/` with `price_id`; portal button retained; default checkout fallback when no plans.
   - [US-013][US-014] API client: added `getSubscriptionPlans()` and extended `startSubscriptionCheckout(priceId?)` to accept a specific plan.
   - [US-013][US-014] Added `getSubscriptionStatus()` and surfaced current tier/status on `/subscription` page.
+  - [US-013][US-014] Header: added plan/status chip (reads `/subscriptions/status/`) to keep subscription visibility consistent with UI/UX docs.
   - Types (`types/api.ts`): aligned `receipt_type` union with backend; added optional `storage_provider` and `cloudinary_public_id` fields.
 
 - Settings/Config

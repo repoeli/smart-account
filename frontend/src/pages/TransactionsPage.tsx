@@ -34,6 +34,7 @@ const TransactionsPage: React.FC = () => {
   const [pageInfo, setPageInfo] = useState<{limit:number;offset:number;totalCount:number;hasNext:boolean;hasPrev:boolean}>({limit:50,offset:0,totalCount:0,hasNext:false,hasPrev:false});
   const [totals, setTotals] = useState<{income:{currency:string;sum:string}[];expense:{currency:string;sum:string}[]}>({income:[], expense:[]});
   const [categories, setCategories] = useState<string[]>([]);
+  const [clients, setClients] = useState<Array<{ id: string; name: string }>>([]);
   const [duplicateDraft, setDuplicateDraft] = useState<TxItem | null>(null);
   const [editDraft, setEditDraft] = useState<TxItem | null>(null);
 
@@ -54,13 +55,22 @@ const TransactionsPage: React.FC = () => {
       try {
         setLoading(true);
         const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
-        // fetch categories (once per page load)
+        // fetch categories (once per page load) and clients list for filter
         try {
           if (!categories.length) {
             const catRes = await fetch(`${apiBase}/categories/`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }});
             if (catRes.ok) {
               const cdata = await catRes.json();
               if (cdata?.success && Array.isArray(cdata.categories)) setCategories(cdata.categories);
+            }
+          }
+          if (!clients.length) {
+            const clRes = await fetch(`${apiBase}/clients/`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }});
+            if (clRes.ok) {
+              const c = await clRes.json();
+              if (c?.success && Array.isArray(c.items)) {
+                setClients(c.items.map((it: any) => ({ id: String(it.id), name: String(it.name) })));
+              }
             }
           }
         } catch {}
@@ -139,7 +149,7 @@ const TransactionsPage: React.FC = () => {
     setSearchParams(searchParams, { replace: true });
   };
   const clearFilters = () => {
-    ['dateFrom', 'dateTo', 'type', 'category'].forEach(k => searchParams.delete(k));
+    ['dateFrom', 'dateTo', 'type', 'category', 'client_id'].forEach(k => searchParams.delete(k));
     searchParams.set('offset', '0');
     setSearchParams(searchParams, { replace: true });
   };
@@ -150,7 +160,7 @@ const TransactionsPage: React.FC = () => {
     sp.set('sort', 'date');
     sp.set('order', 'desc');
     // Filters cleared
-    ['dateFrom','dateTo','type','category'].forEach(k => sp.delete(k));
+    ['dateFrom','dateTo','type','category','client_id'].forEach(k => sp.delete(k));
     // Pagination defaults
     sp.set('limit', '50');
     sp.set('offset', '0');
@@ -180,6 +190,7 @@ const TransactionsPage: React.FC = () => {
     if (category) url.searchParams.set('category', category);
     if (sort) url.searchParams.set('sort', sort);
     if (order) url.searchParams.set('order', order);
+    if (clientId) url.searchParams.set('client_id', clientId);
     try {
       const res = await fetch(url.toString(), {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }
@@ -199,9 +210,9 @@ const TransactionsPage: React.FC = () => {
 
   // Persist filter/sort state
   useEffect(() => {
-    const state = { sort, order, dateFrom, dateTo, type, category, limit: pageLimit, offset: pageOffset };
+    const state = { sort, order, dateFrom, dateTo, type, category, client_id: clientId, limit: pageLimit, offset: pageOffset };
     try { localStorage.setItem('tx_filters', JSON.stringify(state)); } catch {}
-  }, [sort, order, dateFrom, dateTo, type, category, pageLimit, pageOffset]);
+  }, [sort, order, dateFrom, dateTo, type, category, clientId, pageLimit, pageOffset]);
 
   // Hydrate from last-used on initial mount when params are mostly empty
   useEffect(() => {
@@ -213,7 +224,7 @@ const TransactionsPage: React.FC = () => {
         if (raw) {
           const saved = JSON.parse(raw);
           const sp = new URLSearchParams(searchParams);
-          keys.forEach(k => { if (saved[k] !== undefined && saved[k] !== null && saved[k] !== '') sp.set(k, String(saved[k])); });
+          [...keys, 'client_id'].forEach(k => { if (saved[k] !== undefined && saved[k] !== null && saved[k] !== '') sp.set(k, String(saved[k])); });
           setSearchParams(sp, { replace: true });
         }
       } catch {}
@@ -304,8 +315,15 @@ const TransactionsPage: React.FC = () => {
             )}
           </div>
           <div>
-            <label className="block text-xs text-gray-600 mb-1">Client ID</label>
-            <input type="text" value={clientId} onChange={(e)=>{ const v=e.target.value; if (v) searchParams.set('client_id', v); else searchParams.delete('client_id'); setSearchParams(searchParams, { replace: true }); }} placeholder="optional" className="input input-bordered w-full" />
+            <label className="block text-xs text-gray-600 mb-1">Client</label>
+            {clients.length > 0 ? (
+              <select value={clientId} onChange={(e)=>{ const v=e.target.value; if (v) searchParams.set('client_id', v); else searchParams.delete('client_id'); searchParams.set('offset','0'); setSearchParams(searchParams, { replace: true }); }} className="input input-bordered w-full">
+                <option value="">All</option>
+                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            ) : (
+              <input type="text" value={clientId} onChange={(e)=>{ const v=e.target.value; if (v) searchParams.set('client_id', v); else searchParams.delete('client_id'); setSearchParams(searchParams, { replace: true }); }} placeholder="optional" className="input input-bordered w-full" />
+            )}
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1">Page size</label>

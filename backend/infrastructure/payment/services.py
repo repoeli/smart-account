@@ -32,7 +32,23 @@ class StripePaymentService:
         except Exception:
             self.enabled = False
 
-    def create_checkout_session(self, user_id: str, price_id: Optional[str] = None) -> dict:
+    def _ensure_customer(self, email: Optional[str]) -> Optional[str]:
+        """Find or create a Stripe customer by email. Returns customer_id or None."""
+        if not self.enabled or not email:
+            return None
+        try:
+            import stripe
+            stripe.api_key = self.config.secret_key
+            # Try to find an existing customer by email (best-effort)
+            res = stripe.Customer.list(email=email, limit=1)
+            if getattr(res, 'data', None):
+                return res.data[0].id
+            cust = stripe.Customer.create(email=email)
+            return cust.id
+        except Exception:
+            return None
+
+    def create_checkout_session(self, user_id: str, price_id: Optional[str] = None, customer_id: Optional[str] = None, customer_email: Optional[str] = None) -> dict:
         if not self.enabled:
             logger.info('Stripe disabled; returning no-op checkout session')
             return { 'success': True, 'url': None }
@@ -52,17 +68,19 @@ class StripePaymentService:
                     pid = None
             if not pid:
                 return { 'success': False, 'message': 'No Stripe price configured/found' }
+            cust_id = customer_id or self._ensure_customer(customer_email)
             session = stripe.checkout.Session.create(
                 mode='subscription',
                 line_items=[{ 'price': pid, 'quantity': 1 }],
                 success_url=settings.PUBLIC_BASE_URL + '/subscription/success',
                 cancel_url=settings.PUBLIC_BASE_URL + '/subscription/cancel',
+                customer=cust_id if cust_id else None,
                 subscription_data={
                     'metadata': { 'user_id': user_id }
                 },
                 metadata={ 'user_id': user_id },
             )
-            return { 'success': True, 'url': session.url }
+            return { 'success': True, 'url': session.url, 'customer_id': cust_id }
         except Exception as e:
             logger.warning('Stripe checkout failed: %s', e)
             return { 'success': False, 'message': str(e) }
@@ -125,7 +143,7 @@ class StripePaymentService:
         except Exception as e:
             return { 'success': False, 'message': str(e) }
 
-    def create_billing_portal(self, customer_id: Optional[str] = None, user_id: Optional[str] = None) -> dict:
+    def create_billing_portal(self, customer_id: Optional[str] = None, user_id: Optional[str] = None, customer_email: Optional[str] = None) -> dict:
         if not self.enabled:
             logger.info('Stripe disabled; returning no-op portal session')
             return { 'success': True, 'url': None }
@@ -134,13 +152,14 @@ class StripePaymentService:
             stripe.api_key = self.config.secret_key
             # In a full implementation, we would look up the Stripe customer id by user
             if not customer_id:
-                # no customer yet; no-op
-                return { 'success': True, 'url': None }
+                customer_id = self._ensure_customer(customer_email)
+                if not customer_id:
+                    return { 'success': True, 'url': None }
             portal = stripe.billing_portal.Session.create(
                 customer=customer_id,
                 return_url=settings.PUBLIC_BASE_URL + '/account',
             )
-            return { 'success': True, 'url': portal.url }
+            return { 'success': True, 'url': portal.url, 'customer_id': customer_id }
         except Exception as e:
             logger.warning('Stripe portal failed: %s', e)
             return { 'success': False, 'message': str(e) }

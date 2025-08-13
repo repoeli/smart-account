@@ -332,12 +332,12 @@ class ApiClient {
   }
 
   // Subscriptions (optional)
-  async startSubscriptionCheckout(priceId?: string): Promise<{ success: boolean; url?: string; message?: string }>{
+  async startSubscriptionCheckout(priceId?: string): Promise<{ success: boolean; url?: string; message?: string; customer_id?: string }>{
     const response = await this.client.post('/subscriptions/checkout/', priceId ? { price_id: priceId } : {});
     return response.data;
   }
 
-  async openBillingPortal(): Promise<{ success: boolean; url?: string; message?: string }>{
+  async openBillingPortal(): Promise<{ success: boolean; url?: string; message?: string; customer_id?: string }>{
     const response = await this.client.post('/subscriptions/portal/', {});
     return response.data;
   }

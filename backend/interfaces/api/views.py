@@ -2459,7 +2459,12 @@ class SubscriptionCheckoutView(APIView):
     def post(self, request):
         svc = StripePaymentService()
         price_id = (request.data or {}).get('price_id') if hasattr(request, 'data') else None
-        result = svc.create_checkout_session(user_id=str(request.user.id), price_id=price_id)
+        result = svc.create_checkout_session(
+            user_id=str(request.user.id),
+            price_id=price_id,
+            customer_id=getattr(request.user, 'stripe_customer_id', None),
+            customer_email=getattr(request.user, 'email', None),
+        )
         return Response(result, status=200 if result.get('success') else 400)
 
 
@@ -2535,7 +2540,11 @@ class SubscriptionPortalView(APIView):
     def post(self, request):
         # Customer lookup can be wired when user billing is implemented
         svc = StripePaymentService()
-        result = svc.create_billing_portal(customer_id=None, user_id=str(request.user.id))
+        result = svc.create_billing_portal(
+            customer_id=getattr(request.user, 'stripe_customer_id', None),
+            user_id=str(request.user.id),
+            customer_email=getattr(request.user, 'email', None),
+        )
         return Response(result, status=200 if result.get('success') else 400)
 
 
