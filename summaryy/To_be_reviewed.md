@@ -54,11 +54,24 @@ Next steps queued:
   - [US-013][US-014] Stripe wiring: unit/integration tests to return no-op when keys missing; when keys present (mocked), verify Checkout URL is returned; webhook signature verification success/failure cases.
   - Add tests for `GET /subscriptions/plans/`: with Stripe mocked, verify recurring prices listed with fields (id, nickname, currency, unit_amount, interval); when Stripe disabled, env price IDs are returned. Ensure `publishable_key` included.
   - Frontend E2E: Subscription plan list renders; clicking Subscribe for a plan opens Checkout URL; default checkout works when no plans are listed.
+  - Frontend E2E: Subscription plan list renders exactly three plans (Basic, Premium, Platinum) based on env price ids; the active plan shows a "Current" badge and its button is disabled; clicking Subscribe on another plan opens Checkout and redirects back to `/subscription` success/cancel routes.
+  - [US-013][US-015] Clients plan gating: tests that Basic users receive 403 `plan_restricted` on `GET/POST /clients`, Premium users succeed.
   - Webhook persistence: unit/integration tests that `checkout.session.completed` and `customer.subscription.*` events update `User.subscription_status`, `subscription_tier` (mapped by env price ids), and Stripe linkage fields (`stripe_customer_id`, `stripe_subscription_id`, `subscription_price_id`).
   - Add endpoint test for `GET /subscriptions/status/` returning current user’s tier/status and ids.
   - Frontend E2E: Subscription page shows current status and updates after webhook-simulated state change.
   - Dashboard E2E: Clients KPI shows count from `/clients/count/` and navigates to `/clients`; subscription chip reflects status and tier; OCR pill remains.
+  - Frontend plan gating UX:
+    - ClientsPage: simulate 403 to verify upgrade CTA and disabled Create.
+    - ReceiptUploadPage: usage bar renders from `/subscriptions/usage/`; button disables when limit reached; 403 `plan_limit_reached` shows upgrade CTA.
+    - TransactionsPage: CSV export shows friendly toast on 403 and hints to upgrade.
   - Stripe customer continuity: tests to assert `create_checkout_session` and `create_billing_portal` pass a stable customer (found or created by email) and that returned `customer_id` surfaces.
+  - Add tests for `GET /subscriptions/current/` (when Stripe enabled) and `GET /subscriptions/usage/` for receipt counts vs tier limits.
+  - Add tests for `GET /subscriptions/invoices/` listing invoice attributes (id, created, status, amount_due, urls) and UI table rendering.
+  - Plans enrichment: verify `/subscriptions/plans/` includes `product_id`, `product_name`, `product_metadata`, `image`, and `payment_link_url` mapping for known prices.
+  - Frontend: verify refined `isCurrentPlan` logic correctly marks Basic (including free trial) as current using `price_id`, `product_id`, and tier/status fallbacks.
+  - [US-013][US-014] CSV export plan gating: tests that Basic receives 403 `plan_restricted`, Premium succeeds.
+  - [US-013][US-014] Receipt upload monthly limits: tests that when `usage.receipts_this_month >= max_receipts`, `POST /receipts/upload/` returns 403 `plan_limit_reached`; also verify unlimited plan behavior.
+  - E2E Subscription wizard: plan cards render features from `product_metadata.features`, badges (Popular/Current), trial days, and both actions (Payment Link/Choose plan) work; confirm dialog appears and redirects to Stripe Checkout.
   - Header E2E: subscription chip renders for authenticated users; reflects mocked status changes.
   - [US-015] Clients: backend tests for `GET/POST /clients/` (ownership scoping, validation errors, creation success); migration applied and model present.
   - Add tests for `GET/PATCH/DELETE /clients/:id` (ownership scoping, validation, deletion) and UI flows once wired on the ClientsPage.

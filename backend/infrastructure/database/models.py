@@ -471,3 +471,27 @@ class Client(models.Model):
 
     def __str__(self):
         return f"Client {self.id} {self.name}"
+
+
+class ApplicationSettings(models.Model):
+    """
+    Stores application-wide admin-configurable settings (non-secrets) as JSON.
+    Singleton row; use .get_solo() to retrieve or create.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    data = models.JSONField(default=dict, blank=True)
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='updated_settings')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'application_settings'
+
+    def __str__(self):
+        return f"ApplicationSettings {self.id}"
+
+    @classmethod
+    def get_solo(cls):
+        obj = cls.objects.first()
+        if not obj:
+            obj = cls.objects.create(data={})
+        return obj

@@ -23,6 +23,7 @@ const navigation = [
   { name: 'Receipts', href: '/receipts', icon: DocumentTextIcon },
   { name: 'Folders', href: '/folders', icon: FolderIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+  { name: 'Subscription', href: '/subscription', icon: Cog6ToothIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];
 

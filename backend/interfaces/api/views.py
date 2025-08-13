@@ -514,6 +514,23 @@ class ReceiptUploadView(APIView):
             )
         
         try:
+            # Enforce monthly upload limit by plan (US-013/US-014)
+            try:
+                from django.utils import timezone as _tz
+                from infrastructure.database.models import Receipt as _R
+                now = _tz.now()
+                start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                monthly_count = _R.objects.filter(user_id=request.user.id, created_at__gte=start, created_at__lte=now).count()
+                try:
+                    limit = request.user.get_receipt_limit()
+                except Exception:
+                    tier = getattr(request.user, 'subscription_tier', 'basic') or 'basic'
+                    limit_map = {'basic': 100, 'premium': 500, 'enterprise': -1}
+                    limit = limit_map.get(tier, 100)
+                if limit >= 0 and monthly_count >= limit:
+                    return Response({'success': False, 'error': 'plan_limit_reached', 'message': 'You have reached your monthly receipt upload limit for your plan.'}, status=403)
+            except Exception:
+                pass
             # Get file data
             uploaded_file = serializer.validated_data['file']
             receipt_type = serializer.validated_data['receipt_type']
@@ -2575,11 +2592,377 @@ class SubscriptionStatusView(APIView):
             return Response({'success': False, 'message': str(e)}, status=500)
 
 
+class SubscriptionCurrentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            from django.conf import settings
+            svc = StripePaymentService()
+            result: dict = {
+                'plan': None,
+                'status': getattr(request.user, 'subscription_status', None),
+                'current_period_start': None,
+                'current_period_end': None,
+                'price_id': getattr(request.user, 'subscription_price_id', None),
+            }
+            if svc.enabled and getattr(request.user, 'stripe_customer_id', None):
+                try:
+                    import stripe
+                    stripe.api_key = getattr(settings, 'STRIPE_SECRET_KEY', '')
+                    subs = stripe.Subscription.list(customer=request.user.stripe_customer_id, status='all', limit=1, expand=['data.items.data.price.product'])
+                    sub = subs.data[0] if getattr(subs, 'data', None) else None
+                    if sub:
+                        price = sub.items.data[0].price if (getattr(sub, 'items', None) and getattr(sub.items, 'data', None)) else None
+                        result.update({
+                            'status': sub.status,
+                            'current_period_start': getattr(sub, 'current_period_start', None),
+                            'current_period_end': getattr(sub, 'current_period_end', None),
+                            'price_id': getattr(price, 'id', None),
+                            'plan': {
+                                'id': getattr(getattr(price, 'product', None), 'id', None),
+                                'name': getattr(price, 'nickname', None) or getattr(getattr(price, 'product', None), 'name', None),
+                                'unit_amount': getattr(price, 'unit_amount', None),
+                                'currency': getattr(price, 'currency', None),
+                                'interval': getattr(getattr(price, 'recurring', None), 'interval', None),
+                            }
+                        })
+                except Exception:
+                    pass
+            return Response({'success': True, 'subscription': result}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+
+class SubscriptionUsageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            from django.utils import timezone
+            from datetime import datetime
+            from infrastructure.database.models import Receipt
+            now = timezone.now()
+            start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            # Receipt FK is `user`, not `owner`
+            count = Receipt.objects.filter(user_id=request.user.id, created_at__gte=start, created_at__lte=now).count()
+            # Use model method for limit if available
+            try:
+                limit = request.user.get_receipt_limit()
+            except Exception:
+                limit = 100
+            return Response({'success': True, 'usage': {'receipts_this_month': count, 'max_receipts': limit}}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+
+class SubscriptionInvoicesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            limit = int(request.query_params.get('limit', 10))
+            svc = StripePaymentService()
+            result = svc.list_invoices(getattr(request.user, 'stripe_customer_id', None), limit=limit)
+            return Response(result, status=200 if result.get('success') else 400)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+
+class SubscriptionPaymentMethodsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            svc = StripePaymentService()
+            result = svc.list_payment_methods(getattr(request.user, 'stripe_customer_id', None))
+            return Response(result, status=200 if result.get('success') else 400)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+    def post(self, request):
+        try:
+            pm_id = (request.data or {}).get('payment_method_id')
+            if not pm_id:
+                return Response({'success': False, 'message': 'payment_method_id is required'}, status=400)
+            svc = StripePaymentService()
+            result = svc.set_default_payment_method(getattr(request.user, 'stripe_customer_id', None), pm_id)
+            return Response(result, status=200 if result.get('success') else 400)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+
+class AdminSettingsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def _ensure_staff(self, request):
+        if not getattr(request.user, 'is_staff', False) and not getattr(request.user, 'is_superuser', False):
+            return Response({'success': False, 'error': 'forbidden', 'message': 'Admin access required'}, status=403)
+        return None
+
+    def get(self, request):
+        forbidden = self._ensure_staff(request)
+        if forbidden:
+            return forbidden
+        try:
+            from infrastructure.database.models import ApplicationSettings
+            obj = ApplicationSettings.get_solo()
+            # Compose runtime status for integrations without exposing secrets
+            from django.conf import settings as _s
+            integrations = {
+                'stripe': {'configured': bool(getattr(_s, 'STRIPE_SECRET_KEY', ''))},
+                'cloudinary': bool(getattr(_s, 'CLOUDINARY_CLOUD_NAME', None) and getattr(_s, 'CLOUDINARY_API_KEY', None) and getattr(_s, 'CLOUDINARY_API_SECRET', None)),
+            }
+            data = obj.data or {}
+            data.setdefault('integrations', {'stripe': {'configured': integrations['stripe']['configured']}, 'cloudinary': {'configured': integrations['cloudinary']}})
+            return Response({'success': True, 'settings': data}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+    def put(self, request):
+        forbidden = self._ensure_staff(request)
+        if forbidden:
+            return forbidden
+        try:
+            payload = request.data or {}
+            if not isinstance(payload, dict):
+                return Response({'success': False, 'error': 'validation_error', 'message': 'Body must be a JSON object'}, status=400)
+            from infrastructure.database.models import ApplicationSettings, UserAuditLog
+            obj = ApplicationSettings.get_solo()
+            # Merge shallowly; groups are objects (plans, ocr, storage, dashboard, transactions, receipts, security)
+            data = obj.data or {}
+            for key, val in payload.items():
+                if key in ('integrations',):
+                    # read-only; ignore
+                    continue
+                if isinstance(val, dict):
+                    prev = data.get(key) or {}
+                    if isinstance(prev, dict):
+                        prev.update(val)
+                        data[key] = prev
+                    else:
+                        data[key] = val
+                else:
+                    data[key] = val
+            obj.data = data
+            obj.updated_by = request.user
+            obj.save(update_fields=['data', 'updated_by', 'updated_at'])
+            try:
+                UserAuditLog.objects.create(user=request.user, event_type='settings_update', event_data={'keys': list(payload.keys())})
+            except Exception:
+                pass
+            # Optionally bust caches that depend on settings
+            try:
+                from django.core.cache import cache
+                cache.clear()
+            except Exception:
+                pass
+            return Response({'success': True}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+
+class AdminDiagnosticsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not getattr(request.user, 'is_staff', False) and not getattr(request.user, 'is_superuser', False):
+            return Response({'success': False, 'error': 'forbidden'}, status=403)
+        try:
+            from django.conf import settings as _s
+            # Build a minimal diagnostics payload
+            diag = {
+                'ocr_health': None,
+                'stripe': {'configured': bool(getattr(_s, 'STRIPE_SECRET_KEY', ''))},
+                'cloudinary': {'configured': bool(getattr(_s, 'CLOUDINARY_CLOUD_NAME', None) and getattr(_s, 'CLOUDINARY_API_KEY', None) and getattr(_s, 'CLOUDINARY_API_SECRET', None))},
+                'migrations': 'unknown',
+            }
+            # OCR health
+            try:
+                svc_res = OCRHealthView().get(request)
+                diag['ocr_health'] = getattr(svc_res, 'data', None)
+            except Exception:
+                pass
+            # Migrations status (best-effort)
+            try:
+                from django.db import connection
+                with connection.cursor() as cur:
+                    cur.execute("SELECT 1")
+                diag['migrations'] = 'ok'
+            except Exception:
+                diag['migrations'] = 'error'
+            return Response({'success': True, 'diagnostics': diag}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+
+class AdminAnalysisOverviewView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not getattr(request.user, 'is_staff', False) and not getattr(request.user, 'is_superuser', False):
+            return Response({'success': False, 'error': 'forbidden'}, status=403)
+        try:
+            from infrastructure.database.models import Receipt, Transaction, User
+            from django.utils.dateparse import parse_date
+            from collections import Counter
+            import math
+
+            df = request.query_params.get('dateFrom')
+            dt = request.query_params.get('dateTo')
+            date_from = parse_date(df) if df else None
+            date_to = parse_date(dt) if dt else None
+
+            rqs = Receipt.objects.all()
+            if date_from:
+                rqs = rqs.filter(created_at__date__gte=date_from)
+            if date_to:
+                rqs = rqs.filter(created_at__date__lte=date_to)
+            receipts_total = rqs.count()
+            receipts_processed = rqs.filter(status='processed').count()
+            receipts_failed = rqs.filter(status='failed').count()
+
+            # Latency extraction (best-effort) from JSON fields
+            latencies = []
+            try:
+                for r in rqs.values('ocr_data', 'metadata')[:5000]:
+                    v = None
+                    try:
+                        v = (r.get('ocr_data') or {}).get('additional_data', {}).get('latency_ms')
+                    except Exception:
+                        v = None
+                    if v is None:
+                        try:
+                            v = (r.get('metadata') or {}).get('custom_fields', {}).get('latency_ms')
+                        except Exception:
+                            v = None
+                    if isinstance(v, (int, float)) and v >= 0:
+                        latencies.append(float(v))
+            except Exception:
+                pass
+            latencies.sort()
+            p95 = None
+            if latencies:
+                idx = max(0, min(len(latencies) - 1, int(math.ceil(0.95 * len(latencies)) - 1)))
+                p95 = latencies[idx]
+
+            # Transactions summary
+            txs = Transaction.objects.all()
+            if date_from:
+                txs = txs.filter(transaction_date__gte=date_from)
+            if date_to:
+                txs = txs.filter(transaction_date__lte=date_to)
+            tx_total = txs.count()
+            by_type = {
+                'income': txs.filter(type='income').count(),
+                'expense': txs.filter(type='expense').count(),
+            }
+
+            # Top categories
+            from django.db.models import Count
+            top_categories = list(
+                txs.exclude(category__isnull=True).exclude(category='')
+                   .values('category')
+                   .order_by()
+                   .annotate(count=Count('id'))
+                   .order_by('-count')[:10]
+            )
+
+            # Top merchants (Python-side aggregation for cross-db safety)
+            merchants_counter = Counter()
+            try:
+                for r in rqs.values('ocr_data')[:5000]:
+                    try:
+                        name = (r.get('ocr_data') or {}).get('merchant_name')
+                        if name:
+                            merchants_counter[name] += 1
+                    except Exception:
+                        continue
+            except Exception:
+                pass
+            top_merchants = [{'merchant': m, 'count': c} for m, c in merchants_counter.most_common(10)]
+
+            # Plan distribution
+            plans = list(User.objects.values('subscription_tier').order_by().annotate(count=Count('id')))
+            plan_dist = {row['subscription_tier'] or 'unknown': row['count'] for row in plans}
+
+            metrics = {
+                'receipts': {'count': receipts_total, 'processed': receipts_processed, 'failed': receipts_failed},
+                'ocr': {'latency_ms_p95': p95},
+                'transactions': {'count': tx_total, 'by_type': by_type},
+                'categories_top': top_categories,
+                'merchants_top': top_merchants,
+                'plans': plan_dist,
+            }
+            return Response({'success': True, 'metrics': metrics}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+
+class AdminAnalysisExportCSVView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not getattr(request.user, 'is_staff', False) and not getattr(request.user, 'is_superuser', False):
+            return Response({'success': False, 'error': 'forbidden'}, status=403)
+        try:
+            # Reuse overview to build CSV
+            overview = AdminAnalysisOverviewView().get(request)
+            data = getattr(overview, 'data', None) or {}
+            if not data.get('success'):
+                return Response({'success': False, 'message': 'Analysis unavailable'}, status=400)
+            import csv
+            from django.http import StreamingHttpResponse
+
+            class Echo:
+                def write(self, value):
+                    return value
+
+            pseudo_buffer = Echo()
+            writer = csv.writer(pseudo_buffer)
+
+            def streaming():
+                yield writer.writerow(['section', 'key', 'value'])
+                metrics = data.get('metrics') or {}
+                # Flatten receipts
+                for k, v in (metrics.get('receipts') or {}).items():
+                    yield writer.writerow(['receipts', k, v])
+                # OCR
+                for k, v in (metrics.get('ocr') or {}).items():
+                    yield writer.writerow(['ocr', k, v])
+                # Transactions
+                yield writer.writerow(['transactions', 'count', (metrics.get('transactions') or {}).get('count')])
+                for k, v in ((metrics.get('transactions') or {}).get('by_type') or {}).items():
+                    yield writer.writerow(['transactions.by_type', k, v])
+                # Categories top
+                for row in (metrics.get('categories_top') or []):
+                    yield writer.writerow(['categories_top', row.get('category'), row.get('count')])
+                # Merchants top (anonymized by default — display name as-is; downstream can mask if needed)
+                for row in (metrics.get('merchants_top') or []):
+                    yield writer.writerow(['merchants_top', row.get('merchant'), row.get('count')])
+                # Plans
+                for k, v in (metrics.get('plans') or {}).items():
+                    yield writer.writerow(['plans', k, v])
+
+            resp = StreamingHttpResponse(streaming(), content_type='text/csv')
+            resp['Content-Disposition'] = 'attachment; filename="admin_analysis.csv"'
+            return resp
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
 class ClientsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
+            # Plan gating: Clients available for Premium and above
+            try:
+                tier = getattr(request.user, 'subscription_tier', 'basic') or 'basic'
+                order = {'basic': 1, 'premium': 2, 'enterprise': 3}
+                if order.get(tier, 1) < order.get('premium', 2):
+                    return Response({'success': False, 'error': 'plan_restricted', 'message': 'Clients are available on Premium and above. Upgrade to access this feature.'}, status=403)
+            except Exception:
+                pass
             from infrastructure.database.models import Client
             qs = Client.objects.filter(owner_id=request.user.id).order_by('name')
             items = [{'id': str(c.id), 'name': c.name, 'email': c.email, 'company_name': c.company_name} for c in qs]
@@ -2589,6 +2972,14 @@ class ClientsView(APIView):
 
     def post(self, request):
         try:
+            # Plan gating: Clients available for Premium and above
+            try:
+                tier = getattr(request.user, 'subscription_tier', 'basic') or 'basic'
+                order = {'basic': 1, 'premium': 2, 'enterprise': 3}
+                if order.get(tier, 1) < order.get('premium', 2):
+                    return Response({'success': False, 'error': 'plan_restricted', 'message': 'Clients are available on Premium and above. Upgrade to create clients.'}, status=403)
+            except Exception:
+                pass
             from infrastructure.database.models import Client
             from .serializers import ClientSerializer
             ser = ClientSerializer(data=request.data)
@@ -2805,6 +3196,14 @@ class TransactionsExportCSVView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # Plan gating: CSV export available for Premium and above
+        try:
+            tier = getattr(request.user, 'subscription_tier', 'basic') or 'basic'
+            order = {'basic': 1, 'premium': 2, 'enterprise': 3}
+            if order.get(tier, 1) < order.get('premium', 2):
+                return Response({'success': False, 'error': 'plan_restricted', 'message': 'CSV export is available on Premium and above.'}, status=403)
+        except Exception:
+            pass
         from infrastructure.database.models import Transaction as TxModel
         import csv
         from django.http import StreamingHttpResponse

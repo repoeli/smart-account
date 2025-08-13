@@ -342,13 +342,23 @@ class ApiClient {
     return response.data;
   }
 
-  async getSubscriptionPlans(): Promise<{ success: boolean; items: Array<{ id: string; nickname?: string; currency?: string; unit_amount?: number; interval?: string }>; publishable_key?: string; message?: string }>{
+  async getSubscriptionPlans(): Promise<{ success: boolean; items: Array<{ id: string; nickname?: string; currency?: string; unit_amount?: number; interval?: string; product_id?: string; product_name?: string; product_metadata?: Record<string, any> | null; image?: string | null; payment_link_url?: string | null }>; publishable_key?: string; message?: string }>{
     const response = await this.client.get('/subscriptions/plans/');
     return response.data;
   }
 
   async getSubscriptionStatus(): Promise<{ success: boolean; subscription?: { tier?: string; status?: string; price_id?: string; customer_id?: string; subscription_id?: string } }>{
     const response = await this.client.get('/subscriptions/status/');
+    return response.data;
+  }
+
+  async getSubscriptionCurrent(): Promise<{ success: boolean; subscription?: { status?: string; current_period_start?: number; current_period_end?: number; price_id?: string; plan?: { id?: string; name?: string; unit_amount?: number; currency?: string; interval?: string } } }>{
+    const response = await this.client.get('/subscriptions/current/');
+    return response.data;
+  }
+
+  async getSubscriptionUsage(): Promise<{ success: boolean; usage?: { receipts_this_month: number; max_receipts: number } }>{
+    const response = await this.client.get('/subscriptions/usage/');
     return response.data;
   }
 

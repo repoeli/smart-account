@@ -11,7 +11,7 @@ from .views import (
     PasswordResetRequestView, PasswordResetConfirmView,
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView, ReceiptManualCreateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
-    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionsExportCSVView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView, SubscriptionCheckoutView, StripeWebhookView, SubscriptionPortalView, ClientsView, SubscriptionPlansView, ClientDetailView, SubscriptionStatusView, ClientsCountView,
+    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionsExportCSVView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView, SubscriptionCheckoutView, StripeWebhookView, SubscriptionPortalView, ClientsView, SubscriptionPlansView, ClientDetailView, SubscriptionStatusView, ClientsCountView, SubscriptionCurrentView, SubscriptionUsageView, SubscriptionInvoicesView, SubscriptionPaymentMethodsView, AdminSettingsView, AdminDiagnosticsView, AdminAnalysisOverviewView, AdminAnalysisExportCSVView,
 )
 from .management_views import (
     CreateFolderView, FolderDetailView, FolderListView, SearchReceiptsView,
@@ -69,10 +69,20 @@ urlpatterns = [
     path('subscriptions/portal/', SubscriptionPortalView.as_view(), name='subscription-portal'),
     path('subscriptions/plans/', SubscriptionPlansView.as_view(), name='subscription-plans'),
     path('subscriptions/status/', SubscriptionStatusView.as_view(), name='subscription-status'),
+    path('subscriptions/current/', SubscriptionCurrentView.as_view(), name='subscription-current'),
+    path('subscriptions/usage/', SubscriptionUsageView.as_view(), name='subscription-usage'),
+    path('subscriptions/invoices/', SubscriptionInvoicesView.as_view(), name='subscription-invoices'),
+    path('subscriptions/payment-methods/', SubscriptionPaymentMethodsView.as_view(), name='subscription-payment-methods'),
     # Clients (US-015 minimal) – put count BEFORE detail to avoid matching as client_id
     path('clients/', ClientsView.as_view(), name='clients'),
     path('clients/count/', ClientsCountView.as_view(), name='clients-count'),
     path('clients/<str:client_id>/', ClientDetailView.as_view(), name='client-detail'),
+
+    # Admin (settings & diagnostics)
+    path('admin/settings/', AdminSettingsView.as_view(), name='admin-settings'),
+    path('admin/diagnostics/', AdminDiagnosticsView.as_view(), name='admin-diagnostics'),
+    path('admin/analysis/overview/', AdminAnalysisOverviewView.as_view(), name='admin-analysis-overview'),
+    path('admin/analysis/export.csv', AdminAnalysisExportCSVView.as_view(), name='admin-analysis-export'),
     
     # US-006: Receipt Management and Organization endpoints
     path('folders/', FolderListView.as_view(), name='folder-list'),

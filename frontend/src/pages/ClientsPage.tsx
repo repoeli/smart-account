@@ -8,6 +8,7 @@ const ClientsPage: React.FC = () => {
   const [items, setItems] = useState<ClientItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [restrictedMessage, setRestrictedMessage] = useState<string | null>(null);
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [companyName, setCompanyName] = useState<string>('');
@@ -21,7 +22,15 @@ const ClientsPage: React.FC = () => {
       if (!res?.success) throw new Error('Failed to load');
       setItems(res.items || []);
     } catch (e: any) {
-      setError(e?.message || 'Failed to load clients');
+      const status = e?.response?.status;
+      const err = e?.response?.data;
+      if (status === 403 && err?.error === 'plan_restricted') {
+        setRestrictedMessage(err?.message || 'Clients are available on Premium and above.');
+        setItems([]);
+        setError(null);
+      } else {
+        setError(e?.message || 'Failed to load clients');
+      }
     } finally {
       setLoading(false);
     }
@@ -38,7 +47,14 @@ const ClientsPage: React.FC = () => {
       setName(''); setEmail(''); setCompanyName('');
       load();
     } catch (e: any) {
-      toast.error(e?.message || 'Failed to create client');
+      const status = e?.response?.status;
+      const err = e?.response?.data;
+      if (status === 403 && err?.error === 'plan_restricted') {
+        setRestrictedMessage(err?.message || 'Clients are available on Premium and above.');
+        toast.error('Upgrade required to use Clients.');
+      } else {
+        toast.error(e?.message || 'Failed to create client');
+      }
     }
   };
 
@@ -48,6 +64,14 @@ const ClientsPage: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-bold mb-4">Clients</h1>
+      {restrictedMessage && (
+        <div className="card p-4 mb-4 border border-yellow-200 bg-yellow-50">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-yellow-800">{restrictedMessage}</div>
+            <a href="/subscription" className="btn btn-sm btn-primary">Upgrade</a>
+          </div>
+        </div>
+      )}
       <div className="card p-4 mb-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
@@ -64,7 +88,7 @@ const ClientsPage: React.FC = () => {
           </div>
         </div>
         <div className="mt-3">
-          <button className="btn btn-primary" onClick={submit}>Create</button>
+          <button className="btn btn-primary" onClick={submit} disabled={!!restrictedMessage}>Create</button>
         </div>
       </div>
       <div className="card p-4">

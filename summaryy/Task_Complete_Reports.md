@@ -150,6 +150,10 @@
   - Receipt telemetry: persist `metadata.custom_fields.storage_provider` and `metadata.custom_fields.cloudinary_public_id` on upload (Cloudinary vs local visibility per receipt).
   - Added diagnostics API `GET /api/v1/files/info/?url=...` to verify Cloudinary/local assets and return metadata (public_id, format, width/height, bytes, created_at).
   - Relaxed receipt ownership checks in development for detail/update/reprocess/validate flows to prevent 400s while data is normalized.
+  - Plan gating and limits:
+    - [US-013][US-014] Gated `Clients` features (GET/POST `/clients`) to Premium and above; returns 403 with `error=plan_restricted` when on Basic.
+    - [US-013][US-014] Gated `GET /transactions/export.csv` to Premium and above; returns 403 with `error=plan_restricted` on Basic.
+    - [US-013][US-014] Enforced monthly receipt upload limits in `POST /receipts/upload/`, using `user.get_receipt_limit()` when available, else tier defaults (Basic=100, Premium=500, Enterprise=unlimited). Returns 403 with `error=plan_limit_reached` when exceeded.
   - Reprocess behavior: always persist OCR data on success. If validation fails, mark `needs_review=true` and attach `validation_errors` instead of returning 400; response includes `warnings`.
   - [US-008][US-009] API-level 1:1 guard: `POST /api/v1/transactions/` now returns 409 Conflict with `{error:'duplicate'}` when a transaction already exists for the given `receipt_id`. This preserves data integrity while deferring DB constraints to the end phase.
   - [US-008][US-009] Core editing: `PATCH /api/v1/transactions/:id` now allows updating `description, amount, currency, type, transaction_date, category` with validation and ownership checks.
@@ -158,6 +162,8 @@
   - [US-013][US-014] Plans retrieval: added `GET /subscriptions/plans/` to list active recurring prices from Stripe (Basic/Premium/Platinum supported). Falls back to env price IDs when SDK or network is unavailable. Returns `publishable_key`.
   - [US-013][US-014] Webhook enrichment and persistence: webhook handler now extracts `user_id`, `price_id`, and plan details. Minimal persistence wired to update the requesting user's `subscription_tier`, `subscription_status`, and Stripe linkage fields (`stripe_customer_id`, `stripe_subscription_id`, `subscription_price_id`) based on events like `checkout.session.completed` and `customer.subscription.*`.
   - [US-013][US-014] Checkout/Portal customer handling: service now finds or creates Stripe Customer by user email to improve continuity in Checkout and Billing Portal flows; endpoints pass `customer_id`/`customer_email` when present.
+  - [US-013][US-014] Plans enrichment: `/subscriptions/plans/` now returns Stripe Product details per price (`product_id`, `product_name`, `product_metadata`, first `image`) and best‑effort `payment_link_url` by matching Payment Links line items to price ids.
+  - [US-013][US-014] Added `GET /subscriptions/invoices/` to list recent invoices for the authenticated user's Stripe customer (id, created, status, currency, amount_due, hosted_invoice_url, invoice_pdf).
   - [US-015] Clients detail endpoints: added `GET /clients/:id`, `PATCH /clients/:id`, `DELETE /clients/:id` with ownership checks and validation via `ClientSerializer`.
   - [US-015] Client minimal CRUD (list/create): `GET /clients/` (owner-scoped), `POST /clients/` (validate and create). Added `Client` model (owner, name, email, company_name) with basic indexes.
   - Migration: added `0005_client.py` to create `clients` table and indexes.
@@ -174,11 +180,21 @@
   - API client (`api.ts`): `getReceipt` now normalizes backend shape (nested `ocr_data`, `metadata.custom_fields`) into the frontend `Receipt` type; `createTransaction` surfaces 409 duplicate as a user-friendly message. Added `updateTransaction`, and [US-013][US-014] `startSubscriptionCheckout`/`openBillingPortal` methods; [US-015] `getClients`/`createClient` methods.
   - [US-015][US-008][US-009] Transactions page: added Client filter dropdown populated from `/clients/`; CSV export now honors `client_id`.
   - [US-015] ClientsPage: list/create/edit/delete wired to `/clients` and `/clients/:id` with inline editing and confirmation on delete.
-  - [US-013][US-014] SubscriptionPage: plan picker wired to `GET /subscriptions/plans/` and "Subscribe" per plan posting to `POST /subscriptions/checkout/` with `price_id`; portal button retained; default checkout fallback when no plans.
+  - [US-013][US-014] SubscriptionPage: full plan selector wizard.
+    - Cards show plan image/name/price, top features (from `product_metadata.features`), badges (Popular, Current), and trial days when present.
+    - Actions: "Open Payment Link" (when available) and "Choose plan" (opens confirm dialog → redirects via Checkout).
+    - Page shows current plan & status, current billing period (from `/subscriptions/current/`), monthly usage bar (from `/subscriptions/usage/`), and a Recent Invoices table with links (from `/subscriptions/invoices/`).
   - [US-013][US-014] API client: added `getSubscriptionPlans()` and extended `startSubscriptionCheckout(priceId?)` to accept a specific plan.
   - [US-013][US-014] Added `getSubscriptionStatus()` and surfaced current tier/status on `/subscription` page.
+  - [US-013][US-014] Frontend surfaces `GET /subscriptions/current/` (Stripe plan/period) and `GET /subscriptions/usage/` (monthly receipts usage vs tier) and lists invoices from `/subscriptions/invoices/`.
   - [US-013][US-014] Header: added plan/status chip (reads `/subscriptions/status/`) to keep subscription visibility consistent with UI/UX docs.
   - Types (`types/api.ts`): aligned `receipt_type` union with backend; added optional `storage_provider` and `cloudinary_public_id` fields.
+  - API typing: plans response expanded to include `product_id`, `product_name`, `product_metadata`, `image`, `payment_link_url` to render Stripe catalog metadata in the UI.
+  - [US-013][US-014] Subscription selection polish: refined current plan detection and disabled the "Choose plan" button when the plan is already active; visibly marks it as "Current". Frontend filters plans to exactly the three env-configured price ids (Basic, Premium, Platinum) regardless of what Stripe returns. Always uses Checkout (not Payment Link) to ensure redirect back to the app after payment.
+  - Plan gating UX:
+    - ClientsPage: shows upgrade CTA when backend returns 403 `plan_restricted` and disables Create action on Basic.
+    - ReceiptUploadPage: shows monthly usage bar from `/subscriptions/usage/`; disables Upload when limit reached; shows upgrade CTA when backend returns 403 `plan_limit_reached`.
+    - TransactionsPage: CSV export gracefully handles 403 `plan_restricted` with a toast and upgrade hint.
 
 - Settings/Config
   - Ensured `.env` is loaded from `backend/.env` explicitly.

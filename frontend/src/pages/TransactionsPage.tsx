@@ -195,7 +195,13 @@ const TransactionsPage: React.FC = () => {
       const res = await fetch(url.toString(), {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }
       });
-      if (!res.ok) throw new Error('Export failed');
+      if (!res.ok) {
+        if (res.status === 403) {
+          try { const data = await res.json(); if (data?.error === 'plan_restricted') { toast.error(data?.message || 'Upgrade required for CSV export'); } } catch {}
+          throw new Error('Export requires Premium plan');
+        }
+        throw new Error('Export failed');
+      }
       const blob = await res.blob();
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
@@ -374,6 +380,7 @@ const TransactionsPage: React.FC = () => {
                 <th className="py-2">Type</th>
                 <th className="py-2 text-right">Amount</th>
                 <th className="py-2">Category</th>
+                {clients.length > 0 && <th className="py-2">Client</th>}
                 <th className="py-2 text-right">Actions</th>
               </tr>
             </thead>
@@ -405,6 +412,26 @@ const TransactionsPage: React.FC = () => {
                       }}
                     />
                   </td>
+                  {clients.length > 0 && (
+                    <td className="py-2">
+                      <InlineClientEditor
+                        value={tx.client_id || ''}
+                        options={clients}
+                        onChange={async (newClientId) => {
+                          const prev = items;
+                          setItems(items.map(it => it.id === tx.id ? { ...it, client_id: newClientId || null, client_name: (clients.find(c=>c.id===newClientId)?.name || null) } : it));
+                          try {
+                            const res = await apiClient.updateTransaction(tx.id, { client_id: newClientId || null } as any);
+                            if (!res?.success) throw new Error(res?.message || 'Failed');
+                            toast.success('Client updated');
+                          } catch (e: any) {
+                            setItems(prev);
+                            toast.error(e?.message || 'Failed to update client');
+                          }
+                        }}
+                      />
+                    </td>
+                  )}
                   <td className="py-2 text-right">
                     {tx.receipt_id ? (
                       <div className="inline-flex gap-2">
@@ -485,6 +512,43 @@ const TransactionsPage: React.FC = () => {
 export default TransactionsPage;
  
 // Inline category editor component
+const InlineClientEditor: React.FC<{
+  value: string;
+  options: Array<{ id: string; name: string }>;
+  onChange: (val: string) => void | Promise<void>;
+}> = ({ value, options, onChange }) => {
+  const [draft, setDraft] = useState<string>(value || '');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { setDraft(value || ''); }, [value]);
+
+  const submit = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await onChange(draft);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <select
+        className="input input-bordered"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        disabled={saving}
+      >
+        <option value="">-</option>
+        {options.map((opt) => (
+          <option key={opt.id} value={opt.id}>{opt.name}</option>
+        ))}
+      </select>
+      <button className="btn btn-xs" onClick={submit} disabled={saving} aria-label="Save client">{saving ? 'Saving…' : 'Save'}</button>
+    </div>
+  );
+};
 const InlineCategoryEditor: React.FC<{
   value: string;
   options: string[];

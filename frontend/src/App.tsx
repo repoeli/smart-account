@@ -19,6 +19,8 @@ import TransactionsPage from './pages/TransactionsPage';
 import AuditPage from './pages/AuditPage';
 import ClientsPage from './pages/ClientsPage';
 import SubscriptionPage from './pages/SubscriptionPage';
+import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
+import SubscriptionCancelPage from './pages/SubscriptionCancelPage';
 
 // Layouts
 import MainLayout from './components/layouts/MainLayout';
@@ -67,6 +69,8 @@ function App() {
           <Route path="transactions" element={<TransactionsPage />} />
           <Route path="clients" element={<ClientsPage />} />
           <Route path="subscription" element={<SubscriptionPage />} />
+          <Route path="subscription/success" element={<SubscriptionSuccessPage />} />
+          <Route path="subscription/cancel" element={<SubscriptionCancelPage />} />
           <Route path="audit" element={<AuditPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>

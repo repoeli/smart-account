@@ -285,6 +285,8 @@ const ReceiptUploadPage: React.FC = () => {
   const [completedFiles, setCompletedFiles] = useState(0);
   const [showCamera, setShowCamera] = useState(false);
   const [isCheckingConnection, setIsCheckingConnection] = useState(false);
+  const [usage, setUsage] = useState<{ receipts_this_month: number; max_receipts: number } | null>(null);
+  const [planError, setPlanError] = useState<string | null>(null);
 
   const handleFileSelect = (files: File[]) => {
     setSelectedFiles(prev => [...prev, ...files]);
@@ -358,6 +360,9 @@ const ReceiptUploadPage: React.FC = () => {
           }
         } catch (error: any) {
           console.error('Upload error:', error);
+          if (error?.response?.status === 403 && (error.response?.data?.error === 'plan_limit_reached')) {
+            setPlanError(error.response?.data?.message || 'Monthly upload limit reached.');
+          }
           const errorMessage = error.response?.data?.message || 
                              error.response?.data?.error || 
                              error.message || 
@@ -395,6 +400,16 @@ const ReceiptUploadPage: React.FC = () => {
     }
   };
 
+  // Load subscription usage to show monthly cap and disable uploads if exceeded
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const res = await apiClient.getSubscriptionUsage();
+        if (res?.success && res?.usage) setUsage(res.usage);
+      } catch {}
+    })();
+  }, []);
+
   const isUploading = uploadStatus === 'uploading' || uploadStatus === 'processing';
 
   return (
@@ -416,6 +431,21 @@ const ReceiptUploadPage: React.FC = () => {
       </div>
 
       <div className="space-y-6">
+        {usage && (
+          <div className="card p-3 border border-gray-200">
+            <div className="flex items-center justify-between text-sm">
+              <div>Monthly uploads: {usage.receipts_this_month} / {usage.max_receipts < 0 ? '∞' : usage.max_receipts}</div>
+              {planError && <a href="/subscription" className="btn btn-xs btn-primary">Upgrade</a>}
+            </div>
+            <div className="h-2 bg-gray-100 rounded mt-2">
+              {(() => {
+                const max = usage.max_receipts < 0 ? Math.max(1, usage.receipts_this_month) : usage.max_receipts || 1;
+                const pct = Math.min(100, Math.round((usage.receipts_this_month / max) * 100));
+                return <div className={`h-2 rounded ${pct < 80 ? 'bg-green-500' : pct < 100 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${pct}%` }} />;
+              })()}
+            </div>
+          </div>
+        )}
         {/* Upload Options */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* File Upload Zone */}
@@ -474,10 +504,9 @@ const ReceiptUploadPage: React.FC = () => {
             <Button
               onClick={handleUpload}
               className="px-8 py-3 text-lg"
-              disabled={isUploading || isCheckingConnection}
+              disabled={isUploading || isCheckingConnection || (!!usage && usage.max_receipts >= 0 && usage.receipts_this_month >= usage.max_receipts)}
             >
-              {isCheckingConnection ? 'Checking Connection...' : 
-               `Upload ${selectedFiles.length} Receipt${selectedFiles.length !== 1 ? 's' : ''}`}
+              {isCheckingConnection ? 'Checking Connection...' : (!!usage && usage.max_receipts >= 0 && usage.receipts_this_month >= usage.max_receipts) ? 'Monthly Limit Reached' : `Upload ${selectedFiles.length} Receipt${selectedFiles.length !== 1 ? 's' : ''}`}
             </Button>
           </div>
         )}
