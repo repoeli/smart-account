@@ -14,6 +14,7 @@ const ReceiptDetailPage: React.FC = () => {
   const [linkedTransactionId, setLinkedTransactionId] = useState<string | null>(null);
   const [ocrHealth, setOcrHealth] = useState<any>(null);
   const [history, setHistory] = useState<Array<{at:string;engine:string;success:boolean;latency_ms?:number;error?:string}>>([]);
+  const [categoryHint, setCategoryHint] = useState<string | null>(null);
   const formatDisplayDate = React.useCallback((value?: string) => {
     if (!value) return '-';
     // Accept DD/MM/YYYY and display as-is; else try ISO/parsable
@@ -113,6 +114,11 @@ const ReceiptDetailPage: React.FC = () => {
           const hdata = await hres.json().catch(() => ({}));
           if (hres.ok && hdata?.success && Array.isArray(hdata.items)) setHistory(hdata.items);
         } catch {}
+        // Category suggestion hint (best-effort) [US-006]
+        try {
+          const s = await apiClient.suggestCategory({ receiptId: id!, merchant: r?.merchant_name });
+          if (s?.success && s?.category) setCategoryHint(s.category);
+        } catch {}
       } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || 'Failed to load receipt';
         setError(msg);
@@ -177,6 +183,12 @@ const ReceiptDetailPage: React.FC = () => {
               )}
             </div>
             <div><span className="text-gray-500">Merchant:</span> {receipt.merchant_name || '-'}</div>
+            {categoryHint && (
+              <div className="col-span-2">
+                <span className="text-gray-500">Suggested category:</span>{' '}
+                <span className="px-2 py-0.5 rounded-full border bg-gray-50 text-gray-700 border-gray-200" title="Based on your history and merchant heuristics">{categoryHint}</span>
+              </div>
+            )}
             <div>
               <span className="text-gray-500">Total:</span>{' '}
               {(() => {

@@ -469,7 +469,17 @@ class TransactionCreateSerializer(serializers.Serializer):
 
 
 class TransactionUpdateSerializer(serializers.Serializer):
+    description = serializers.CharField(max_length=255, required=False)
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    currency = serializers.CharField(max_length=10, required=False)
+    type = serializers.ChoiceField(choices=['income', 'expense'], required=False)
+    transaction_date = serializers.DateField(required=False)
     category = serializers.CharField(max_length=100, required=False, allow_blank=True)
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('Amount must be greater than 0')
+        return value
 
 class ReceiptCategorizeResponseSerializer(serializers.Serializer):
     """
@@ -496,6 +506,14 @@ class CreateFolderSerializer(serializers.Serializer):
     description = serializers.CharField(max_length=500, required=False)
     icon = serializers.CharField(max_length=50, required=False)
     color = serializers.CharField(max_length=7, required=False)  # Hex color
+
+
+# US-015: Client Management
+class ClientSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    name = serializers.CharField(max_length=255)
+    email = serializers.EmailField(required=False, allow_blank=True)
+    company_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
 
 
 class MoveFolderSerializer(serializers.Serializer):

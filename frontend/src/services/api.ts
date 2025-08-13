@@ -302,12 +302,54 @@ class ApiClient {
     receipt_id?: string;
     category?: string;
   }): Promise<{ success: boolean; transaction_id?: string; message?: string }>{
-    const response = await this.client.post('/transactions/', payload);
-    return response.data;
+    try {
+      const response = await this.client.post('/transactions/', payload);
+      return response.data;
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 409) {
+        return { success: false, message: err?.response?.data?.message || 'A transaction already exists for this receipt.' } as any;
+      }
+      throw err;
+    }
   }
 
   async updateTransactionCategory(txId: string, category: string | null): Promise<{ success: boolean; message?: string }>{
     const response = await this.client.patch(`/transactions/${txId}/`, { category: category || '' });
+    return response.data;
+  }
+
+  async updateTransaction(txId: string, payload: Partial<{
+    description: string;
+    amount: number | string;
+    currency: string;
+    type: 'income' | 'expense';
+    transaction_date: string; // YYYY-MM-DD
+    category: string | null;
+  }>): Promise<{ success: boolean; message?: string }>{
+    const response = await this.client.patch(`/transactions/${txId}/`, payload);
+    return response.data;
+  }
+
+  // Subscriptions (optional)
+  async startSubscriptionCheckout(): Promise<{ success: boolean; url?: string; message?: string }>{
+    const response = await this.client.post('/subscriptions/checkout/', {});
+    return response.data;
+  }
+
+  async openBillingPortal(): Promise<{ success: boolean; url?: string; message?: string }>{
+    const response = await this.client.post('/subscriptions/portal/', {});
+    return response.data;
+  }
+
+  // Clients
+  async getClients(): Promise<{ success: boolean; items: Array<{ id: string; name: string; email?: string; company_name?: string }> }>{
+    const response = await this.client.get('/clients/');
+    return response.data;
+  }
+
+  async createClient(payload: { name: string; email?: string; company_name?: string }): Promise<{ success: boolean; id?: string; message?: string }>{
+    const response = await this.client.post('/clients/', payload);
     return response.data;
   }
 

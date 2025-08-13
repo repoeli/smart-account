@@ -27,6 +27,11 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-change-me-in-production'
 # Application definition
 # Summary cache TTL (seconds) for transactions summary endpoint
 SUMMARY_CACHE_TTL = int(os.environ.get('SUMMARY_CACHE_TTL', '60'))
+# Stripe (Subscriptions) – optional; endpoints will no-op if not configured
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
+STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
+STRIPE_PRICE_BASIC = env('STRIPE_PRICE_BASIC', default='')
+STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='')
 DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -212,10 +217,20 @@ SPECTACULAR_SETTINGS = {
 }
 
 # OCR/Storage configuration (env-driven)
-# Support both our canonical names and the user's provided names for compatibility
-OCR_ENGINE_DEFAULT = env("OCR_ENGINE_DEFAULT", default=env("OCR_PROVIDER_DEFAULT", default="paddle"))
-OCR_TIMEOUT_SECONDS = env.int("OCR_TIMEOUT_SECONDS", default=env.int("PADDLE_TIMEOUT_SECONDS", default=25))
-MAX_RECEIPT_MB = env.int("MAX_RECEIPT_MB", default=env.int("OCR_MAX_IMAGE_MB", default=10))
+# Prefer names found in backend/.env/env.example; fall back to our older names
+OCR_ENGINE_DEFAULT = env(
+    "OCR_PROVIDER",
+    default=env("OCR_ENGINE_DEFAULT", default=env("OCR_PROVIDER_DEFAULT", default="paddle"))
+)
+OCR_TIMEOUT_SECONDS = env.int(
+    "OCR_TIMEOUT_SECONDS",
+    default=env.int("PADDLE_TIMEOUT_SECONDS", default=25)
+)
+MAX_RECEIPT_MB = env.int(
+    "MAX_RECEIPT_MB",
+    default=env.int("OCR_MAX_IMAGE_MB", default=10)
+)
+PADDLE_OCR_LANGUAGE = env("PADDLEOCR_LANGUAGE", default="en")
 
 # External Paddle FastAPI service
 _paddle_base = env("PADDLE_API_BASE", default="http://127.0.0.1:8089")

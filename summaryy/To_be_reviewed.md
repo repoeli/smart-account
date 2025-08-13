@@ -31,19 +31,29 @@ Next steps queued:
   - [US-010] KPI trend: with synthetic data, verify previous-period comparison computes correct diff for Income, Expense, and Net.
   - [US-005] Dashboard OCR health pill: mock up/down states and ensure pill text/color reflect engine availability.
   - [US-010] KPI deep links: E2E that clicking a month navigates to `/transactions` with that month’s `dateFrom/dateTo`; clicking a category navigates with `category` param plus the current date range.
+  - [US-006][US-008][US-010] Dashboard category chips: verify chips appear for top categories when present; clicking a chip navigates to `/transactions` preserving `dateFrom/dateTo` and setting `category`; verify no chips render and the “No data” overlays show when the dataset is empty.
   - [US-006] Categories: E2E category dropdown hydrates from `/categories/`, falls back gracefully; ensure selected category filters list and persists via URL/localStorage.
+  - [US-006] Category Suggestion: with seeded transactions for a merchant, `GET /categories/suggest?merchant=<name>` should return the most frequent prior category; if none, heuristic may return a default; always 200 with `{success:true}`.
+  - [US-006] UI hint: `ReceiptDetailPage` displays a suggested category chip when API returns one; verify it appears/disappears as expected and survives reload.
   - [US-008][US-009] Receipt→Transaction 1:1 guard (no duplicates):
     - UI: disable "Create Transaction" button on `ReceiptDetailPage` when a transaction already exists for the receipt; surface a tooltip/explanatory note. Do NOT change DB yet.
     - API option (preferred, no DB change): support `GET /transactions/?receipt_id=<id>&limit=1` to check existence; or include `has_transaction` in `GET /receipts/:id`. Decide one path and implement.
     - E2E: create once → button disabled on reload; attempting again does nothing; transactions list remains single entry.
     - Later (DB hardening): add unique partial index on `transactions(receipt_id)` WHERE receipt_id IS NOT NULL. Migration + backfill/validation. [US-008][US-009]
+    - Finalization reminder (end of project phase): implement a DB-level uniqueness constraint to enforce one transaction per receipt. Ensure existing data is backfilled/validated and add a safe migration path. [US-008][US-009]
     - UX enhancement: Receipts list should display a small “Converted” badge for receipts with an existing transaction. Current implementation performs per-card background checks; optimize by enriching list API items with `has_transaction` to avoid N queries. Document API shape and add caching where appropriate.
   - [US-008][US-009] Inline category edit (Transactions):
     - Backend: ensure PATCH `/transactions/:id` supports updating `category` with ownership checks and returns `{success}`.
     - Frontend: inline editor should optimistically update and rollback on error; dropdown hydrates from `/categories/` with fallback to free-text when not available.
+  - [US-008][US-009] Transaction editing: backend PATCH allows updating description, amount, currency, type, transaction_date, and category. Add unit/integration tests (ownership, validation, date normalization) and E2E happy path from Transactions table inline editing and a future edit form.
+  - [US-008][US-009] Frontend Edit modal: E2E to open, change fields, save, see updated row; simulate validation error (amount<=0) and assert error toast/no state change.
   - [US-008][US-009] Tests: Backend `receipt_id` filter → verify 0/1 results on `/transactions/?receipt_id=<id>`; include mixed dataset cases.
   - [US-008][US-009] Tests: Frontend E2E → Create transaction from Receipt Detail, reload detail, assert “Create Transaction” is disabled and shows explanatory note; verify only one row appears in `/transactions`.
   - [US-008][US-009] Optional UX: show a small “Converted” badge on receipts that already have a transaction. Implement via detail enrichment (`has_transaction`) or list-row check using `/transactions/?receipt_id` on demand.
+  - [US-013][US-014] Stripe wiring: unit/integration tests to return no-op when keys missing; when keys present (mocked), verify Checkout URL is returned; webhook signature verification success/failure cases.
+  - [US-015] Clients: backend tests for `GET/POST /clients/` (ownership scoping, validation errors, creation success); migration applied and model present.
+  - [US-015] Future tasks: add update/delete endpoints and tie clients into receipts/transactions scoping in later iterations.
+  - [US-015] ClientsPage E2E: list renders, create form validates name, successful create reloads list and shows toast; error banner on 500.
 
 - [US-010] Dashboard Phase – next big tasks
   - Add date range presets (This month, Last month, This year, Custom) controlling `/transactions/summary/` queries.

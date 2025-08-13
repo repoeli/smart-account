@@ -17,6 +17,8 @@ import OCRResultsPage from './pages/receipts/OCRResultsPage';
 import ProfilePage from './pages/ProfilePage';
 import TransactionsPage from './pages/TransactionsPage';
 import AuditPage from './pages/AuditPage';
+import ClientsPage from './pages/ClientsPage';
+import SubscriptionPage from './pages/SubscriptionPage';
 
 // Layouts
 import MainLayout from './components/layouts/MainLayout';
@@ -63,6 +65,8 @@ function App() {
           <Route path="receipts/:id/ocr" element={<OCRResultsPage />} />
           <Route path="receipts/:id" element={<ReceiptDetailPage />} />
           <Route path="transactions" element={<TransactionsPage />} />
+          <Route path="clients" element={<ClientsPage />} />
+          <Route path="subscription" element={<SubscriptionPage />} />
           <Route path="audit" element={<AuditPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>

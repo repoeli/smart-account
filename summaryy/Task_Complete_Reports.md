@@ -21,9 +21,13 @@
   - [US-005] `api.getReceipt` normalizes relative `file_url` to absolute so previews and Copy URL work even for local storage.
   - [US-010] Dashboard: added a safe retry with backoff for `GET /transactions/summary/` and a Retry button in the banner to recover gracefully from transient errors.
   - [US-005] Added `AuditPage` to view recent audit logs with filters (`eventType`, `receipt_id`, `limit`), consuming `/api/v1/audit/logs/`.
+  - [US-006] `ReceiptDetailPage`: shows a Suggested category hint based on `GET /categories/suggest?receiptId=...&merchant=...` (history-first, heuristic fallback). This informs the one-click Create Transaction flow.
 
 - Configuration
   - [US-004] If using local storage in dev, set `PUBLIC_BASE_URL=http://127.0.0.1:8000` so newly saved local files get absolute URLs.
+  - Env alignment: respected names present in `backend/env.example`.
+    - `OCR_PROVIDER` preferred over `OCR_ENGINE_DEFAULT`; `PADDLEOCR_LANGUAGE` read.
+    - Stripe keys `STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` loaded from env.
 
 #### Impact
 - Reprocess and validate flows are resilient; images reliably reach OCR services; UI remains responsive (no full page reloads) and shows engine availability.
@@ -70,6 +74,7 @@
 - Receipts no longer default to failed solely due to low confidence; processing status should move to processed with data populated (merchant/date/total) when available.
 
 - Transactions now supports practical ledger exploration: filter by date/type/category, sort by date/amount/category, view income/expense totals grouped by currency, and paginate through large lists without losing filter context.
+ - [US-006] Categories suggestion now leverages user history: if a merchant is known (from receipt or provided), the system suggests the most frequent category previously used for that merchant. Falls back to keyword heuristics (e.g., Tesco → food_and_drink). This enhances one‑click create accuracy without impacting persistence.
 
 #### Configuration expectations
 - Ensure in `backend/.env`:
@@ -98,6 +103,7 @@
     - Totals: `totals` object containing `income` and `expense` arrays grouped by `currency`, with decimal-safe sums.
     - Optional filter: `receipt_id=<uuid>` to fetch transactions for a specific receipt (used by UI to guard 1:1 create).
   - Still returns each item with `merchant` resolved from linked `Receipt` (if any) for quick context.
+  - [US-006] `GET /api/v1/categories/suggest/` improved: first tries history-based suggestion per user and merchant (from query or receipt’s OCR), then falls back to heuristics; always returns 200 with `{success:true, category?:string}`.
 
 #### Frontend changes (Transactions)
 - `frontend/src/pages/TransactionsPage.tsx`
@@ -113,6 +119,7 @@
   - [US-005] Added quick deep-link from Transactions rows to “Open OCR Results” when a `receipt_id` exists.
   - [US-008][US-009] Added Delete action with confirmation and optimistic update; rollback on error.
   - [US-008][US-009] Added “Duplicate to new” modal to quickly create a new transaction prefilled from an existing row.
+  - [US-008][US-009] Added Edit modal to update description, amount, currency, type, date, and category using `PATCH /transactions/:id`; state updates optimistically on success.
 
 #### Frontend changes (Dashboard)
 - `frontend/src/pages/DashboardPage.tsx`
@@ -124,6 +131,7 @@
   - [US-005] Dashboard shows OCR engine status pill (Paddle/OpenAI/Unavailable) using `/ocr/health/` for quick visibility.
   - [US-010] Added lightweight shimmer placeholders while summary is being fetched to improve perceived performance.
   - [US-010] KPI deep links: clicking a month bar filters `/transactions` to that month; clicking a category bar filters to that category within the current date range.
+  - [US-006][US-008][US-010] Category polish: added quick category chips above the Category Breakdown that deep-link to `/transactions` with the same active date range; added no-data overlays for Month/Category/Merchants when the range yields no results; added legends for the bar visuals.
   - [US-008][US-009] Receipt→Transaction UI guard refined: on `ReceiptDetailPage`, disabled Create button shows a clear notice and tooltip explaining one transaction per receipt; deep link to view existing transaction retained.
 
 #### Notes
@@ -142,6 +150,12 @@
   - Added diagnostics API `GET /api/v1/files/info/?url=...` to verify Cloudinary/local assets and return metadata (public_id, format, width/height, bytes, created_at).
   - Relaxed receipt ownership checks in development for detail/update/reprocess/validate flows to prevent 400s while data is normalized.
   - Reprocess behavior: always persist OCR data on success. If validation fails, mark `needs_review=true` and attach `validation_errors` instead of returning 400; response includes `warnings`.
+  - [US-008][US-009] API-level 1:1 guard: `POST /api/v1/transactions/` now returns 409 Conflict with `{error:'duplicate'}` when a transaction already exists for the given `receipt_id`. This preserves data integrity while deferring DB constraints to the end phase.
+  - [US-008][US-009] Core editing: `PATCH /api/v1/transactions/:id` now allows updating `description, amount, currency, type, transaction_date, category` with validation and ownership checks.
+  - [US-013][US-014] Subscription/Stripe wiring: added optional endpoints `POST /subscriptions/checkout/` (returns Stripe Checkout URL or no-op when not configured) and `POST /subscriptions/stripe/webhook/` (verifies and returns event type). Keys are read from settings; safe when absent.
+  - [US-013][US-014] Added `POST /subscriptions/portal/` to open Stripe Billing Portal (no-op when not configured). Service encapsulated in `infrastructure.payment.services` with env-guard.
+  - [US-015] Client minimal CRUD (list/create): `GET /clients/` (owner-scoped), `POST /clients/` (validate and create). Added `Client` model (owner, name, email, company_name) with basic indexes.
+  - Migration: added `0005_client.py` to create `clients` table and indexes.
 
 - Frontend
   - TransactionsPage: Inline category editor with optimistic update + toasts; PATCH to `/transactions/:id` wired.
@@ -149,7 +163,9 @@
   - ReceiptUploadPage: improved error messaging to inform about potential fallback save; advises user to check Receipts list and reprocess if needed.
   - Receipts list (`ReceiptsPage.tsx`): shows storage origin badge (cloudinary/local) and OCR confidence percentage. Mapping updated to read `metadata.custom_fields`.
   - Receipt detail page (`ReceiptDetailPage.tsx`): implemented fully. Displays thumbnail, merchant, total, date, confidence, storage provider, Cloudinary public_id. Adds actions to reprocess with Paddle or OpenAI and to open the OCR results page.
-  - API client (`api.ts`): `getReceipt` now normalizes backend shape (nested `ocr_data`, `metadata.custom_fields`) into the frontend `Receipt` type.
+  - API client (`api.ts`): `getReceipt` now normalizes backend shape (nested `ocr_data`, `metadata.custom_fields`) into the frontend `Receipt` type; `createTransaction` surfaces 409 duplicate as a user-friendly message. Added `updateTransaction`, and [US-013][US-014] `startSubscriptionCheckout`/`openBillingPortal` methods; [US-015] `getClients`/`createClient` methods.
+  - [US-015] ClientsPage: minimal list/create UI added at `/clients` consuming the new endpoints.
+  - [US-013][US-014] SubscriptionPage: minimal page at `/subscription` with actions to start checkout and open billing portal; both no-op gracefully when backend not configured.
   - Types (`types/api.ts`): aligned `receipt_type` union with backend; added optional `storage_provider` and `cloudinary_public_id` fields.
 
 - Settings/Config

@@ -381,6 +381,11 @@ const DashboardPage = () => {
                 acc[r.month].expense += r.expense;
               });
               const rows = Object.entries(acc).sort((a,b)=>a[0].localeCompare(b[0]));
+              if (rows.length === 0) {
+                return (
+                  <div className="text-sm text-gray-500 italic">No data for the selected date range.</div>
+                );
+              }
               const maxVal = rows.reduce((m, [,v])=>Math.max(m, v.income, v.expense), 0) || 1;
               return rows.map(([m, v]) => (
                 <div key={m} className="text-xs cursor-pointer" onClick={() => navigateToMonth(m)} title={`View transactions for ${m}`}>
@@ -396,7 +401,26 @@ const DashboardPage = () => {
           <div className="mt-3 text-xs text-gray-500">Legend: <span className="inline-block w-3 h-3 bg-green-500 align-middle mr-1"></span>Income <span className="inline-block w-3 h-3 bg-yellow-500 align-middle mx-1"></span>Expense</div>
         </div>
         <div className="card p-4">
-          <h3 className="font-semibold mb-3">Category Breakdown</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold">Category Breakdown</h3>
+            <div className="flex flex-wrap gap-2">
+              {(() => {
+                const acc: Record<string, { total: number }> = {};
+                byCategoryRaw.forEach(r => {
+                  const key = r.category || 'uncategorized';
+                  acc[key] = acc[key] || { total: 0 };
+                  acc[key].total += r.income + r.expense;
+                });
+                const rows = Object.entries(acc).sort((a,b)=>b[1].total - a[1].total).slice(0,5);
+                if (rows.length === 0) return null;
+                return rows.map(([cat]) => (
+                  <button key={`chip-${cat}`} className="px-2 py-0.5 text-xs rounded-full border bg-gray-50 hover:bg-gray-100" onClick={() => navigateToCategory(cat)} title={`Filter transactions by ${cat}`}>
+                    {cat}
+                  </button>
+                ));
+              })()}
+            </div>
+          </div>
           <div className="space-y-2">
             {(() => {
               const acc: Record<string, { total: number }> = {};
@@ -406,6 +430,11 @@ const DashboardPage = () => {
                 acc[key].total += r.income + r.expense;
               });
               const rows = Object.entries(acc).sort((a,b)=>b[1].total - a[1].total).slice(0,8);
+              if (rows.length === 0) {
+                return (
+                  <div className="text-sm text-gray-500 italic">No data for the selected date range.</div>
+                );
+              }
               const maxVal = rows.reduce((m, [,v])=>Math.max(m, v.total), 1);
               return rows.map(([cat, v]) => (
                 <div key={cat} className="text-xs cursor-pointer" onClick={() => navigateToCategory(cat)} title={`View transactions in ${cat}`}>
@@ -430,6 +459,11 @@ const DashboardPage = () => {
                 acc[key].total += r.income + r.expense;
               });
               const rows = Object.entries(acc).sort((a,b)=>b[1].total - a[1].total).slice(0,10);
+              if (rows.length === 0) {
+                return (
+                  <div className="text-sm text-gray-500 italic">No data for the selected date range.</div>
+                );
+              }
               const maxVal = rows.reduce((m, [,v])=>Math.max(m, v.total), 1);
               return rows.map(([merch, v]) => (
                 <div key={merch} className="text-xs">

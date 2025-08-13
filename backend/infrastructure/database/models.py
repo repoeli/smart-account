@@ -438,3 +438,28 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"Transaction {self.id} {self.type} {self.amount} {self.currency}"
+
+
+class Client(models.Model):
+    """
+    Client entity for accounting companies to manage their customers (US-015).
+    Minimal fields for listing and creation.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='clients')
+    name = models.CharField(max_length=255)
+    email = models.EmailField(blank=True, null=True)
+    company_name = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'clients'
+        indexes = [
+            models.Index(fields=['owner']),
+            models.Index(fields=['name']),
+        ]
+        ordering = ['name', 'created_at']
+
+    def __str__(self):
+        return f"Client {self.id} {self.name}"

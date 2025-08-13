@@ -32,6 +32,7 @@ from .serializers import (
 from infrastructure.ocr.services import OCRService, OCRMethod
 from domain.receipts.entities import ReceiptType
 from django.conf import settings
+from infrastructure.payment.services import StripePaymentService
 
 logger = logging.getLogger(__name__)
 
@@ -2386,18 +2387,56 @@ class CategorySuggestView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = CategorySuggestQuerySerializer(data=request.query_params)
-        qs.is_valid(raise_exception=False)
-        merchant = (qs.validated_data or {}).get('merchant') or ''
-        suggested = None
-        m = merchant.lower()
-        if any(k in m for k in ['tesco', 'asda', 'lidl', 'aldi', 'sainsbury', 'co-op', 'waitrose', 'morrisons', 'greggs', 'costa', 'starbucks', 'pret']):
-            suggested = 'food_and_drink'
-        elif any(k in m for k in ['uber', 'tfl', 'train', 'rail', 'bus', 'stagecoach']):
-            suggested = 'transport'
-        elif any(k in m for k in ['boots', 'superdrug']):
-            suggested = 'other'
-        return Response({'success': True, 'category': suggested}, status=200)
+        try:
+            qs = CategorySuggestQuerySerializer(data=request.query_params)
+            qs.is_valid(raise_exception=False)
+            receipt_id = (qs.validated_data or {}).get('receiptId') or request.query_params.get('receiptId')
+            merchant = (qs.validated_data or {}).get('merchant') or ''
+
+            # 1) History-based suggestion (US-006): if we know the merchant (either directly or via receipt),
+            #    return the most frequent previously used category for this merchant by the current user.
+            merchant_name = (merchant or '').strip()
+            if not merchant_name and receipt_id:
+                try:
+                    from infrastructure.database.models import Receipt as Rx
+                    r = Rx.objects.filter(id=receipt_id, user_id=request.user.id).first()
+                    if r and isinstance(r.ocr_data, dict):
+                        merchant_name = (r.ocr_data or {}).get('merchant_name') or ''
+                except Exception:
+                    merchant_name = ''
+
+            if merchant_name:
+                try:
+                    from infrastructure.database.models import Transaction as TxModel
+                    from django.db.models import Count
+                    top = (
+                        TxModel.objects.filter(user_id=request.user.id, receipt__ocr_data__merchant_name__iexact=merchant_name)
+                        .values('category')
+                        .exclude(category__isnull=True)
+                        .exclude(category='')
+                        .annotate(n=Count('id'))
+                        .order_by('-n')
+                        .first()
+                    )
+                    if top and top.get('category'):
+                        return Response({'success': True, 'category': top['category']}, status=200)
+                except Exception:
+                    pass
+
+            # 2) Heuristic fallback by merchant keywords (keep existing behavior)
+            suggested = None
+            m = merchant_name.lower()
+            if any(k in m for k in ['tesco', 'asda', 'lidl', 'aldi', 'sainsbury', 'co-op', 'waitrose', 'morrisons', 'greggs', 'costa', 'starbucks', 'pret']):
+                suggested = 'food_and_drink'
+            elif any(k in m for k in ['uber', 'tfl', 'train', 'rail', 'bus', 'stagecoach']):
+                suggested = 'transport'
+            elif any(k in m for k in ['boots', 'superdrug']):
+                suggested = 'other'
+
+            return Response({'success': True, 'category': suggested}, status=200)
+        except Exception as e:
+            # Defensive: never block UI on suggestion
+            return Response({'success': True, 'category': None, 'message': 'fallback'}, status=200)
 
 
 class CategoriesListView(APIView):
@@ -2412,6 +2451,67 @@ class CategoriesListView(APIView):
 
     def get(self, request):
         return Response({'success': True, 'categories': self.CATEGORIES}, status=200)
+
+
+class SubscriptionCheckoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        svc = StripePaymentService()
+        result = svc.create_checkout_session(user_id=str(request.user.id))
+        return Response(result, status=200 if result.get('success') else 400)
+
+
+class StripeWebhookView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        try:
+            sig = request.META.get('HTTP_STRIPE_SIGNATURE', '')
+            result = StripePaymentService().handle_webhook(request.body, sig)
+            return Response(result, status=200 if result.get('success') else 400)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=400)
+
+
+class SubscriptionPortalView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Customer lookup can be wired when user billing is implemented
+        svc = StripePaymentService()
+        result = svc.create_billing_portal(customer_id=None, user_id=str(request.user.id))
+        return Response(result, status=200 if result.get('success') else 400)
+
+
+class ClientsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            from infrastructure.database.models import Client
+            qs = Client.objects.filter(owner_id=request.user.id).order_by('name')
+            items = [{'id': str(c.id), 'name': c.name, 'email': c.email, 'company_name': c.company_name} for c in qs]
+            return Response({'success': True, 'items': items}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+    def post(self, request):
+        try:
+            from infrastructure.database.models import Client
+            from .serializers import ClientSerializer
+            ser = ClientSerializer(data=request.data)
+            if not ser.is_valid():
+                return Response({'success': False, 'error': 'validation_error', 'validation_errors': ser.errors}, status=400)
+            obj = Client.objects.create(
+                owner_id=request.user.id,
+                name=ser.validated_data['name'],
+                email=ser.validated_data.get('email') or None,
+                company_name=ser.validated_data.get('company_name') or None,
+            )
+            return Response({'success': True, 'id': str(obj.id)}, status=200)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
 
 
 class TransactionsSummaryView(APIView):
@@ -2631,6 +2731,15 @@ class TransactionCreateView(APIView):
             return Response({'success': False, 'error': 'validation_error', 'validation_errors': serializer.errors}, status=400)
         data = serializer.validated_data
         try:
+            # API-level 1:1 guard (US-008/US-009): prevent duplicates without DB constraint
+            try:
+                from infrastructure.database.models import Transaction as TxModel
+                if data.get('receipt_id'):
+                    exists = TxModel.objects.filter(user_id=request.user.id, receipt_id=str(data['receipt_id'])).exists()
+                    if exists:
+                        return Response({'success': False, 'error': 'duplicate', 'message': 'A transaction already exists for this receipt.'}, status=409)
+            except Exception:
+                pass
             from infrastructure.database.repositories import DjangoTransactionRepository
             from application.transactions.use_cases import CreateTransactionUseCase, CreateTransactionCommand
             from domain.accounts.entities import User as DUser, UserType, BusinessProfile
@@ -2659,17 +2768,28 @@ class TransactionCreateView(APIView):
             try:
                 from infrastructure.database.models import Transaction as TxModel
                 from decimal import Decimal as _D
-                obj = TxModel.objects.create(
-                    user_id=request.user.id,
-                    receipt_id=str(data.get('receipt_id')) if data.get('receipt_id') else None,
-                    description=data['description'],
-                    amount=_D(str(data['amount'])),
-                    currency=data.get('currency') or 'GBP',
-                    type=data['type'],
-                    transaction_date=data['transaction_date'],
-                    category=(data.get('category') or None),
-                )
-                return Response({'success': True, 'transaction_id': str(obj.id)}, status=200)
+                # Repeat 1:1 guard in fallback path
+                if data.get('receipt_id'):
+                    if TxModel.objects.filter(user_id=request.user.id, receipt_id=str(data['receipt_id'])).exists():
+                        return Response({'success': False, 'error': 'duplicate', 'message': 'A transaction already exists for this receipt.'}, status=409)
+                try:
+                    obj = TxModel.objects.create(
+                        user_id=request.user.id,
+                        receipt_id=str(data.get('receipt_id')) if data.get('receipt_id') else None,
+                        description=data['description'],
+                        amount=_D(str(data['amount'])),
+                        currency=data.get('currency') or 'GBP',
+                        type=data['type'],
+                        transaction_date=data['transaction_date'],
+                        category=(data.get('category') or None),
+                    )
+                    return Response({'success': True, 'transaction_id': str(obj.id)}, status=200)
+                except Exception as db_ex:
+                    # Handle unique receipt guard with a 409
+                    msg = str(db_ex)
+                    if 'uniq_transaction_per_receipt' in msg or 'UNIQUE' in msg:
+                        return Response({'success': False, 'error': 'duplicate', 'message': 'A transaction already exists for this receipt.'}, status=409)
+                    raise
             except Exception as e2:
                 return Response({'success': False, 'error': 'create_error', 'message': str(e2)}, status=500)
 
@@ -2686,9 +2806,28 @@ class TransactionCreateView(APIView):
             obj = TxModel.objects.filter(id=tx_id, user_id=request.user.id).first()
             if not obj:
                 return Response({'success': False, 'error': 'not_found'}, status=404)
+            # Update allowed fields (US-008, US-009 core editing)
+            fields_to_update = []
+            if 'description' in data:
+                obj.description = data['description']
+                fields_to_update.append('description')
+            if 'amount' in data:
+                obj.amount = data['amount']
+                fields_to_update.append('amount')
+            if 'currency' in data:
+                obj.currency = data['currency']
+                fields_to_update.append('currency')
+            if 'type' in data:
+                obj.type = data['type']
+                fields_to_update.append('type')
+            if 'transaction_date' in data:
+                obj.transaction_date = data['transaction_date']
+                fields_to_update.append('transaction_date')
             if 'category' in data:
                 obj.category = data.get('category') or None
-            obj.save(update_fields=['category', 'updated_at'])
+                fields_to_update.append('category')
+            fields_to_update.append('updated_at')
+            obj.save(update_fields=fields_to_update)
             return Response({'success': True}, status=200)
         except Exception as e:
             return Response({'success': False, 'error': 'update_error', 'message': str(e)}, status=500)
