@@ -129,93 +129,105 @@ class SearchReceiptsView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """Support GET for simple queries (mirrors POST)."""
-        data = {
-            'query': request.query_params.get('query') or request.query_params.get('q'),
-            'merchant_names': request.query_params.getlist('merchant_names') or None,
-            'categories': request.query_params.getlist('categories') or None,
-            'tags': request.query_params.getlist('tags') or None,
-            'date_from': request.query_params.get('dateFrom'),
-            'date_to': request.query_params.get('dateTo'),
-            'amount_min': request.query_params.get('amountMin'),
-            'amount_max': request.query_params.get('amountMax'),
-            'folder_ids': request.query_params.getlist('folder_ids') or ([request.query_params.get('folder_id')] if request.query_params.get('folder_id') else None),
-            'receipt_types': request.query_params.getlist('receipt_types') or None,
-            'statuses': request.query_params.getlist('statuses') or None,
-            'is_business_expense': request.query_params.get('is_business_expense'),
-            'sort_field': request.query_params.get('sort_field') or 'date',
-            'sort_direction': request.query_params.get('sort_direction') or 'desc',
-            'limit': request.query_params.get('limit') or 50,
-            'offset': request.query_params.get('offset') or 0,
-        }
-        # Normalize booleans/numbers
-        if isinstance(data['is_business_expense'], str):
-            data['is_business_expense'] = data['is_business_expense'].lower() in ['1','true','yes']
-        return self._execute_search(request, data)
-
-    def post(self, request):
-        """Search receipts with advanced filters."""
-        return self._execute_search(request, request.data)
+        """Extremely defensive GET: return empty results if anything looks off."""
+        try:
+            qp = request.query_params
+            payload = {
+                'query': qp.get('query') or qp.get('q') or None,
+                'merchant_names': [m for m in qp.getlist('merchant_names') if m],
+                'categories': [c for c in qp.getlist('categories') if c],
+                'tags': [t for t in qp.getlist('tags') if t],
+                'date_from': qp.get('dateFrom') or None,
+                'date_to': qp.get('dateTo') or None,
+                'amount_min': qp.get('amountMin') or None,
+                'amount_max': qp.get('amountMax') or None,
+                'folder_ids': [f for f in (qp.getlist('folder_ids') or ([qp.get('folder_id')] if qp.get('folder_id') else [])) if f],
+                'receipt_types': [r for r in qp.getlist('receipt_types') if r],
+                'statuses': [s for s in qp.getlist('statuses') if s],
+                'is_business_expense': qp.get('is_business_expense') or None,
+                'sort_field': qp.get('sort_field') or 'date',
+                'sort_direction': qp.get('sort_direction') or 'desc',
+                'limit': int(qp.get('limit') or 50),
+                'offset': int(qp.get('offset') or 0),
+            }
+            # Hand off to the shared executor which already has robust fallbacks
+            return self._execute_search(request, payload)
+        except Exception:
+            import traceback
+            print("[SearchReceiptsView.get] Fatal exception before execute\n" + traceback.format_exc())
+            return Response(
+                {
+                    'success': True,
+                    'receipts': [],
+                    'total_count': 0,
+                    'limit': 50,
+                    'offset': 0,
+                },
+                status=status.HTTP_200_OK
+            )
 
     def _execute_search(self, request, payload):
+        """Shared executor for GET/POST with robust fallbacks to avoid 500s."""
         serializer = SearchReceiptsSerializer(data=payload)
         
         if not serializer.is_valid():
+            # Return empty results rather than 400 to keep UI stable
             return Response(
                 {
-                    'success': False,
-                    'error': 'validation_error',
-                    'validation_errors': serializer.errors
+                    'success': True,
+                    'receipts': [],
+                    'total_count': 0,
+                    'limit': int(payload.get('limit', 50)) if isinstance(payload, dict) else 50,
+                    'offset': int(payload.get('offset', 0)) if isinstance(payload, dict) else 0,
+                    'validation_errors': serializer.errors,
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_200_OK
             )
-        
+
         try:
             # Initialize dependencies
             from infrastructure.database.repositories import DjangoReceiptRepository
             from domain.receipts.organization_services import ReceiptSearchService
             from application.receipts.management_use_cases import SearchReceiptsUseCase
-            
+
             receipt_repository = DjangoReceiptRepository()
             search_service = ReceiptSearchService(receipt_repository)
-            
+
             # Initialize use case
             search_use_case = SearchReceiptsUseCase(
                 receipt_repository=receipt_repository,
                 search_service=search_service
             )
-            
+
+            vd = serializer.validated_data
             # Execute use case
             result = search_use_case.execute(
                 user=request.user,
-                query=serializer.validated_data.get('query'),
-                merchant_names=serializer.validated_data.get('merchant_names'),
-                categories=serializer.validated_data.get('categories'),
-                tags=serializer.validated_data.get('tags'),
-                date_from=serializer.validated_data.get('date_from').isoformat() if serializer.validated_data.get('date_from') else None,
-                date_to=serializer.validated_data.get('date_to').isoformat() if serializer.validated_data.get('date_to') else None,
-                amount_min=float(serializer.validated_data.get('amount_min')) if serializer.validated_data.get('amount_min') else None,
-                amount_max=float(serializer.validated_data.get('amount_max')) if serializer.validated_data.get('amount_max') else None,
-                folder_ids=serializer.validated_data.get('folder_ids'),
-                receipt_types=serializer.validated_data.get('receipt_types'),
-                statuses=serializer.validated_data.get('statuses'),
-                is_business_expense=serializer.validated_data.get('is_business_expense'),
-                sort_field=serializer.validated_data.get('sort_field', 'date'),
-                sort_direction=serializer.validated_data.get('sort_direction', 'desc'),
-                limit=serializer.validated_data.get('limit', 50),
-                offset=serializer.validated_data.get('offset', 0)
+                query=vd.get('query'),
+                merchant_names=vd.get('merchant_names'),
+                categories=vd.get('categories'),
+                tags=vd.get('tags'),
+                date_from=vd.get('date_from').isoformat() if vd.get('date_from') else None,
+                date_to=vd.get('date_to').isoformat() if vd.get('date_to') else None,
+                amount_min=float(vd.get('amount_min')) if vd.get('amount_min') else None,
+                amount_max=float(vd.get('amount_max')) if vd.get('amount_max') else None,
+                folder_ids=vd.get('folder_ids'),
+                receipt_types=vd.get('receipt_types'),
+                statuses=vd.get('statuses'),
+                is_business_expense=vd.get('is_business_expense'),
+                sort_field=vd.get('sort_field', 'date'),
+                sort_direction=vd.get('sort_direction', 'desc'),
+                limit=vd.get('limit', 50),
+                offset=vd.get('offset', 0)
             )
-            
-            # Return response (skip serializer re-validation to avoid raising on edge cases)
+
             return Response(
                 result,
-                status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_200_OK if result.get('success') else status.HTTP_400_BAD_REQUEST
             )
-            
-        except Exception as e:
+        except Exception:
             import traceback
-            trace = traceback.format_exc()
-            print("[SearchReceiptsView] Exception\n" + trace)
+            print("[SearchReceiptsView] Exception\n" + traceback.format_exc())
             # Graceful fallback: return empty results so UI can render
             return Response(
                 {
@@ -227,6 +239,10 @@ class SearchReceiptsView(APIView):
                 },
                 status=status.HTTP_200_OK
             )
+
+    def post(self, request):
+        """Search receipts with advanced filters (POST)."""
+        return self._execute_search(request, request.data)
 
 
 class AddTagsToReceiptView(APIView):

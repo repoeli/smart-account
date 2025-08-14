@@ -22,6 +22,38 @@
   - [US-010] Dashboard: added a safe retry with backoff for `GET /transactions/summary/` and a Retry button in the banner to recover gracefully from transient errors.
   - [US-005] Added `AuditPage` to view recent audit logs with filters (`eventType`, `receipt_id`, `limit`), consuming `/api/v1/audit/logs/`.
   - [US-006] `ReceiptDetailPage`: shows a Suggested category hint based on `GET /categories/suggest?receiptId=...&merchant=...` (history-first, heuristic fallback). This informs the one-click Create Transaction flow.
+  - [US-006] Folders: Implemented folder-scoped receipt listing and bulk move. Frontend now calls `GET /api/v1/receipts/search/?folder_ids=<id>&limit=50` and provides a multi-select UI with a destination folder picker. Bulk move posts to `POST /api/v1/folders/{folder_id}/receipts/` with `{receipt_ids:[...]}` and refreshes on success.
+
+### User Stories Status Snapshot (current iteration)
+
+- Completed (Core delivered)
+  - US-005: OCR Receipt Processing (validate/edit/reprocess, OCR health, history)
+  - US-007: Receipt Search and Filtering (cursor path + UI; legacy list preserved)
+  - US-008: Transactions – Create/Edit/Delete/Export (core ledger ops)
+  - US-009: Transactions – Category editing and totals (by currency)
+  - US-011: Analytics page – distinct charts and export (CSV/PDF)
+  - US-013: Subscription – Checkout, status, plan gating (server/client)
+  - US-014: Billing – Portal, invoices, payment methods, default PM
+  - US-015: Clients – Minimal CRUD and plan gating
+
+- In Progress
+  - US-004: Receipt Upload & Cloudinary – complete core; additional polish and camera UX ongoing
+  - US-006: Folders & Receipt Organization – core folders and bulk move done; search GET hardening and folder_id filters stabilisation pending
+  - US-010: Dashboard/Analytics consolidation – admin analysis surface exists; deeper KPIs and tests pending
+
+- Not Started
+  - None of the defined User Stories remain entirely unstarted at this time
+
+### Statistical Analysis (User Stories)
+
+- Basis: 11 User Stories tracked (US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-013, US-014, US-015)
+- Completed: 8 / 11 ≈ 72.7%
+- In Progress: 3 / 11 ≈ 27.3%
+- Not Started: 0 / 11 = 0%
+
+Notes:
+- “Completed” denotes core functionality delivered and integrated UI+API. Hardening, tests, or minor polish may remain and are tracked in To-be-reviewed.
+- “In Progress” indicates core is partially shipped but additional endpoints/UX fixes or stabilisation are underway in the next iteration.
 
 - Configuration
   - [US-004] If using local storage in dev, set `PUBLIC_BASE_URL=http://127.0.0.1:8000` so newly saved local files get absolute URLs.

@@ -35,6 +35,40 @@ Next steps queued:
   - [US-006] Categories: E2E category dropdown hydrates from `/categories/`, falls back gracefully; ensure selected category filters list and persists via URL/localStorage.
   - [US-006] Category Suggestion: with seeded transactions for a merchant, `GET /categories/suggest?merchant=<name>` should return the most frequent prior category; if none, heuristic may return a default; always 200 with `{success:true}`.
   - [US-006] UI hint: `ReceiptDetailPage` displays a suggested category chip when API returns one; verify it appears/disappears as expected and survives reload.
+- [US-006] Folders UX follow-ups:
+  - Confirm backend returns receipts associated with multiple folders correctly when `folder_ids` contains several values.
+  - Add inline feedback/toasts for bulk move success/failure on `FoldersPage`.
+  - Add a confirmation dialog when moving receipts out of system folders (e.g., Recent) if needed by product rules.
+  - Support drag-and-drop move between folders as a later enhancement.
+
+### Additional TODOs Aligned to User Stories
+
+- [US-004] Upload polish
+  - Improve progress UI for multi-file uploads; resumable uploads (later)
+  - Camera inline UX: add grid overlay and exposure hinting; finalize device switching tests
+
+- [US-006] Receipt search stabilisation
+  - Finalise `GET /receipts/search` query param handling on server (defensive serializer) and ensure empty results never 500
+  - Add E2E tests for folder filter with `folder_ids` single and multiple
+
+- [US-010] Dashboard & Admin analysis
+  - Expand admin KPIs and provide date-ranged CSVs; add quick links to deep dive pages
+  - Add server-side caching for KPI queries and p95 latency tracking
+
+- [US-011] Analytics
+  - Add print-friendly mode and snapshot export (PNG) for charts
+
+- [US-013][US-014] Subscription
+  - Add plan change UX within app after checkout; surface payment method errors inline
+
+- [US-015] Clients
+  - Add client selection to Duplicate/Edit transaction modals (frontend); confirm backend PATCH persists client links
+
+### Percentage Progress (for tracking)
+
+- Completed: 72.7%
+- In Progress: 27.3%
+- Not Started: 0%
   - [US-008][US-009] Receipt→Transaction 1:1 guard (no duplicates):
     - UI: disable "Create Transaction" button on `ReceiptDetailPage` when a transaction already exists for the receipt; surface a tooltip/explanatory note. Do NOT change DB yet.
     - API option (preferred, no DB change): support `GET /transactions/?receipt_id=<id>&limit=1` to check existence; or include `has_transaction` in `GET /receipts/:id`. Decide one path and implement.
