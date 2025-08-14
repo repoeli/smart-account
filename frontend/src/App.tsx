@@ -23,6 +23,7 @@ import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import SubscriptionCancelPage from './pages/SubscriptionCancelPage';
 import AdminPage from './pages/AdminPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import FoldersPage from './pages/FoldersPage';
 
 // Layouts
 import MainLayout from './components/layouts/MainLayout';
@@ -30,7 +31,7 @@ import AuthLayout from './components/layouts/AuthLayout';
 
 function App() {
   const dispatch = useAppDispatch();
-  const { isAuthenticated, token } = useAppSelector((state) => state.auth);
+  const { token } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     // Always try to hydrate user if we have a token
@@ -65,6 +66,7 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="receipts" element={<ReceiptsPage />} />
           <Route path="receipts/upload" element={<ReceiptUploadPage />} />
+          <Route path="folders" element={<FoldersPage />} />
           <Route path="receipts/new" element={<ReceiptManualCreatePage />} />
           <Route path="receipts/:id/ocr" element={<OCRResultsPage />} />
           <Route path="receipts/:id" element={<ReceiptDetailPage />} />

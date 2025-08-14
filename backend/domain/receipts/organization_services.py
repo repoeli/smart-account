@@ -30,23 +30,24 @@ class FolderService:
     
     def create_default_folders(self, user_id: str) -> List[Folder]:
         """Create default system folders for a new user."""
+        import uuid
         folders = []
-        
-        for folder_id, folder_name in self.SYSTEM_FOLDERS.items():
+
+        for folder_key, folder_name in self.SYSTEM_FOLDERS.items():
             folder = Folder(
-                id=f"{user_id}_{folder_id}",
+                id=str(uuid.uuid4()),
                 user_id=user_id,
                 name=folder_name,
                 folder_type=FolderType.SYSTEM,
                 metadata=FolderMetadata(
                     description=f"System folder: {folder_name}",
-                    is_favorite=folder_id in ['all', 'recent']
+                    is_favorite=folder_key in ['all', 'recent']
                 )
             )
             folders.append(folder)
-        
-        # Create smart folder for recent receipts
-        recent_folder = next(f for f in folders if 'recent' in f.id)
+
+        # Create smart folder for recent receipts (find by name, not id)
+        recent_folder = next(f for f in folders if f.name.lower() == 'recent')
         recent_folder.folder_type = FolderType.SMART
         recent_folder.add_smart_rule(SmartFolderRule(
             field='date',
@@ -229,7 +230,7 @@ class ReceiptSearchService:
         # This is a simplified implementation
         # In real implementation, this would delegate to repository with proper query building
         
-        # Get all user receipts
+        # Get all user receipts (repository accepts user object or id)
         all_receipts = self.receipt_repository.find_by_user(user_id, limit=1000, offset=0)
         
         # Apply filters
@@ -308,21 +309,29 @@ class ReceiptSearchService:
         return False
     
     def _apply_sorting(self, receipts: List[Receipt], sort_options: ReceiptSortOptions) -> List[Receipt]:
-        """Apply sorting to receipts."""
+        """Apply sorting to receipts with None-safe keys to avoid TypeError."""
         reverse = sort_options.direction == 'desc'
         
         if sort_options.field == 'date':
-            return sorted(receipts, key=lambda r: r.get_receipt_date() or r.created_at, reverse=reverse)
+            # Sort by receipt date; if None, fall back to created_at; place None at end
+            return sorted(
+                receipts,
+                key=lambda r: (
+                    (r.get_receipt_date() or r.created_at) is None,
+                    (r.get_receipt_date() or r.created_at or datetime.min)
+                ),
+                reverse=reverse
+            )
         elif sort_options.field == 'amount':
             return sorted(receipts, key=lambda r: r.get_total_amount() or Decimal('0'), reverse=reverse)
         elif sort_options.field == 'merchant_name':
             return sorted(receipts, key=lambda r: r.get_merchant_name() or '', reverse=reverse)
         elif sort_options.field == 'created_at':
-            return sorted(receipts, key=lambda r: r.created_at, reverse=reverse)
+            return sorted(receipts, key=lambda r: r.created_at or datetime.min, reverse=reverse)
         elif sort_options.field == 'updated_at':
-            return sorted(receipts, key=lambda r: r.updated_at, reverse=reverse)
+            return sorted(receipts, key=lambda r: r.updated_at or datetime.min, reverse=reverse)
         elif sort_options.field == 'category':
-            return sorted(receipts, key=lambda r: r.metadata.category if r.metadata else '', reverse=reverse)
+            return sorted(receipts, key=lambda r: (r.metadata.category if r.metadata else ''), reverse=reverse)
         
         return receipts
 

@@ -3,7 +3,7 @@ Repository implementations for Smart Accounts Management System.
 Implements repository interfaces using Django ORM.
 """
 
-from typing import List, Optional
+from typing import List, Optional, Any
 from decimal import Decimal
 from datetime import datetime
 
@@ -20,9 +20,11 @@ from domain.receipts.entities import (
 )
 from domain.receipts.repositories import ReceiptRepository
 from domain.common.entities import Email, PhoneNumber, Address
-from .models import User, Receipt, Transaction as TxModel
+from .models import User, Receipt, Transaction as TxModel, Folder as FolderModel, FolderReceipt as FolderReceiptModel
 from domain.transactions.repositories import TransactionRepository
 from domain.transactions.entities import Transaction as DomainTx, TransactionType as TxType, Money, Category
+from domain.receipts.organization_repositories import FolderRepository
+from domain.receipts.organization import Folder as DomainFolder, FolderType as DomainFolderType, FolderMetadata
 
 UserModel = get_user_model()
 
@@ -350,9 +352,15 @@ class DjangoReceiptRepository(ReceiptRepository):
         except Receipt.DoesNotExist:
             return None
     
-    def find_by_user(self, user: DomainUser, limit: int = 100, offset: int = 0) -> List[DomainReceipt]:
-        """Find receipts by user with pagination."""
-        django_receipts = Receipt.objects.filter(user_id=user.id)[offset:offset + limit]
+    def find_by_user(self, user: Any, limit: int = 100, offset: int = 0) -> List[DomainReceipt]:
+        """Find receipts by user with pagination.
+        Accepts either a DomainUser or a raw user_id string/UUID for convenience.
+        """
+        try:
+            user_id = user.id  # DomainUser
+        except AttributeError:
+            user_id = str(user)  # assume id
+        django_receipts = Receipt.objects.filter(user_id=user_id)[offset:offset + limit]
         return [self._to_domain_receipt(receipt) for receipt in django_receipts]
     
     def find_by_status(self, user: DomainUser, status: ReceiptStatus, limit: int = 100, offset: int = 0) -> List[DomainReceipt]:
@@ -430,6 +438,105 @@ class DjangoTransactionRepository(TransactionRepository):
             receipt_type=receipt_type.value
         )[offset:offset + limit]
         return [self._to_domain_receipt(receipt) for receipt in django_receipts]
+
+
+class DjangoFolderRepository(FolderRepository):
+    """Django ORM implementation of FolderRepository."""
+
+    def save(self, folder: DomainFolder) -> DomainFolder:
+        with transaction.atomic():
+            try:
+                obj = FolderModel.objects.get(id=folder.id)
+            except FolderModel.DoesNotExist:
+                obj = FolderModel(id=folder.id)
+
+            obj.user_id = folder.user_id
+            obj.name = folder.name
+            obj.folder_type = folder.folder_type.value
+            obj.parent_id = folder.parent_id
+            obj.metadata = {
+                'description': folder.metadata.description,
+                'icon': folder.metadata.icon,
+                'color': folder.metadata.color,
+                'is_favorite': folder.metadata.is_favorite,
+                'sort_order': folder.metadata.sort_order,
+            }
+            obj.save()
+
+            # Sync membership for non-smart folders (best-effort)
+            if folder.folder_type != DomainFolderType.SMART:
+                # Remove existing not in set
+                FolderReceiptModel.objects.filter(folder=obj).exclude(receipt_id__in=list(folder.receipt_ids)).delete()
+                # Add missing
+                existing = set(FolderReceiptModel.objects.filter(folder=obj).values_list('receipt_id', flat=True))
+                to_create = [rid for rid in folder.receipt_ids if rid not in existing]
+                for rid in to_create:
+                    try:
+                        FolderReceiptModel.objects.create(folder=obj, receipt_id=rid)
+                    except Exception:
+                        pass
+
+            return self._to_domain_folder(obj)
+
+    def find_by_id(self, folder_id: str) -> Optional[DomainFolder]:
+        try:
+            return self._to_domain_folder(FolderModel.objects.get(id=folder_id))
+        except FolderModel.DoesNotExist:
+            return None
+
+    def find_by_user(self, user_id: str) -> List[DomainFolder]:
+        qs = FolderModel.objects.filter(user_id=user_id).order_by('name', 'created_at')
+        return [self._to_domain_folder(o) for o in qs]
+
+    def find_by_user_and_type(self, user_id: str, folder_type: DomainFolderType) -> List[DomainFolder]:
+        qs = FolderModel.objects.filter(user_id=user_id, folder_type=folder_type.value).order_by('name')
+        return [self._to_domain_folder(o) for o in qs]
+
+    def find_by_parent(self, parent_id: str) -> List[DomainFolder]:
+        qs = FolderModel.objects.filter(parent_id=parent_id).order_by('name')
+        return [self._to_domain_folder(o) for o in qs]
+
+    def find_system_folder(self, user_id: str, folder_name: str) -> Optional[DomainFolder]:
+        try:
+            o = FolderModel.objects.get(user_id=user_id, folder_type='system', name=folder_name)
+            return self._to_domain_folder(o)
+        except FolderModel.DoesNotExist:
+            return None
+
+    def delete(self, folder_id: str) -> bool:
+        try:
+            FolderModel.objects.get(id=folder_id).delete()
+            return True
+        except FolderModel.DoesNotExist:
+            return False
+
+    def exists_by_name(self, user_id: str, name: str, parent_id: Optional[str] = None) -> bool:
+        qs = FolderModel.objects.filter(user_id=user_id, name=name)
+        if parent_id is None:
+            qs = qs.filter(parent__isnull=True)
+        else:
+            qs = qs.filter(parent_id=parent_id)
+        return qs.exists()
+
+    def _to_domain_folder(self, obj: FolderModel) -> DomainFolder:
+        meta = obj.metadata or {}
+        folder = DomainFolder(
+            id=str(obj.id),
+            user_id=str(obj.user_id),
+            name=obj.name,
+            folder_type=DomainFolderType(obj.folder_type),
+            parent_id=str(obj.parent_id) if obj.parent_id else None,
+            metadata=FolderMetadata(
+                description=meta.get('description'),
+                icon=meta.get('icon'),
+                color=meta.get('color'),
+                is_favorite=bool(meta.get('is_favorite', False)),
+                sort_order=int(meta.get('sort_order', 0)),
+            ),
+        )
+        if obj.folder_type != 'smart':
+            folder.receipt_ids = set(str(rid) for rid in FolderReceiptModel.objects.filter(folder_id=obj.id).values_list('receipt_id', flat=True))
+        return folder
     
     def find_by_date_range(self, user: DomainUser, start_date, end_date, limit: int = 100, offset: int = 0) -> List[DomainReceipt]:
         """Find receipts within a date range for a specific user."""
@@ -524,20 +631,52 @@ class DjangoTransactionRepository(TransactionRepository):
             file_url=django_receipt.file_url
         )
         
-        # Create OCR data
+        # Create OCR data (robust parsing)
         ocr_data = None
         if django_receipt.ocr_data:
+            raw = django_receipt.ocr_data or {}
+            # Safe decimal parse
+            def _to_decimal(val):
+                if val is None or val == '':
+                    return None
+                try:
+                    return Decimal(str(val).replace(',', ''))
+                except Exception:
+                    return None
+            # Safe date parse: try ISO, then YYYY-MM-DD, then DD/MM/YYYY
+            def _to_datetime(val):
+                if not val:
+                    return None
+                # Already datetime
+                if isinstance(val, datetime):
+                    return val
+                s = str(val)
+                # Handle trailing 'Z' as UTC
+                if s.endswith('Z'):
+                    s = s[:-1] + '+00:00'
+                try:
+                    return datetime.fromisoformat(s)
+                except Exception:
+                    try:
+                        from datetime import datetime as _dt
+                        return _dt.strptime(s, '%Y-%m-%d')
+                    except Exception:
+                        try:
+                            from datetime import datetime as _dt
+                            return _dt.strptime(s, '%d/%m/%Y')
+                        except Exception:
+                            return None
             ocr_data = OCRData(
-                merchant_name=django_receipt.ocr_data.get('merchant_name'),
-                total_amount=Decimal(django_receipt.ocr_data['total_amount']) if django_receipt.ocr_data.get('total_amount') else None,
-                currency=django_receipt.ocr_data.get('currency', 'GBP'),
-                date=datetime.fromisoformat(django_receipt.ocr_data['date']) if django_receipt.ocr_data.get('date') else None,
-                vat_amount=Decimal(django_receipt.ocr_data['vat_amount']) if django_receipt.ocr_data.get('vat_amount') else None,
-                vat_number=django_receipt.ocr_data.get('vat_number'),
-                receipt_number=django_receipt.ocr_data.get('receipt_number'),
-                items=django_receipt.ocr_data.get('items', []),
-                confidence_score=django_receipt.ocr_data.get('confidence_score'),
-                raw_text=django_receipt.ocr_data.get('raw_text')
+                merchant_name=raw.get('merchant_name'),
+                total_amount=_to_decimal(raw.get('total_amount')),
+                currency=raw.get('currency', 'GBP'),
+                date=_to_datetime(raw.get('date')),
+                vat_amount=_to_decimal(raw.get('vat_amount')),
+                vat_number=raw.get('vat_number'),
+                receipt_number=raw.get('receipt_number'),
+                items=raw.get('items', []),
+                confidence_score=raw.get('confidence_score'),
+                raw_text=raw.get('raw_text')
             )
         
         # Create metadata

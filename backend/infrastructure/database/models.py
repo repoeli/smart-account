@@ -413,6 +413,61 @@ class Receipt(models.Model):
         return None 
 
 
+class Folder(models.Model):
+    """
+    Folder model for organizing receipts (US-006).
+    Supports user-created, system, and smart folders. Metadata stored as JSON.
+    """
+
+    FOLDER_TYPE_CHOICES = [
+        ('system', 'System'),
+        ('user', 'User'),
+        ('smart', 'Smart'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='folders')
+    name = models.CharField(max_length=255)
+    folder_type = models.CharField(max_length=10, choices=FOLDER_TYPE_CHOICES, default='user')
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'folders'
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['parent']),
+            models.Index(fields=['user', 'name']),
+        ]
+        ordering = ['name', 'created_at']
+
+    def __str__(self):
+        return f"Folder {self.name} ({self.folder_type})"
+
+
+class FolderReceipt(models.Model):
+    """
+    Join table mapping receipts to folders (many-to-many via explicit model).
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='folder_receipts')
+    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, related_name='receipt_folders')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'folder_receipts'
+        constraints = [
+            models.UniqueConstraint(fields=['folder', 'receipt'], name='uniq_folder_receipt'),
+        ]
+        indexes = [
+            models.Index(fields=['folder']),
+            models.Index(fields=['receipt']),
+        ]
+
+
 class Transaction(models.Model):
     """
     Django Transaction model (Sprint 2.2).
