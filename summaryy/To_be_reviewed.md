@@ -71,6 +71,11 @@ Next steps queued:
   - Frontend: verify refined `isCurrentPlan` logic correctly marks Basic (including free trial) as current using `price_id`, `product_id`, and tier/status fallbacks.
   - [US-013][US-014] CSV export plan gating: tests that Basic receives 403 `plan_restricted`, Premium succeeds.
   - [US-013][US-014] Receipt upload monthly limits: tests that when `usage.receipts_this_month >= max_receipts`, `POST /receipts/upload/` returns 403 `plan_limit_reached`; also verify unlimited plan behavior.
+  - Admin:
+    - Backend unit/integration tests for `GET/PUT /admin/settings/` (RBAC, validation, audit, cache bust).
+    - Diagnostics endpoint returns OCR status, integration flags; resilient when OCR health fails.
+    - Analysis overview returns expected metrics for seeded data and respects date ranges; CSV export shape stable.
+    - Frontend `/admin` page: E2E for load, edit JSON, save, diagnostics view, analysis modal, CSV export link.
   - E2E Subscription wizard: plan cards render features from `product_metadata.features`, badges (Popular/Current), trial days, and both actions (Payment Link/Choose plan) work; confirm dialog appears and redirects to Stripe Checkout.
   - Header E2E: subscription chip renders for authenticated users; reflects mocked status changes.
   - [US-015] Clients: backend tests for `GET/POST /clients/` (ownership scoping, validation errors, creation success); migration applied and model present.

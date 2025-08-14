@@ -2950,6 +2950,196 @@ class AdminAnalysisExportCSVView(APIView):
         except Exception as e:
             return Response({'success': False, 'message': str(e)}, status=500)
 
+
+def _compute_financial_summary_for_user(user, date_from: str = None, date_to: str = None):
+    from infrastructure.database.models import Transaction as TxModel
+    from django.db.models import Sum
+    qs = TxModel.objects.filter(user_id=user.id)
+    if date_from:
+        qs = qs.filter(transaction_date__gte=date_from)
+    if date_to:
+        qs = qs.filter(transaction_date__lte=date_to)
+    income_by_currency = list(qs.filter(type='income').values('currency').annotate(total=Sum('amount')))
+    expense_by_currency = list(qs.filter(type='expense').values('currency').annotate(total=Sum('amount')))
+    totals = {
+        'income': [{'currency': row['currency'], 'sum': str(row['total'])} for row in income_by_currency],
+        'expense': [{'currency': row['currency'], 'sum': str(row['total'])} for row in expense_by_currency],
+    }
+    # by month
+    from django.db.models.functions import TruncMonth
+    monthly = (
+        qs.annotate(m=TruncMonth('transaction_date'))
+          .values('m', 'currency', 'type')
+          .annotate(total=Sum('amount'))
+          .order_by('m')
+    )
+    from collections import defaultdict
+    acc = defaultdict(lambda: {'income': 0, 'expense': 0})
+    for row in monthly:
+        m_val = row['m']
+        try:
+            from datetime import date as _date, datetime as _datetime
+            if isinstance(m_val, _datetime) or isinstance(m_val, _date):
+                month_key = m_val.strftime('%Y-%m')
+            else:
+                month_key = str(m_val)[:7]
+        except Exception:
+            month_key = str(m_val)[:7]
+        key = f"{month_key}|{row['currency']}"
+        acc[key][row['type']] = float(row['total'] or 0)
+    by_month = []
+    for key, vals in sorted(acc.items()):
+        month, currency = key.split('|', 1)
+        by_month.append({'month': month, 'currency': currency, 'income': vals['income'], 'expense': vals['expense']})
+
+    # by category
+    by_cat_qs = qs.exclude(category__isnull=True).exclude(category='').values('category', 'currency', 'type').annotate(total=Sum('amount')).order_by('category')
+    acc_cat = defaultdict(lambda: {'income': 0, 'expense': 0})
+    for row in by_cat_qs:
+        key = f"{row['category']}|{row['currency']}"
+        acc_cat[key][row['type']] = float(row['total'] or 0)
+    by_category = []
+    for key, vals in acc_cat.items():
+        cat, currency = key.split('|', 1)
+        by_category.append({'category': cat, 'currency': currency, 'income': vals['income'], 'expense': vals['expense']})
+
+    # by merchant (best-effort from linked receipt)
+    from django.db.models import Value, CharField
+    from django.db import connection
+    from django.db.models.functions import Coalesce
+    merchant_annotation = None
+    if connection.vendor == 'postgresql':
+        try:
+            from django.db.models.functions import Cast
+            try:
+                from django.db.models.fields.json import KeyTextTransform as _KTT  # type: ignore
+            except Exception:
+                from django.contrib.postgres.fields.jsonb import KeyTextTransform as _KTT  # type: ignore
+            merchant_annotation = Cast(_KTT('merchant_name', 'receipt__ocr_data'), CharField())
+        except Exception:
+            merchant_annotation = Value('', output_field=CharField())
+    else:
+        merchant_annotation = Value('', output_field=CharField())
+    merch_qs = (
+        qs.annotate(merchant=Coalesce(merchant_annotation, Value('', output_field=CharField())))
+          .values('merchant', 'currency', 'type')
+          .annotate(total=Sum('amount'))
+          .order_by('merchant')
+    )
+    acc_merch = defaultdict(lambda: {'income': 0, 'expense': 0})
+    for row in merch_qs:
+        key = f"{row['merchant']}|{row['currency']}"
+        acc_merch[key][row['type']] = float(row['total'] or 0)
+    by_merchant = []
+    for key, vals in acc_merch.items():
+        merchant, currency = key.split('|', 1)
+        by_merchant.append({'merchant': merchant, 'currency': currency, 'income': vals['income'], 'expense': vals['expense']})
+
+    return {'totals': totals, 'byMonth': by_month, 'byCategory': by_category, 'byMerchant': by_merchant}
+
+
+class ReportsFinancialOverviewCSVView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            df = request.query_params.get('dateFrom')
+            dt = request.query_params.get('dateTo')
+            data = _compute_financial_summary_for_user(request.user, df, dt)
+            import csv
+            from django.http import StreamingHttpResponse
+
+            class Echo:
+                def write(self, value):
+                    return value
+
+            pseudo = Echo()
+            writer = csv.writer(pseudo)
+
+            def stream():
+                # Totals
+                yield writer.writerow(['section', 'currency', 'income', 'expense'])
+                cur_set = {t['currency'] for t in data['totals']['income']} | {t['currency'] for t in data['totals']['expense']}
+                for cur in cur_set:
+                    inc = next((x for x in data['totals']['income'] if x['currency'] == cur), None)
+                    exp = next((x for x in data['totals']['expense'] if x['currency'] == cur), None)
+                    yield writer.writerow(['totals', cur, (inc or {}).get('sum') or '0', (exp or {}).get('sum') or '0'])
+                # By Month
+                yield writer.writerow([])
+                yield writer.writerow(['by_month', 'month', 'currency', 'income', 'expense'])
+                for r in data['byMonth']:
+                    yield writer.writerow(['by_month', r['month'], r['currency'], r['income'], r['expense']])
+                # By Category
+                yield writer.writerow([])
+                yield writer.writerow(['by_category', 'category', 'currency', 'income', 'expense'])
+                for r in data['byCategory']:
+                    yield writer.writerow(['by_category', r['category'], r['currency'], r['income'], r['expense']])
+                # By Merchant
+                yield writer.writerow([])
+                yield writer.writerow(['by_merchant', 'merchant', 'currency', 'income', 'expense'])
+                for r in data['byMerchant']:
+                    yield writer.writerow(['by_merchant', r['merchant'], r['currency'], r['income'], r['expense']])
+
+            resp = StreamingHttpResponse(stream(), content_type='text/csv')
+            resp['Content-Disposition'] = 'attachment; filename="financial_overview.csv"'
+            return resp
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+
+class ReportsFinancialOverviewPDFView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            df = request.query_params.get('dateFrom')
+            dt = request.query_params.get('dateTo')
+            data = _compute_financial_summary_for_user(request.user, df, dt)
+            # Try to generate a simple PDF
+            try:
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.pagesizes import A4
+                from reportlab.lib.units import mm
+                from django.http import HttpResponse
+                resp = HttpResponse(content_type='application/pdf')
+                resp['Content-Disposition'] = 'attachment; filename="financial_overview.pdf"'
+                c = canvas.Canvas(resp, pagesize=A4)
+                width, height = A4
+                y = height - 20*mm
+                c.setFont('Helvetica-Bold', 14)
+                c.drawString(20*mm, y, 'Financial Overview Report')
+                y -= 10*mm
+                c.setFont('Helvetica', 10)
+                c.drawString(20*mm, y, f"Date range: {df or '-'} .. {dt or '-'}")
+                y -= 8*mm
+                # Totals
+                c.setFont('Helvetica-Bold', 12); c.drawString(20*mm, y, 'Totals'); y -= 6*mm; c.setFont('Helvetica', 10)
+                cur_set = {t['currency'] for t in data['totals']['income']} | {t['currency'] for t in data['totals']['expense']}
+                for cur in sorted(cur_set):
+                    inc = next((x for x in data['totals']['income'] if x['currency'] == cur), None)
+                    exp = next((x for x in data['totals']['expense'] if x['currency'] == cur), None)
+                    c.drawString(20*mm, y, f"{cur}: income { (inc or {}).get('sum') or '0' } · expense { (exp or {}).get('sum') or '0' }"); y -= 6*mm
+                # By category (top 10 by total)
+                y -= 4*mm
+                c.setFont('Helvetica-Bold', 12); c.drawString(20*mm, y, 'Top Categories'); y -= 6*mm; c.setFont('Helvetica', 10)
+                cats = sorted(data['byCategory'], key=lambda r: (r['income']+r['expense']), reverse=True)[:10]
+                for r in cats:
+                    c.drawString(20*mm, y, f"{r['category']}: {r['income']+r['expense']:.2f} {r['currency']}"); y -= 6*mm
+                    if y < 30*mm: c.showPage(); y = height - 20*mm
+                # By merchant (top 10)
+                y -= 2*mm; c.setFont('Helvetica-Bold', 12); c.drawString(20*mm, y, 'Top Merchants'); y -= 6*mm; c.setFont('Helvetica', 10)
+                mers = sorted(data['byMerchant'], key=lambda r: (r['income']+r['expense']), reverse=True)[:10]
+                for r in mers:
+                    name = (r['merchant'] or '—')
+                    c.drawString(20*mm, y, f"{name}: {r['income']+r['expense']:.2f} {r['currency']}"); y -= 6*mm
+                    if y < 30*mm: c.showPage(); y = height - 20*mm
+                c.showPage(); c.save()
+                return resp
+            except Exception as e:
+                return Response({'success': False, 'message': f'PDF generation unavailable: {str(e)}'}, status=400)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
 class ClientsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -3183,8 +3373,16 @@ class TransactionsSummaryView(APIView):
                 by_merchant.append({'merchant': merchant, 'currency': currency, 'income': vals['income'], 'expense': vals['expense']})
             response['byMerchant'] = by_merchant
         # Cache and timing log
-        ttl = getattr(settings, 'SUMMARY_CACHE_TTL', 60)
-        cache.set(cache_key, response, timeout=ttl)
+        try:
+            # Allow admin-configurable TTL via ApplicationSettings.dashboard.summary_cache_ttl
+            from infrastructure.database.models import ApplicationSettings as _AS
+            _data = (_AS.get_solo().data or {}) if _AS else {}
+            _ttl = int((((_data or {}).get('dashboard') or {}).get('summary_cache_ttl')))
+            if _ttl <= 0:
+                _ttl = getattr(settings, 'SUMMARY_CACHE_TTL', 60)
+        except Exception:
+            _ttl = getattr(settings, 'SUMMARY_CACHE_TTL', 60)
+        cache.set(cache_key, response, timeout=_ttl)
         try:
             logger.info('transactions.summary timings', extra={'ms': int((time.perf_counter()-t0)*1000), 'user_id': str(request.user.id), 'groups': group_tokens})
         except Exception:

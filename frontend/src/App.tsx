@@ -21,6 +21,8 @@ import ClientsPage from './pages/ClientsPage';
 import SubscriptionPage from './pages/SubscriptionPage';
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import SubscriptionCancelPage from './pages/SubscriptionCancelPage';
+import AdminPage from './pages/AdminPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 // Layouts
 import MainLayout from './components/layouts/MainLayout';
@@ -72,6 +74,8 @@ function App() {
           <Route path="subscription/success" element={<SubscriptionSuccessPage />} />
           <Route path="subscription/cancel" element={<SubscriptionCancelPage />} />
           <Route path="audit" element={<AuditPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="admin" element={<AdminPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 

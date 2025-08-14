@@ -11,7 +11,7 @@ from .views import (
     PasswordResetRequestView, PasswordResetConfirmView,
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView, ReceiptManualCreateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
-    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionsExportCSVView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView, SubscriptionCheckoutView, StripeWebhookView, SubscriptionPortalView, ClientsView, SubscriptionPlansView, ClientDetailView, SubscriptionStatusView, ClientsCountView, SubscriptionCurrentView, SubscriptionUsageView, SubscriptionInvoicesView, SubscriptionPaymentMethodsView, AdminSettingsView, AdminDiagnosticsView, AdminAnalysisOverviewView, AdminAnalysisExportCSVView,
+    ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionsExportCSVView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView, SubscriptionCheckoutView, StripeWebhookView, SubscriptionPortalView, ClientsView, SubscriptionPlansView, ClientDetailView, SubscriptionStatusView, ClientsCountView, SubscriptionCurrentView, SubscriptionUsageView, SubscriptionInvoicesView, SubscriptionPaymentMethodsView, AdminSettingsView, AdminDiagnosticsView, AdminAnalysisOverviewView, AdminAnalysisExportCSVView, ReportsFinancialOverviewCSVView, ReportsFinancialOverviewPDFView,
 )
 from .management_views import (
     CreateFolderView, FolderDetailView, FolderListView, SearchReceiptsView,
@@ -83,6 +83,9 @@ urlpatterns = [
     path('admin/diagnostics/', AdminDiagnosticsView.as_view(), name='admin-diagnostics'),
     path('admin/analysis/overview/', AdminAnalysisOverviewView.as_view(), name='admin-analysis-overview'),
     path('admin/analysis/export.csv', AdminAnalysisExportCSVView.as_view(), name='admin-analysis-export'),
+    # Reports (user-scoped financial exports)
+    path('reports/financial/overview.csv', ReportsFinancialOverviewCSVView.as_view(), name='reports-financial-overview-csv'),
+    path('reports/financial/overview.pdf', ReportsFinancialOverviewPDFView.as_view(), name='reports-financial-overview-pdf'),
     
     # US-006: Receipt Management and Organization endpoints
     path('folders/', FolderListView.as_view(), name='folder-list'),

@@ -74,6 +74,22 @@ const Sidebar = ({ open, mobileOpen, onClose }: SidebarProps) => {
             {open && item.name}
           </NavLink>
         ))}
+        {/* Admin link (visible for staff users) */}
+        {user?.is_staff && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) =>
+              `group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                isActive
+                  ? 'bg-primary-100 text-primary-700 border-r-2 border-primary-600'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`
+            }
+          >
+            <Cog6ToothIcon className={`mr-3 h-5 w-5 flex-shrink-0 ${open ? '' : 'mr-0'}`} aria-hidden="true" />
+            {open && 'Admin'}
+          </NavLink>
+        )}
       </nav>
 
       {/* User info (bottom) */}
