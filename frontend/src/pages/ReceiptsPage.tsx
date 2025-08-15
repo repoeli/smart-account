@@ -144,6 +144,14 @@ const ReceiptsPage = () => {
           storage_provider: it.provider as any,
         }));
         setReceipts(mapped);
+        // Seed converted map from API if present to avoid background checks
+        const seeded: Record<string, { exists: boolean; txId?: string }> = {};
+        r.items.forEach((it: any) => {
+          if (typeof it.has_transaction === 'boolean') {
+            seeded[it.id] = { exists: it.has_transaction };
+          }
+        });
+        if (Object.keys(seeded).length) setConvertedMap((prev) => ({ ...prev, ...seeded }));
         setNextCursor(r.pageInfo.nextCursor);
         setPrevCursor(r.pageInfo.prevCursor);
         setHasNext(r.pageInfo.hasNext);
@@ -157,34 +165,6 @@ const ReceiptsPage = () => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId]);
-
-  // Background check: mark receipts that already have a linked transaction
-  useEffect(() => {
-    let canceled = false;
-    const run = async () => {
-      if (!receipts.length) return;
-      const idsToCheck = receipts
-        .map((r) => r.id)
-        .filter((id) => convertedMap[id] === undefined);
-      await Promise.all(
-        idsToCheck.map(async (id) => {
-          try {
-            const res = await apiClient.hasTransactionForReceipt(id);
-            if (!canceled) {
-              setConvertedMap((prev) => ({ ...prev, [id]: { exists: !!res.exists, txId: res.transaction_id } }));
-            }
-          } catch {
-            if (!canceled) setConvertedMap((prev) => ({ ...prev, [id]: { exists: false } }));
-          }
-        })
-      );
-    };
-    run();
-    return () => {
-      canceled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [receipts]);
 
   // Debounced search (query + applied filters + sorting) – resets pagination and clears cursor
   useEffect(() => {

@@ -604,6 +604,7 @@ class DjangoFolderRepository(FolderRepository):
     def _to_domain_receipt(self, django_receipt: Receipt) -> DomainReceipt:
         """Convert Django receipt to domain receipt."""
         # Get user (simplified - in real implementation, you'd inject user repository)
+        user = None
         try:
             django_user = UserModel.objects.get(id=django_receipt.user_id)
             # Create minimal domain user for receipt
@@ -620,86 +621,125 @@ class DjangoFolderRepository(FolderRepository):
                 )
             )
         except UserModel.DoesNotExist:
-            # Handle case where user doesn't exist
-            user = None
+            # Handle case where user doesn't exist - create a minimal placeholder
+            try:
+                user = DomainUser(
+                    id=str(django_receipt.user_id),
+                    email=Email('placeholder@example.com'),
+                    password_hash='placeholder',
+                    first_name='Unknown',
+                    last_name='User',
+                    user_type=UserType.INDIVIDUAL,
+                    business_profile=BusinessProfile(
+                        company_name='Unknown Company',
+                        business_type='unknown'
+                    )
+                )
+            except Exception as e:
+                # If even placeholder creation fails, log and continue with None
+                print(f"Warning: Could not create user placeholder for receipt {django_receipt.id}: {e}")
+                user = None
         
-        # Create file info
-        file_info = FileInfo(
-            filename=django_receipt.filename,
-            file_size=django_receipt.file_size,
-            mime_type=django_receipt.mime_type,
-            file_url=django_receipt.file_url
-        )
+        # Create file info with defensive programming
+        try:
+            file_info = FileInfo(
+                filename=django_receipt.filename or 'unknown',
+                file_size=django_receipt.file_size or 0,
+                mime_type=django_receipt.mime_type or 'application/octet-stream',
+                file_url=django_receipt.file_url or ''
+            )
+        except Exception as e:
+            print(f"Warning: Could not create file info for receipt {django_receipt.id}: {e}")
+            # Create minimal file info
+            file_info = FileInfo(
+                filename='unknown',
+                file_size=0,
+                mime_type='application/octet-stream',
+                file_url=''
+            )
         
         # Create OCR data (robust parsing)
         ocr_data = None
         if django_receipt.ocr_data:
-            raw = django_receipt.ocr_data or {}
-            # Safe decimal parse
-            def _to_decimal(val):
-                if val is None or val == '':
-                    return None
-                try:
-                    return Decimal(str(val).replace(',', ''))
-                except Exception:
-                    return None
-            # Safe date parse: try ISO, then YYYY-MM-DD, then DD/MM/YYYY
-            def _to_datetime(val):
-                if not val:
-                    return None
-                # Already datetime
-                if isinstance(val, datetime):
-                    return val
-                s = str(val)
-                # Handle trailing 'Z' as UTC
-                if s.endswith('Z'):
-                    s = s[:-1] + '+00:00'
-                try:
-                    return datetime.fromisoformat(s)
-                except Exception:
+            try:
+                raw = django_receipt.ocr_data or {}
+                # Safe decimal parse
+                def _to_decimal(val):
+                    if val is None or val == '':
+                        return None
                     try:
-                        from datetime import datetime as _dt
-                        return _dt.strptime(s, '%Y-%m-%d')
+                        return Decimal(str(val).replace(',', ''))
+                    except Exception:
+                        return None
+                # Safe date parse: try ISO, then YYYY-MM-DD, then DD/MM/YYYY
+                def _to_datetime(val):
+                    if not val:
+                        return None
+                    # Already datetime
+                    if isinstance(val, datetime):
+                        return val
+                    s = str(val)
+                    # Handle trailing 'Z' as UTC
+                    if s.endswith('Z'):
+                        s = s[:-1] + '+00:00'
+                    try:
+                        return datetime.fromisoformat(s)
                     except Exception:
                         try:
                             from datetime import datetime as _dt
-                            return _dt.strptime(s, '%d/%m/%Y')
+                            return _dt.strptime(s, '%Y-%m-%d')
                         except Exception:
-                            return None
-            ocr_data = OCRData(
-                merchant_name=raw.get('merchant_name'),
-                total_amount=_to_decimal(raw.get('total_amount')),
-                currency=raw.get('currency', 'GBP'),
-                date=_to_datetime(raw.get('date')),
-                vat_amount=_to_decimal(raw.get('vat_amount')),
-                vat_number=raw.get('vat_number'),
-                receipt_number=raw.get('receipt_number'),
-                items=raw.get('items', []),
-                confidence_score=raw.get('confidence_score'),
-                raw_text=raw.get('raw_text')
-            )
+                            try:
+                                from datetime import datetime as _dt
+                                return _dt.strptime(s, '%d/%m/%Y')
+                            except Exception:
+                                return None
+                ocr_data = OCRData(
+                    merchant_name=raw.get('merchant_name'),
+                    total_amount=_to_decimal(raw.get('total_amount')),
+                    currency=raw.get('currency', 'GBP'),
+                    date=_to_datetime(raw.get('date')),
+                    vat_amount=_to_decimal(raw.get('vat_amount')),
+                    vat_number=raw.get('vat_number'),
+                    receipt_number=raw.get('receipt_number'),
+                    items=raw.get('items', []),
+                    confidence_score=raw.get('confidence_score'),
+                    raw_text=raw.get('raw_text')
+                )
+            except Exception as e:
+                print(f"Warning: Could not create OCR data for receipt {django_receipt.id}: {e}")
+                ocr_data = None
         
-        # Create metadata
+        # Create metadata with defensive programming
         metadata = None
         if django_receipt.metadata:
-            metadata = ReceiptMetadata(
-                category=django_receipt.metadata.get('category'),
-                tags=django_receipt.metadata.get('tags', []),
-                notes=django_receipt.metadata.get('notes'),
-                is_business_expense=django_receipt.metadata.get('is_business_expense', False),
-                tax_deductible=django_receipt.metadata.get('tax_deductible', False),
-                custom_fields=django_receipt.metadata.get('custom_fields', {})
-            )
+            try:
+                metadata = ReceiptMetadata(
+                    category=django_receipt.metadata.get('category'),
+                    tags=django_receipt.metadata.get('tags', []),
+                    notes=django_receipt.metadata.get('notes'),
+                    is_business_expense=django_receipt.metadata.get('is_business_expense', False),
+                    tax_deductible=django_receipt.metadata.get('tax_deductible', False),
+                    custom_fields=django_receipt.metadata.get('custom_fields', {})
+                )
+            except Exception as e:
+                print(f"Warning: Could not create metadata for receipt {django_receipt.id}: {e}")
+                metadata = None
         
-        # Create domain receipt (do not pass created_at/updated_at; managed by base entity)
-        domain_receipt = DomainReceipt(
-            id=str(django_receipt.id),
-            user=user,
-            file_info=file_info,
-            status=ReceiptStatus(django_receipt.status),
-            receipt_type=ReceiptType(django_receipt.receipt_type),
-            ocr_data=ocr_data,
-            metadata=metadata,
-            processed_at=django_receipt.processed_at
-        )
-        return domain_receipt
+        # Create domain receipt with defensive programming
+        try:
+            domain_receipt = DomainReceipt(
+                id=str(django_receipt.id),
+                user=user,
+                file_info=file_info,
+                status=ReceiptStatus(django_receipt.status),
+                receipt_type=ReceiptType(django_receipt.receipt_type),
+                ocr_data=ocr_data,
+                metadata=metadata,
+                processed_at=django_receipt.processed_at
+            )
+            return domain_receipt
+        except Exception as e:
+            print(f"Error: Could not create domain receipt for {django_receipt.id}: {e}")
+            # Return None to indicate failure - the calling code should handle this
+            return None

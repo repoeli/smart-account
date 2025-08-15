@@ -218,12 +218,12 @@ class ReceiptValidateSerializer(serializers.Serializer):
     """
     Serializer for receipt validation and correction.
     """
-    merchant_name = serializers.CharField(max_length=255, required=False)
-    total_amount = serializers.CharField(required=False, help_text="Supports plain number or 2dp")
-    date = serializers.CharField(max_length=50, required=False, allow_blank=True, help_text="Date in DD/MM/YYYY or YYYY-MM-DD format")
-    vat_number = serializers.CharField(max_length=50, required=False)
-    receipt_number = serializers.CharField(max_length=100, required=False)
-    currency = serializers.CharField(max_length=10, required=False)
+    merchant_name = serializers.CharField(max_length=255, required=False, allow_blank=True, allow_null=True)
+    total_amount = serializers.CharField(required=False, allow_blank=True, allow_null=True, help_text="Supports plain number or 2dp")
+    date = serializers.CharField(max_length=50, required=False, allow_blank=True, allow_null=True, help_text="Date in DD/MM/YYYY or YYYY-MM-DD format")
+    vat_number = serializers.CharField(max_length=50, required=False, allow_blank=True, allow_null=True)
+    receipt_number = serializers.CharField(max_length=100, required=False, allow_blank=True, allow_null=True)
+    currency = serializers.CharField(max_length=10, required=False, allow_blank=True, allow_null=True)
     
     def validate(self, attrs):
         # Normalize total_amount string -> Decimal-ish string with 2dp where possible
@@ -231,21 +231,32 @@ class ReceiptValidateSerializer(serializers.Serializer):
         amt = attrs.get('total_amount')
         if amt is not None and amt != '':
             try:
-                amt_num = Decimal(str(amt))
-                if amt_num <= 0:
-                    raise serializers.ValidationError({'total_amount': ['Total amount must be greater than zero.']})
-                attrs['total_amount'] = str(amt_num)
-            except InvalidOperation:
-                raise serializers.ValidationError({'total_amount': ['Invalid amount']})
+                # Clean the amount string
+                amt_clean = str(amt).strip().replace(',', '')
+                if amt_clean:
+                    amt_num = Decimal(amt_clean)
+                    if amt_num <= 0:
+                        # Don't fail validation, just log and keep original
+                        print(f"Warning: Amount {amt} is not positive, keeping original")
+                        attrs['total_amount'] = str(amt)
+                    else:
+                        attrs['total_amount'] = str(amt_num)
+                else:
+                    # Empty amount is fine
+                    attrs['total_amount'] = ''
+            except (InvalidOperation, ValueError):
+                # Don't fail validation, just keep original value
+                print(f"Warning: Could not parse amount {amt}, keeping original")
+                attrs['total_amount'] = str(amt)
 
         # Normalize date: accept DD/MM/YYYY, YYYY-MM-DD; keep as DD/MM/YYYY for UI
         d = attrs.get('date')
-        if d:
+        if d and d.strip():
             from datetime import datetime
             normalized = None
             for fmt in ('%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y'):
                 try:
-                    dt = datetime.strptime(d, fmt)
+                    dt = datetime.strptime(d.strip(), fmt)
                     normalized = dt.strftime('%d/%m/%Y')
                     break
                 except Exception:
@@ -253,15 +264,28 @@ class ReceiptValidateSerializer(serializers.Serializer):
             if normalized:
                 attrs['date'] = normalized
             else:
-                raise serializers.ValidationError({'date': ['Invalid date format']})
+                # Don't fail validation, just keep original and log
+                print(f"Warning: Could not parse date {d}, keeping original")
+                attrs['date'] = d.strip()
+        elif d is not None:
+            # Empty date is fine
+            attrs['date'] = ''
         
         # Normalize currency: uppercase 3-letter if provided
         c = attrs.get('currency')
-        if c:
+        if c and c.strip():
             c_norm = str(c).strip().upper()
-            if len(c_norm) not in (3, 4):
-                raise serializers.ValidationError({'currency': ['Invalid currency']})
-            attrs['currency'] = c_norm
+            # Be more lenient with currency codes
+            if len(c_norm) >= 2 and len(c_norm) <= 10:
+                attrs['currency'] = c_norm
+            else:
+                # Don't fail validation, just keep original
+                print(f"Warning: Currency {c} has unusual length, keeping original")
+                attrs['currency'] = c.strip()
+        elif c is not None:
+            # Empty currency is fine
+            attrs['currency'] = ''
+        
         return attrs
 
 

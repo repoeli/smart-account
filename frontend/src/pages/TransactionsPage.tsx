@@ -388,7 +388,18 @@ const TransactionsPage: React.FC = () => {
               {items.map(tx => (
                 <tr key={tx.id} className="border-b last:border-0">
                   <td className="py-2">{new Date(tx.transaction_date).toLocaleDateString()}</td>
-                  <td className="py-2">{tx.receipt_id ? <Link className="link" to={`/receipts/${tx.receipt_id}`}>{tx.merchant || '-'}</Link> : (tx.merchant || '-')}</td>
+                  <td className="py-2">
+                    <div className="flex items-center gap-2">
+                      {tx.receipt_id ? (
+                        <>
+                          <Link className="link" to={`/receipts/${tx.receipt_id}`}>{tx.merchant || '-'}</Link>
+                          <span className="px-1.5 py-0.5 text-[11px] rounded bg-green-50 text-green-700 border border-green-200" title="Linked to a receipt">Converted</span>
+                        </>
+                      ) : (
+                        <span>{tx.merchant || '-'}</span>
+                      )}
+                    </div>
+                  </td>
                   <td className="py-2">{tx.description}</td>
                   <td className="py-2">{tx.type}</td>
                   <td className="py-2 text-right">{formatMoney(tx.amount, tx.currency)}</td>

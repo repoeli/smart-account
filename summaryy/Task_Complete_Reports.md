@@ -23,6 +23,8 @@
   - [US-005] Added `AuditPage` to view recent audit logs with filters (`eventType`, `receipt_id`, `limit`), consuming `/api/v1/audit/logs/`.
   - [US-006] `ReceiptDetailPage`: shows a Suggested category hint based on `GET /categories/suggest?receiptId=...&merchant=...` (history-first, heuristic fallback). This informs the one-click Create Transaction flow.
   - [US-006] Folders: Implemented folder-scoped receipt listing and bulk move. Frontend now calls `GET /api/v1/receipts/search/?folder_ids=<id>&limit=50` and provides a multi-select UI with a destination folder picker. Bulk move posts to `POST /api/v1/folders/{folder_id}/receipts/` with `{receipt_ids:[...]}` and refreshes on success.
+  - [US-006] Folders UX polish: added success/error toasts for bulk move, disabled state with “Moving…” while request is in-flight, and a non-blocking yellow notice when receipts cannot be loaded due to backend errors.
+  - [US-008][US-009] Transactions UX polish: added a subtle “Converted” badge for transactions linked to a receipt (`receipt_id` present) to visually indicate conversion from receipt.
 
 ### User Stories Status Snapshot (current iteration)
 

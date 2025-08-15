@@ -1111,13 +1111,18 @@ class ReceiptValidateView(APIView):
         serializer = ReceiptValidateSerializer(data=request.data)
         
         if not serializer.is_valid():
+            # Be UI-friendly: never block with 400; surface errors in body for display/logging
+            try:
+                print(f"[ReceiptValidateView] serializer invalid for receipt {receipt_id}: {serializer.errors}")
+            except Exception:
+                pass
             return Response(
                 {
                     'success': False,
                     'error': 'validation_error',
                     'validation_errors': serializer.errors
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_200_OK
             )
         
         try:
@@ -1126,6 +1131,10 @@ class ReceiptValidateView(APIView):
             from domain.receipts.services import ReceiptValidationService, ReceiptDataEnrichmentService
             from application.receipts.use_cases import ReceiptValidateUseCase
             from infrastructure.database.models import UserAuditLog
+            
+            print(f"[DEBUG] Starting validation for receipt {receipt_id}")
+            print(f"[DEBUG] User: {request.user.id}")
+            print(f"[DEBUG] Corrections data: {serializer.validated_data}")
             
             receipt_repository = DjangoReceiptRepository()
             receipt_validation_service = ReceiptValidationService()
@@ -1139,15 +1148,55 @@ class ReceiptValidateView(APIView):
             )
             
             # Execute validation use case
+            print(f"[DEBUG] Executing use case...")
             result = validate_use_case.execute(
                 receipt_id=receipt_id,
                 user=request.user,
                 corrections=serializer.validated_data
             )
             
+            print(f"[DEBUG] Use case result: {result}")
+            
             # Return response
             response_serializer = ReceiptValidateResponseSerializer(data=result)
-            response_serializer.is_valid()
+            if not response_serializer.is_valid():
+                # Log the validation error for debugging
+                print(f"[DEBUG] Response serializer validation failed: {response_serializer.errors}")
+                print(f"[DEBUG] Result data: {result}")
+                # Return a safe fallback response
+                return Response(
+                    {
+                        'success': result.get('success', False),
+                        'receipt_id': str(receipt_id),
+                        'validation_errors': result.get('validation_errors', []),
+                        'suggestions': result.get('suggestions', {}),
+                        'quality_score': result.get('quality_score'),
+                        'message': result.get('message', 'Validation completed'),
+                        'error': result.get('error')
+                    },
+                    status=status.HTTP_200_OK
+                )
+
+            # Audit log for validation/edit
+            try:
+                UserAuditLog.objects.create(
+                    user=request.user,
+                    event_type='receipt_validate',
+                    event_data={
+                        'receipt_id': str(receipt_id),
+                        'corrections': serializer.validated_data,
+                        'result': response_serializer.data,
+                    },
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    user_agent=request.META.get('HTTP_USER_AGENT')
+                )
+            except Exception:
+                pass
+            
+            return Response(
+                response_serializer.data,
+                status=status.HTTP_200_OK
+            )
 
             # Audit log for validation/edit
             try:

@@ -1,4 +1,5 @@
 import React from 'react';
+import { toast } from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
 
 const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
@@ -17,6 +18,8 @@ const FoldersPage: React.FC = () => {
   const [newFolderName, setNewFolderName] = React.useState('');
   const [selectedReceiptIds, setSelectedReceiptIds] = React.useState<Set<string>>(new Set());
   const [destinationFolderId, setDestinationFolderId] = React.useState<string>('');
+  const [moving, setMoving] = React.useState(false);
+  const [receiptsNotice, setReceiptsNotice] = React.useState<string | null>(null);
 
   const authHeader = React.useMemo(() => ({ 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`, 'Content-Type': 'application/json' }), []);
 
@@ -32,9 +35,9 @@ const FoldersPage: React.FC = () => {
       searchUrl.searchParams.set('_', String(Date.now()));
 
       const fRes = await fetch(`${apiBase}/folders/`, { headers: authHeader });
+      // Try GET first; if server responds 405 (older mapping), retry with POST
       let rRes = await fetch(searchUrl.toString(), { headers: authHeader });
       if (rRes.status === 405) {
-        // Server disallows GET; retry with POST
         rRes = await fetch(`${apiBase}/receipts/search/`, { method: 'POST', headers: authHeader, body: JSON.stringify(searchBody) });
       }
 
@@ -44,14 +47,28 @@ const FoldersPage: React.FC = () => {
       if (!fRes.ok || !fData?.success) throw new Error(fData?.message || fText || 'Failed to load folders');
       setFolders(fData.folders || []);
 
-      // Handle receipts response leniently to avoid blocking UI
+      // Handle receipts response; if unavailable, fallback to legacy list API
       const rText = await rRes.text();
       let rData: any = {};
       try { rData = rText ? JSON.parse(rText) : {}; } catch {}
       if (!rRes.ok || !rData?.success) {
-        // Treat as empty results when backend is unavailable or returns 4xx/5xx
-        setReceipts([]);
+        // Fallback to legacy list when search endpoint is not available
+        try {
+          const listRes = await fetch(`${apiBase}/receipts/?limit=50&offset=0`, { headers: authHeader });
+          const listJson = await listRes.json();
+          if (listRes.ok && listJson?.success && Array.isArray(listJson.receipts)) {
+            setReceiptsNotice('Showing results from the legacy list while search is unavailable.');
+            setReceipts(listJson.receipts || []);
+          } else {
+            setReceipts([]);
+            setReceiptsNotice('Receipts could not be loaded at the moment. Showing an empty list.');
+          }
+        } catch {
+          setReceipts([]);
+          setReceiptsNotice('Receipts could not be loaded at the moment. Showing an empty list.');
+        }
       } else {
+        setReceiptsNotice(null);
         setReceipts(rData.receipts || []);
       }
     } catch (e: any) {
@@ -81,7 +98,14 @@ const FoldersPage: React.FC = () => {
   const moveSelected = async () => {
     if (!destinationFolderId || selectedReceiptIds.size === 0) return;
     if (destinationFolderId === currentFolderId) return;
+    // Optional confirm if moving out of a system folder
+    const currentFolder = folders.find(f => f.id === currentFolderId);
+    if (currentFolder && (currentFolder.folder_type === 'system' || currentFolder.folder_type === 'smart')) {
+      const ok = confirm(`You are moving items out of system folder "${currentFolder.name}". Continue?`);
+      if (!ok) return;
+    }
     try {
+      setMoving(true);
       const res = await fetch(`${apiBase}/folders/${encodeURIComponent(destinationFolderId)}/receipts/`, {
         method: 'POST',
         headers: authHeader,
@@ -93,9 +117,12 @@ const FoldersPage: React.FC = () => {
       if (!res.ok || !data?.success) throw new Error(data?.message || data?.error || text || 'Failed to move receipts');
       setSelectedReceiptIds(new Set());
       setDestinationFolderId('');
+      toast.success(`Moved ${Array.from(selectedReceiptIds).length} receipt(s)`);
       await load();
     } catch (e: any) {
-      alert(e?.message || 'Failed to move receipts');
+      toast.error(e?.message || 'Failed to move receipts');
+    } finally {
+      setMoving(false);
     }
   };
 
@@ -170,11 +197,14 @@ const FoldersPage: React.FC = () => {
                 <button
                   className="btn btn-primary btn-sm"
                   onClick={moveSelected}
-                  disabled={selectedReceiptIds.size===0 || !destinationFolderId || destinationFolderId===currentFolderId}
+                  disabled={moving || selectedReceiptIds.size===0 || !destinationFolderId || destinationFolderId===currentFolderId}
                 >
-                  Move selected
+                  {moving ? 'Moving…' : 'Move selected'}
                 </button>
               </div>
+              {receiptsNotice && (
+                <div className="mb-2 p-2 text-sm rounded border border-yellow-200 bg-yellow-50 text-yellow-800">{receiptsNotice}</div>
+              )}
               {receipts.length === 0 ? (
                 <div className="text-sm text-gray-500">No receipts in this folder.</div>
               ) : (

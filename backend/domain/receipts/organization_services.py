@@ -331,7 +331,8 @@ class ReceiptSearchService:
         elif sort_options.field == 'updated_at':
             return sorted(receipts, key=lambda r: r.updated_at or datetime.min, reverse=reverse)
         elif sort_options.field == 'category':
-            return sorted(receipts, key=lambda r: (r.metadata.category if r.metadata else ''), reverse=reverse)
+            # Safe access to metadata.category with proper null checking
+            return sorted(receipts, key=lambda r: (r.metadata.category if r.metadata and hasattr(r.metadata, 'category') else ''), reverse=reverse)
         
         return receipts
 

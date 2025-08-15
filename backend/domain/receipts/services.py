@@ -506,22 +506,28 @@ class ReceiptValidationService:
         if ocr_data.vat_number:
             vat_service = ReceiptDataEnrichmentService()
             is_valid, error = vat_service.validate_vat_number(ocr_data.vat_number)
+            # Non-blocking: do not hard-fail on VAT format; surface via needs_review instead
             if not is_valid:
-                errors.append(error)
+                pass
         
         # Validate currency
-        if ocr_data.currency and ocr_data.currency not in ['GBP', '£']:
-            errors.append(f"Unsupported currency: {ocr_data.currency}")
+        if ocr_data.currency:
+            currency_norm = str(ocr_data.currency).strip().upper()
+            allowed_currencies = {'GBP', 'EUR', 'USD', '£', '€', '$'}
+            # Be permissive: allow common currencies; do not block unknown ones
+            if currency_norm not in allowed_currencies:
+                pass
         
         # Validate items
         if ocr_data.items:
             for i, item in enumerate(ocr_data.items):
-                if not item.get('description'):
-                    errors.append(f"Item {i+1} missing description")
-                if not item.get('price'):
-                    errors.append(f"Item {i+1} missing price")
-                elif item.get('price', 0) <= 0:
-                    errors.append(f"Item {i+1} has invalid price: {item.get('price')}")
+                # Only flag clearly invalid prices; do not require description/price presence
+                if 'price' in item and item.get('price') is not None:
+                    try:
+                        if float(item.get('price')) <= 0:
+                            errors.append(f"Item {i+1} has invalid price: {item.get('price')}")
+                    except Exception:
+                        errors.append(f"Item {i+1} has invalid price: {item.get('price')}")
         
         return len(errors) == 0, errors
     

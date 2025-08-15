@@ -43,6 +43,8 @@ urlpatterns = [
     path('receipts/parse/', ReceiptParseView.as_view(), name='receipt-parse'),
     path('receipts/count/', ReceiptsCountView.as_view(), name='receipt-count'),
     path('receipts/', ReceiptListView.as_view(), name='receipt-list'),
+    # IMPORTANT: Place static 'search' route BEFORE dynamic '<receipt_id>' routes
+    path('receipts/search/', SearchReceiptsView.as_view(), name='receipt-search'),
     path('receipts/<str:receipt_id>/', ReceiptDetailView.as_view(), name='receipt-detail'),
     path('receipts/<str:receipt_id>/update/', ReceiptUpdateView.as_view(), name='receipt-update'),
     
@@ -92,7 +94,6 @@ urlpatterns = [
     path('folders/create/', CreateFolderView.as_view(), name='folder-create'),
     path('folders/<str:folder_id>/', FolderDetailView.as_view(), name='folder-detail'),
     path('folders/<str:folder_id>/receipts/', MoveReceiptsToFolderView.as_view(), name='folder-receipts'),
-    path('receipts/search/', SearchReceiptsView.as_view(), name='receipt-search'),
     path('receipts/<str:receipt_id>/tags/', AddTagsToReceiptView.as_view(), name='receipt-tags'),
     path('receipts/bulk/', BulkOperationView.as_view(), name='receipt-bulk'),
     path('users/statistics/', UserStatisticsView.as_view(), name='user-statistics'),

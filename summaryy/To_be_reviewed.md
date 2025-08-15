@@ -37,7 +37,7 @@ Next steps queued:
   - [US-006] UI hint: `ReceiptDetailPage` displays a suggested category chip when API returns one; verify it appears/disappears as expected and survives reload.
 - [US-006] Folders UX follow-ups:
   - Confirm backend returns receipts associated with multiple folders correctly when `folder_ids` contains several values.
-  - Add inline feedback/toasts for bulk move success/failure on `FoldersPage`.
+  - Add inline feedback/toasts for bulk move success/failure on `FoldersPage`. (Done)
   - Add a confirmation dialog when moving receipts out of system folders (e.g., Recent) if needed by product rules.
   - Support drag-and-drop move between folders as a later enhancement.
 
@@ -84,7 +84,7 @@ Next steps queued:
   - [US-008][US-009] Tests: Backend `receipt_id` filter → verify 0/1 results on `/transactions/?receipt_id=<id>`; include mixed dataset cases.
   - [US-008][US-009] Regression test: ensure `/transactions` list handles non-dict/nullable `receipt.ocr_data` without 500 and returns items with `merchant=null` gracefully.
   - [US-008][US-009] Tests: Frontend E2E → Create transaction from Receipt Detail, reload detail, assert “Create Transaction” is disabled and shows explanatory note; verify only one row appears in `/transactions`.
-  - [US-008][US-009] Optional UX: show a small “Converted” badge on receipts that already have a transaction. Implement via detail enrichment (`has_transaction`) or list-row check using `/transactions/?receipt_id` on demand.
+  - [US-008][US-009] Optional UX: show a small “Converted” badge on receipts that already have a transaction. Implement via detail enrichment (`has_transaction`) or list-row check using `/transactions/?receipt_id` on demand. (List badge added on Transactions page — consider also showing on Receipts grid.)
   - [US-013][US-014] Stripe wiring: unit/integration tests to return no-op when keys missing; when keys present (mocked), verify Checkout URL is returned; webhook signature verification success/failure cases.
   - Add tests for `GET /subscriptions/plans/`: with Stripe mocked, verify recurring prices listed with fields (id, nickname, currency, unit_amount, interval); when Stripe disabled, env price IDs are returned. Ensure `publishable_key` included.
   - Frontend E2E: Subscription plan list renders; clicking Subscribe for a plan opens Checkout URL; default checkout works when no plans are listed.

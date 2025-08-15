@@ -301,6 +301,7 @@ class ApiClient {
     transaction_date: string; // YYYY-MM-DD
     receipt_id?: string;
     category?: string;
+    client_id?: string;
   }): Promise<{ success: boolean; transaction_id?: string; message?: string }>{
     try {
       const response = await this.client.post('/transactions/', payload);

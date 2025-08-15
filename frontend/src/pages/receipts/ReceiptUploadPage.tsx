@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { ArrowLeftIcon, CameraIcon } from '@heroicons/react/24/outline';
 
-import FileUploadZone from '../../components/receipts/FileUploadZone';
+import EnhancedFileUploadZone from '../../components/receipts/EnhancedFileUploadZone';
 import UploadProgress from '../../components/receipts/UploadProgress';
 import ReceiptPreview from '../../components/receipts/ReceiptPreview';
 import Button from '../../components/forms/Button';
@@ -287,6 +287,8 @@ const ReceiptUploadPage: React.FC = () => {
   const [isCheckingConnection, setIsCheckingConnection] = useState(false);
   const [usage, setUsage] = useState<{ receipts_this_month: number; max_receipts: number } | null>(null);
   const [planError, setPlanError] = useState<string | null>(null);
+  const [currentBatch, setCurrentBatch] = useState(0);
+  const [totalBatches, setTotalBatches] = useState(0);
 
   const handleFileSelect = (files: File[]) => {
     setSelectedFiles(prev => [...prev, ...files]);
@@ -450,11 +452,14 @@ const ReceiptUploadPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* File Upload Zone */}
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-            <FileUploadZone
+            <EnhancedFileUploadZone
               onFileSelect={handleFileSelect}
               disabled={isUploading}
               maxFiles={20}
               maxSize={10 * 1024 * 1024} // 10MB
+              showBatchProgress={uploadStatus === 'uploading'}
+              currentBatch={completedFiles}
+              totalBatches={selectedFiles.length}
             />
           </div>
 
