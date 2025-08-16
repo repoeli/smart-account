@@ -81,7 +81,7 @@ class UserRegistrationUseCase:
         
         # Validate user type specific fields
         user_type = data.get('user_type', 'individual')
-        if user_type == 'business':
+        if user_type in ('business', 'accounting_company'):
             business_required_fields = ['company_name', 'business_type']
             for field in business_required_fields:
                 if not data.get(field):
@@ -104,7 +104,11 @@ class UserRegistrationUseCase:
         
         # Determine user type
         user_type_str = data.get('user_type', 'individual')
-        user_type = UserType.ACCOUNTING_COMPANY if user_type_str == 'business' else UserType.INDIVIDUAL
+        user_type = (
+            UserType.ACCOUNTING_COMPANY
+            if user_type_str in ('business', 'accounting_company')
+            else UserType.INDIVIDUAL
+        )
         
         # Create email value object
         email = Email(data['email'])

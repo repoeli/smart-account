@@ -139,6 +139,19 @@ const RegisterPage = () => {
               </div>
             </label>
           </div>
+          {userType === 'business' && (
+            <div className="text-center mt-2">
+              <p className="text-sm text-gray-600">
+                Are you an accounting firm?{' '}
+                <Link
+                  to="/auth/register/accounting-company"
+                  className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
+                >
+                  Register here
+                </Link>
+              </p>
+            </div>
+          )}
           {errors.user_type && (
             <p className="form-error" role="alert">
               {errors.user_type.message}

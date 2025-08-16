@@ -10,6 +10,22 @@ from infrastructure.ocr.services import OCRMethod
 User = get_user_model()
 
 
+class HealthCheckSerializer(serializers.Serializer):
+    """Serializer for health check endpoint."""
+    status = serializers.CharField(max_length=10)
+    database = serializers.CharField(max_length=10)
+    cache = serializers.CharField(max_length=10)
+    ocr_service = serializers.CharField(max_length=10)
+
+
+class FileInfoSerializer(serializers.Serializer):
+    """Serializer for file info endpoint."""
+    filename = serializers.CharField(max_length=255)
+    file_size = serializers.IntegerField()
+    mime_type = serializers.CharField(max_length=100)
+    file_url = serializers.URLField()
+
+
 class UserRegistrationSerializer(serializers.Serializer):
     """
     Serializer for user registration.
@@ -19,7 +35,7 @@ class UserRegistrationSerializer(serializers.Serializer):
     password_confirm = serializers.CharField(max_length=128, write_only=True)
     first_name = serializers.CharField(max_length=100, required=False)
     last_name = serializers.CharField(max_length=100, required=False)
-    user_type = serializers.ChoiceField(choices=['individual', 'business'], default='individual')
+    user_type = serializers.ChoiceField(choices=['individual', 'business', 'accounting_company'], default='individual')
     company_name = serializers.CharField(max_length=255, required=False)
     business_type = serializers.CharField(max_length=100, required=False)
     tax_id = serializers.CharField(max_length=50, required=False)
@@ -38,11 +54,11 @@ class UserRegistrationSerializer(serializers.Serializer):
         if data.get('password') != data.get('password_confirm'):
             raise serializers.ValidationError("Passwords do not match.")
         
-        # Validate business fields if user_type is business
-        if data.get('user_type') == 'business':
+        # Validate business fields if user_type is business or accounting_company
+        if data.get('user_type') in ['business', 'accounting_company']:
             if not data.get('company_name', '').strip():
                 raise serializers.ValidationError("Company name is required for business accounts.")
-            if not data.get('business_type', '').strip():
+            if not data.get('business_type', '').strip() and data.get('user_type') == 'business':
                 raise serializers.ValidationError("Business type is required for business accounts.")
         
         return data
@@ -206,6 +222,16 @@ class ReceiptReprocessSerializer(serializers.Serializer):
             ('auto', 'Auto (Best Available)')
         ],
         help_text="OCR method to use for reprocessing"
+    )
+    fallback_ocr_method = serializers.ChoiceField(
+        choices=[
+            ('paddle_ocr', 'PaddleOCR (Open Source)'),
+            ('openai_vision', 'OpenAI Vision API'),
+            ('none', 'None')
+        ],
+        required=False,
+        default='none',
+        help_text="Fallback OCR method if primary fails or has low confidence"
     )
 
 
@@ -540,6 +566,10 @@ class ClientSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
     email = serializers.EmailField(required=False, allow_blank=True)
     company_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    address = serializers.CharField(required=False, allow_blank=True)
+    vat_number = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    status = serializers.CharField(max_length=10, required=False)
 
 
 class MoveFolderSerializer(serializers.Serializer):
@@ -562,9 +592,12 @@ class SearchReceiptsSerializer(serializers.Serializer):
     amount_min = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
     amount_max = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
     folder_ids = serializers.ListField(child=serializers.CharField(), required=False)
+    client_ids = serializers.ListField(child=serializers.CharField(), required=False)
     receipt_types = serializers.ListField(child=serializers.CharField(), required=False)
     statuses = serializers.ListField(child=serializers.CharField(), required=False)
-    is_business_expense = serializers.BooleanField(required=False)
+    is_business_expense = serializers.BooleanField(required=False, allow_null=True)
+    has_transaction = serializers.BooleanField(required=False, allow_null=True)
+    has_folder = serializers.BooleanField(required=False, allow_null=True)
     sort_field = serializers.ChoiceField(
         choices=['date', 'amount', 'merchant_name', 'created_at', 'updated_at', 'category'],
         default='date'
@@ -649,4 +682,29 @@ class UserStatisticsResponseSerializer(serializers.Serializer):
     """
     success = serializers.BooleanField()
     statistics = serializers.DictField(required=False)
-    error = serializers.CharField(required=False) 
+    error = serializers.CharField(required=False)
+
+
+class CategoryCreateSerializer(serializers.Serializer):
+    """Serializer for creating a category."""
+    name = serializers.CharField(max_length=100)
+    parent_id = serializers.UUIDField(required=False, allow_null=True)
+    description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+
+class CategoryListSerializer(serializers.Serializer):
+    """Serializer for listing categories."""
+    id = serializers.UUIDField()
+    name = serializers.CharField(max_length=100)
+    parent_id = serializers.UUIDField(required=False, allow_null=True)
+    description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+
+class ReportsFinancialOverviewCSVView(serializers.Serializer):
+    """Placeholder serializer for now."""
+    pass
+
+
+class ReportsFinancialOverviewPDFView(serializers.Serializer):
+    """Placeholder serializer for now."""
+    pass 

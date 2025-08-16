@@ -110,15 +110,16 @@ const SubscriptionPage: React.FC = () => {
   }, [plans]);
 
   const isCurrentPlan = (p: { id: string; product_id?: string; nickname?: string; product_name?: string }) => {
-    const priceMatch = (status?.price_id && status.price_id === p.id) || (current?.price_id && current.price_id === p.id);
-    const productMatch = !!(current as any)?.plan?.id && (current as any).plan.id === p.product_id;
+    const currentPriceId = (status?.price_id || current?.price_id) as string | undefined;
+    if (currentPriceId && currentPriceId === p.id) return true;
     const name = (p.nickname || p.product_name || '').toLowerCase();
-    const tierMatch = (status?.tier || '').toLowerCase() && (
-      (status?.tier === 'basic' && name.includes('basic')) ||
-      (status?.tier === 'premium' && name.includes('premium')) ||
-      (status?.tier === 'enterprise' && (name.includes('platinum') || name.includes('enterprise')))
-    );
-    return Boolean(priceMatch || productMatch || tierMatch);
+    const tier = (status?.tier || '').toLowerCase();
+    if (!currentPriceId && tier) {
+      if (tier === 'basic' && name.includes('basic')) return true;
+      if (tier === 'premium' && name.includes('premium')) return true;
+      if (tier === 'enterprise' && (name.includes('platinum') || name.includes('enterprise'))) return true;
+    }
+    return false;
   };
 
   return (

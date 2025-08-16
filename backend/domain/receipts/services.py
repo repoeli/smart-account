@@ -10,7 +10,9 @@ from decimal import Decimal
 from datetime import datetime, date
 from enum import Enum
 
-from domain.receipts.entities import Receipt, OCRData, ReceiptMetadata, FileInfo
+from domain.receipts.entities import Receipt, OCRData, ReceiptMetadata, FileInfo, Category
+from domain.receipts.repositories import CategoryRepository
+from domain.accounts.entities import User
 from django.conf import settings
 from domain.common.entities import ValueObject
 
@@ -709,4 +711,32 @@ class ReceiptBusinessService:
         if receipt.ocr_data:
             result['data_quality_score'] = self.validation_service.calculate_data_quality_score(receipt.ocr_data)
         
-        return result 
+        return result
+
+
+class CategoryService:
+    """Service for managing categories."""
+
+    def __init__(self, category_repository: CategoryRepository):
+        self.category_repository = category_repository
+
+    def create_category(self, user: User, name: str, parent_id: Optional[str] = None, description: Optional[str] = None) -> Category:
+        """
+        Create a new category.
+        Ensures category name is unique for the user.
+        """
+        import uuid
+        from domain.receipts.entities import Category
+
+        # Check for duplicate category name
+        if self.category_repository.find_by_name(user, name):
+            raise ValueError(f"Category with name '{name}' already exists.")
+
+        category = Category(
+            id=str(uuid.uuid4()),
+            user=user,
+            name=name,
+            parent_id=parent_id,
+            description=description
+        )
+        return self.category_repository.save(category) 

@@ -132,3 +132,17 @@ export type EmailVerificationFormData = z.infer<typeof emailVerificationSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 export type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>;
+
+export const accountingCompanyRegisterSchema = z.object({
+  company_name: z.string().min(1, 'Company name is required'),
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password_confirm: z.string(),
+}).refine((data) => data.password === data.password_confirm, {
+  message: "Passwords don't match",
+  path: ['password_confirm'],
+});
+
+export type AccountingCompanyRegisterFormData = z.infer<typeof accountingCompanyRegisterSchema>;

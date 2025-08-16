@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass
 from typing import Optional
 from django.conf import settings
+from domain.accounts.entities import User
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +12,7 @@ class StripeConfig:
     secret_key: str
     price_basic: str
     price_premium: str
-    price_platinum: str
+    price_enterprise: str  # Changed from price_platinum to price_enterprise
     webhook_secret: str
     publishable_key: str
 
@@ -22,7 +23,7 @@ class StripePaymentService:
             secret_key=getattr(settings, 'STRIPE_SECRET_KEY', ''),
             price_basic=getattr(settings, 'STRIPE_PRICE_BASIC', ''),
             price_premium=getattr(settings, 'STRIPE_PRICE_PREMIUM', ''),
-            price_platinum=getattr(settings, 'STRIPE_PRICE_PLATINUM', ''),
+            price_enterprise=getattr(settings, 'STRIPE_PRICE_ENTERPRISE', ''),  # Changed from price_platinum
             webhook_secret=getattr(settings, 'STRIPE_WEBHOOK_SECRET', ''),
             publishable_key=getattr(settings, 'STRIPE_PUBLISHABLE_KEY', ''),
         )
@@ -32,23 +33,26 @@ class StripePaymentService:
         except Exception:
             self.enabled = False
 
-    def _ensure_customer(self, email: Optional[str]) -> Optional[str]:
+    def _ensure_customer(self, user: User) -> Optional[str]:
         """Find or create a Stripe customer by email. Returns customer_id or None."""
-        if not self.enabled or not email:
+        if not self.enabled or not user or not user.email:
             return None
         try:
             import stripe
             stripe.api_key = self.config.secret_key
             # Try to find an existing customer by email (best-effort)
+            email = user.email if hasattr(user, 'email') else None
+            if not email:
+                return None
             res = stripe.Customer.list(email=email, limit=1)
             if getattr(res, 'data', None):
                 return res.data[0].id
-            cust = stripe.Customer.create(email=email)
+            cust = stripe.Customer.create(email=email, name=f"{user.first_name} {user.last_name}")
             return cust.id
         except Exception:
             return None
 
-    def create_checkout_session(self, user_id: str, price_id: Optional[str] = None, customer_id: Optional[str] = None, customer_email: Optional[str] = None) -> dict:
+    def create_checkout_session(self, user: User, price_id: Optional[str] = None) -> dict:
         if not self.enabled:
             logger.info('Stripe disabled; returning no-op checkout session')
             return { 'success': True, 'url': None }
@@ -68,7 +72,7 @@ class StripePaymentService:
                     pid = None
             if not pid:
                 return { 'success': False, 'message': 'No Stripe price configured/found' }
-            cust_id = customer_id or self._ensure_customer(customer_email)
+            cust_id = self._ensure_customer(user)
             frontend_base = getattr(settings, 'FRONTEND_BASE_URL', 'http://localhost:5173')
             session = stripe.checkout.Session.create(
                 mode='subscription',
@@ -77,9 +81,9 @@ class StripePaymentService:
                 cancel_url=frontend_base.rstrip('/') + '/subscription',
                 customer=cust_id if cust_id else None,
                 subscription_data={
-                    'metadata': { 'user_id': user_id }
+                    'metadata': { 'user_id': str(user.id) }
                 },
-                metadata={ 'user_id': user_id },
+                metadata={ 'user_id': str(user.id) },
             )
             return { 'success': True, 'url': session.url, 'customer_id': cust_id }
         except Exception as e:
@@ -109,13 +113,13 @@ class StripePaymentService:
                     # Expand price info if not present
                     sub_id = getattr(data_obj, 'id', None) or data_obj.get('id')
                     if sub_id:
-                        sub = stripe.Subscription.retrieve(sub_id, expand=['items.data.price.product'])
+                        sub = stripe.Subscription.retrieve(sub_id, expand=['items.data.price'])
                         item = sub.items.data[0] if getattr(sub.items, 'data', None) else None
                         price = getattr(item, 'price', None)
                         price_id = getattr(price, 'id', None)
                         plan = {
                             'id': price_id,
-                            'nickname': getattr(price, 'nickname', None) or getattr(getattr(price, 'product', None), 'name', None),
+                            'nickname': getattr(price, 'nickname', None),
                             'currency': getattr(price, 'currency', None),
                             'unit_amount': getattr(price, 'unit_amount', None),
                             'interval': getattr(getattr(price, 'recurring', None), 'interval', None),
@@ -126,13 +130,13 @@ class StripePaymentService:
                     user_id = (metadata or {}).get('user_id')
                     sub_id = getattr(data_obj, 'subscription', None) or data_obj.get('subscription')
                     if sub_id:
-                        sub = stripe.Subscription.retrieve(sub_id, expand=['items.data.price.product'])
+                        sub = stripe.Subscription.retrieve(sub_id, expand=['items.data.price'])
                         item = sub.items.data[0] if getattr(sub.items, 'data', None) else None
                         price = getattr(item, 'price', None)
                         price_id = getattr(price, 'id', None)
                         plan = {
                             'id': price_id,
-                            'nickname': getattr(price, 'nickname', None) or getattr(getattr(price, 'product', None), 'name', None),
+                            'nickname': getattr(price, 'nickname', None),
                             'currency': getattr(price, 'currency', None),
                             'unit_amount': getattr(price, 'unit_amount', None),
                             'interval': getattr(getattr(price, 'recurring', None), 'interval', None),
@@ -144,7 +148,7 @@ class StripePaymentService:
         except Exception as e:
             return { 'success': False, 'message': str(e) }
 
-    def create_billing_portal(self, customer_id: Optional[str] = None, user_id: Optional[str] = None, customer_email: Optional[str] = None) -> dict:
+    def create_billing_portal(self, customer_id: Optional[str] = None, user: Optional[User] = None, customer_email: Optional[str] = None) -> dict:
         if not self.enabled:
             logger.info('Stripe disabled; returning no-op portal session')
             return { 'success': True, 'url': None }
@@ -153,7 +157,7 @@ class StripePaymentService:
             stripe.api_key = self.config.secret_key
             # In a full implementation, we would look up the Stripe customer id by user
             if not customer_id:
-                customer_id = self._ensure_customer(customer_email)
+                customer_id = self._ensure_customer(user)
                 if not customer_id:
                     return { 'success': True, 'url': None }
             frontend_base = getattr(settings, 'FRONTEND_BASE_URL', 'http://localhost:5173')
@@ -177,7 +181,7 @@ class StripePaymentService:
             for key, nick in [
                 (self.config.price_basic, 'Basic'),
                 (self.config.price_premium, 'Premium'),
-                (self.config.price_platinum, 'Platinum'),
+                (self.config.price_enterprise, 'Enterprise'), # Changed from price_platinum
             ]:
                 if key:
                     items.append({ 'id': key, 'nickname': nick, 'currency': None, 'unit_amount': None, 'interval': None })
@@ -205,7 +209,7 @@ class StripePaymentService:
             env_selected = [
                 (self.config.price_basic, 'Basic'),
                 (self.config.price_premium, 'Premium'),
-                (self.config.price_platinum, 'Platinum'),
+                (self.config.price_enterprise, 'Enterprise'), # Changed from price_platinum
             ]
             env_selected = [(pid, nick) for pid, nick in env_selected if pid]
             items = []
@@ -264,7 +268,7 @@ class StripePaymentService:
             env_prices = [
                 (self.config.price_basic, 'Basic'),
                 (self.config.price_premium, 'Premium'),
-                (self.config.price_platinum, 'Platinum'),
+                (self.config.price_enterprise, 'Enterprise'), # Changed from price_platinum
             ]
             known_ids = { it['id'] for it in items }
             for pid, nick in env_prices:

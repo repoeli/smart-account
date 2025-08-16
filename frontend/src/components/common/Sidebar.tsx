@@ -8,6 +8,8 @@ import {
   ChartBarIcon,
   Cog6ToothIcon,
   XMarkIcon,
+  UsersIcon,
+  DocumentChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { APP_CONFIG } from '../../constants/config';
 import { useAppSelector } from '../../store';
@@ -20,8 +22,10 @@ interface SidebarProps {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Multi-Client Dashboard', href: '/multi-client-dashboard', icon: UsersIcon, userType: 'accounting_company' },
   { name: 'Receipts', href: '/receipts', icon: DocumentTextIcon },
   { name: 'Folders', href: '/folders', icon: FolderIcon },
+  { name: 'Reports', href: '/reports', icon: DocumentChartBarIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   { name: 'Subscription', href: '/subscription', icon: Cog6ToothIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
@@ -55,25 +59,30 @@ const Sidebar = ({ open, mobileOpen, onClose }: SidebarProps) => {
 
       {/* Navigation */}
       <nav className="flex-1 px-4 space-y-1">
-        {navigation.map((item) => (
-          <NavLink
-            key={item.name}
-            to={item.href}
-            className={({ isActive }) =>
-              `group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                isActive
-                  ? 'bg-primary-100 text-primary-700 border-r-2 border-primary-600'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`
-            }
-          >
-            <item.icon
-              className={`mr-3 h-5 w-5 flex-shrink-0 ${open ? '' : 'mr-0'}`}
-              aria-hidden="true"
-            />
-            {open && item.name}
-          </NavLink>
-        ))}
+        {navigation.map((item) => {
+          if (item.userType && item.userType !== user?.user_type) {
+            return null;
+          }
+          return (
+            <NavLink
+              key={item.name}
+              to={item.href}
+              className={({ isActive }) =>
+                `group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                  isActive
+                    ? 'bg-primary-100 text-primary-700 border-r-2 border-primary-600'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`
+              }
+            >
+              <item.icon
+                className={`mr-3 h-5 w-5 flex-shrink-0 ${open ? '' : 'mr-0'}`}
+                aria-hidden="true"
+              />
+              {open && item.name}
+            </NavLink>
+          );
+        })}
         {/* Admin link (visible for staff users) */}
         {user?.is_staff && (
           <NavLink

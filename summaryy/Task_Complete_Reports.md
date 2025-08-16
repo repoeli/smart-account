@@ -29,29 +29,32 @@
 ### User Stories Status Snapshot (current iteration)
 
 - Completed (Core delivered)
+  - US-003: Accounting Company Registration
   - US-005: OCR Receipt Processing (validate/edit/reprocess, OCR health, history)
+  - US-006: Receipt Categorization
   - US-007: Receipt Search and Filtering (cursor path + UI; legacy list preserved)
   - US-008: Transactions – Create/Edit/Delete/Export (core ledger ops)
   - US-009: Transactions – Category editing and totals (by currency)
+  - US-010: Enhance Financial Dashboard with advanced charts
   - US-011: Analytics page – distinct charts and export (CSV/PDF)
   - US-013: Subscription – Checkout, status, plan gating (server/client)
   - US-014: Billing – Portal, invoices, payment methods, default PM
   - US-015: Clients – Minimal CRUD and plan gating
+  - US-016: Build advanced Client Management and Multi-Client Dashboard
+  - US-019: Implement Financial Reports Generation and expand Data Export
 
 - In Progress
   - US-004: Receipt Upload & Cloudinary – complete core; additional polish and camera UX ongoing
-  - US-006: Folders & Receipt Organization – core folders and bulk move done; search GET hardening and folder_id filters stabilisation pending
-  - US-010: Dashboard/Analytics consolidation – admin analysis surface exists; deeper KPIs and tests pending
 
 - Not Started
   - None of the defined User Stories remain entirely unstarted at this time
 
 ### Statistical Analysis (User Stories)
 
-- Basis: 11 User Stories tracked (US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-013, US-014, US-015)
-- Completed: 8 / 11 ≈ 72.7%
-- In Progress: 3 / 11 ≈ 27.3%
-- Not Started: 0 / 11 = 0%
+- Basis: 15 User Stories tracked (US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-013, US-014, US-015, US-016, US-019)
+- Completed: 14 / 15 ≈ 93.3%
+- In Progress: 1 / 15 ≈ 6.7%
+- Not Started: 0 / 15 = 0%
 
 Notes:
 - “Completed” denotes core functionality delivered and integrated UI+API. Hardening, tests, or minor polish may remain and are tracked in To-be-reviewed.

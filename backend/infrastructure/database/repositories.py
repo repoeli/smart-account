@@ -16,11 +16,11 @@ from domain.accounts.entities import User as DomainUser, BusinessProfile, UserTy
 from domain.accounts.repositories import UserRepository
 from domain.receipts.entities import (
     Receipt as DomainReceipt, ReceiptStatus, ReceiptType, 
-    FileInfo, OCRData, ReceiptMetadata
+    FileInfo, OCRData, ReceiptMetadata, Category as DomainCategory
 )
-from domain.receipts.repositories import ReceiptRepository
+from domain.receipts.repositories import ReceiptRepository, CategoryRepository
 from domain.common.entities import Email, PhoneNumber, Address
-from .models import User, Receipt, Transaction as TxModel, Folder as FolderModel, FolderReceipt as FolderReceiptModel
+from .models import User, Receipt, Transaction as TxModel, Folder as FolderModel, FolderReceipt as FolderReceiptModel, Category as CategoryModel
 from domain.transactions.repositories import TransactionRepository
 from domain.transactions.entities import Transaction as DomainTx, TransactionType as TxType, Money, Category
 from domain.receipts.organization_repositories import FolderRepository
@@ -743,3 +743,73 @@ class DjangoFolderRepository(FolderRepository):
             print(f"Error: Could not create domain receipt for {django_receipt.id}: {e}")
             # Return None to indicate failure - the calling code should handle this
             return None
+
+
+class DjangoCategoryRepository(CategoryRepository):
+    """Django ORM implementation of CategoryRepository."""
+
+    def save(self, category: DomainCategory) -> DomainCategory:
+        """Save or update a category."""
+        with transaction.atomic():
+            try:
+                # Try to find existing category
+                django_category = CategoryModel.objects.get(id=category.id)
+                # Update existing category
+                django_category.name = category.name
+                django_category.description = category.description
+                django_category.parent_id = category.parent_id
+                django_category.user_id = category.user.id
+                django_category.save()
+            except CategoryModel.DoesNotExist:
+                # Create new category
+                django_category = CategoryModel.objects.create(
+                    id=category.id,
+                    user_id=category.user.id,
+                    name=category.name,
+                    description=category.description,
+                    parent_id=category.parent_id
+                )
+        return self._to_domain_category(django_category)
+
+    def find_by_id(self, category_id: str) -> Optional[DomainCategory]:
+        """Find a category by its ID."""
+        try:
+            django_category = CategoryModel.objects.get(id=category_id)
+            return self._to_domain_category(django_category)
+        except CategoryModel.DoesNotExist:
+            return None
+
+    def find_by_user(self, user: DomainUser) -> List[DomainCategory]:
+        """Find all categories for a specific user."""
+        django_categories = CategoryModel.objects.filter(user=user)
+        return [self._to_domain_category(c) for c in django_categories]
+
+    def find_by_name(self, user: DomainUser, name: str) -> Optional[DomainCategory]:
+        """Find a category by name for a specific user."""
+        try:
+            django_category = CategoryModel.objects.get(user=user, name=name)
+            return self._to_domain_category(django_category)
+        except CategoryModel.DoesNotExist:
+            return None
+
+    def delete(self, category_id: str) -> bool:
+        """Delete a category by its ID."""
+        try:
+            category = CategoryModel.objects.get(id=category_id)
+            category.delete()
+            return True
+        except CategoryModel.DoesNotExist:
+            return False
+
+    def _to_domain_category(self, django_category: CategoryModel) -> DomainCategory:
+        """Convert Django category to domain category."""
+        # This is a simplified conversion. A real implementation might need to
+        # fetch the user domain entity from a user repository.
+        user = DomainUser(id=str(django_category.user.id), email=Email(django_category.user.email), password_hash='', first_name=django_category.user.first_name, last_name=django_category.user.last_name, user_type=UserType.INDIVIDUAL, business_profile=BusinessProfile(company_name='', business_type=''))
+        return DomainCategory(
+            id=str(django_category.id),
+            user=user,
+            name=django_category.name,
+            description=django_category.description,
+            parent_id=str(django_category.parent.id) if django_category.parent else None
+        )

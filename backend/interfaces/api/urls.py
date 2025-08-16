@@ -12,6 +12,9 @@ from .views import (
     ReceiptUploadView, ReceiptListView, ReceiptDetailView, ReceiptUpdateView, ReceiptManualCreateView,
     ReceiptReprocessView, ReceiptValidateView, ReceiptCategorizeView, ReceiptStatisticsView,
     ReceiptParseView, CategorySuggestView, CategoriesListView, TransactionsSummaryView, TransactionsExportCSVView, TransactionCreateView, ReceiptsCountView, ReceiptStorageMigrateView, OCRHealthView, ReceiptReplaceView, ReceiptReprocessHistoryView, AuditLogsView, SubscriptionCheckoutView, StripeWebhookView, SubscriptionPortalView, ClientsView, SubscriptionPlansView, ClientDetailView, SubscriptionStatusView, ClientsCountView, SubscriptionCurrentView, SubscriptionUsageView, SubscriptionInvoicesView, SubscriptionPaymentMethodsView, AdminSettingsView, AdminDiagnosticsView, AdminAnalysisOverviewView, AdminAnalysisExportCSVView, ReportsFinancialOverviewCSVView, ReportsFinancialOverviewPDFView,
+    CategoryView, CategorySummaryView, IncomeExpenseSummaryView,
+    StripeCheckoutView,
+    FinancialReportCSVView,
 )
 from .management_views import (
     CreateFolderView, FolderDetailView, FolderListView, SearchReceiptsView,
@@ -88,6 +91,7 @@ urlpatterns = [
     # Reports (user-scoped financial exports)
     path('reports/financial/overview.csv', ReportsFinancialOverviewCSVView.as_view(), name='reports-financial-overview-csv'),
     path('reports/financial/overview.pdf', ReportsFinancialOverviewPDFView.as_view(), name='reports-financial-overview-pdf'),
+    path('reports/financial-csv/', FinancialReportCSVView.as_view(), name='financial-report-csv'),
     
     # US-006: Receipt Management and Organization endpoints
     path('folders/', FolderListView.as_view(), name='folder-list'),
@@ -97,4 +101,14 @@ urlpatterns = [
     path('receipts/<str:receipt_id>/tags/', AddTagsToReceiptView.as_view(), name='receipt-tags'),
     path('receipts/bulk/', BulkOperationView.as_view(), name='receipt-bulk'),
     path('users/statistics/', UserStatisticsView.as_view(), name='user-statistics'),
+
+    # Category Management (US-006)
+    path('categories/', CategoryView.as_view(), name='category-list-create'),
+
+    # Summary Endpoints (US-010)
+    path('summary/categories/', CategorySummaryView.as_view(), name='summary-categories'),
+    path('summary/income-expense/', IncomeExpenseSummaryView.as_view(), name='summary-income-expense'),
+
+    # Subscription Management (US-013/US-014)
+    path('subscriptions/checkout/', StripeCheckoutView.as_view(), name='subscriptions-checkout'),
 ] 

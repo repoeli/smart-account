@@ -14,7 +14,7 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
-  user_type: 'individual' | 'business';
+  user_type: 'individual' | 'business' | 'accounting_company';
   status: 'pending_verification' | 'active' | 'suspended' | 'deleted';
   subscription_tier: 'basic' | 'premium' | 'enterprise';
   business_profile?: BusinessProfile;
@@ -22,6 +22,7 @@ export interface User {
   is_verified: boolean;
   created_at: string;
   updated_at: string;
+  is_staff?: boolean;
 }
 
 export interface BusinessProfile {
@@ -65,7 +66,7 @@ export interface RegisterRequest {
   password_confirm: string;
   first_name: string;
   last_name: string;
-  user_type: 'individual' | 'business';
+  user_type: 'individual' | 'business' | 'accounting_company';
   phone?: string;
   company_name?: string;
   business_type?: string;

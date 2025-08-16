@@ -364,17 +364,22 @@ class ApiClient {
   }
 
   // Clients
-  async getClients(): Promise<{ success: boolean; items: Array<{ id: string; name: string; email?: string; company_name?: string }> }>{
+  async getClients(): Promise<{ success: boolean; items: Array<{ id: string; name: string; email?: string; company_name?: string; phone?: string; address?: string; vat_number?: string; status?: string; }> }>{
     const response = await this.client.get('/clients/');
     return response.data;
   }
 
-  async createClient(payload: { name: string; email?: string; company_name?: string }): Promise<{ success: boolean; id?: string; message?: string }>{
+  async getClient(id: string): Promise<{ success: boolean; client: { id: string; name: string; email?: string; company_name?: string; phone?: string; address?: string; vat_number?: string; status?: string; } }>{
+    const response = await this.client.get(`/clients/${id}/`);
+    return response.data;
+  }
+
+  async createClient(payload: { name: string; email?: string; company_name?: string; phone?: string; address?: string; vat_number?: string; status?: string; }): Promise<{ success: boolean; id?: string; message?: string }>{
     const response = await this.client.post('/clients/', payload);
     return response.data;
   }
 
-  async updateClient(clientId: string, payload: { name?: string; email?: string; company_name?: string }): Promise<{ success: boolean; message?: string }>{
+  async updateClient(clientId: string, payload: { name?: string; email?: string; company_name?: string; phone?: string; address?: string; vat_number?: string; status?: string; }): Promise<{ success: boolean; message?: string }>{
     const response = await this.client.patch(`/clients/${clientId}/`, payload);
     return response.data;
   }
@@ -461,6 +466,16 @@ class ApiClient {
     return response.data;
   }
 
+  async getCategorySummary(): Promise<{ success: boolean; summary: any[] }> {
+    const response = await this.client.get('/summary/categories/');
+    return response.data;
+  }
+
+  async getIncomeExpenseSummary(params: { start_date: string; end_date: string }): Promise<{ success: boolean; summary: any }> {
+    const response = await this.client.get('/summary/income-expense/', { params });
+    return response.data;
+  }
+
   async getReceiptStatistics(): Promise<ApiResponse> {
     const response = await this.client.get<ApiResponse>('/receipts/statistics/');
     return response.data;
@@ -482,6 +497,14 @@ class ApiClient {
   async healthCheck(): Promise<{ status: string }> {
     const response = await this.client.get<{ status: string }>('/health/');
     return response.data;
+  }
+
+  // Reports
+  async getFinancialReportCSV(): Promise<any> {
+    const response = await this.client.get('/reports/financial-csv/', {
+      responseType: 'blob',
+    });
+    return response;
   }
 }
 

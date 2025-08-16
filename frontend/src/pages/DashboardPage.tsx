@@ -1,6 +1,8 @@
 import { useAppSelector } from '../store';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CategoryPieChart from '../components/charts/CategoryPieChart';
+import IncomeExpenseBarChart from '../components/charts/IncomeExpenseBarChart';
 
 type Totals = { income: { currency: string; sum: string }[]; expense: { currency: string; sum: string }[] };
 
@@ -517,6 +519,15 @@ const DashboardPage = () => {
               ));
             })()}
           </div>
+        </div>
+      </div>
+
+      {/* Analytics Section */}
+      <div className="mt-8">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Analytics</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CategoryPieChart />
+          <IncomeExpenseBarChart />
         </div>
       </div>
 

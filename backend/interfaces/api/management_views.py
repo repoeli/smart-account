@@ -142,9 +142,12 @@ class SearchReceiptsView(APIView):
                 'amount_min': qp.get('amountMin') or None,
                 'amount_max': qp.get('amountMax') or None,
                 'folder_ids': [f for f in (qp.getlist('folder_ids') or ([qp.get('folder_id')] if qp.get('folder_id') else [])) if f],
+                'client_ids': [c for c in qp.getlist('client_ids') if c],
                 'receipt_types': [r for r in qp.getlist('receipt_types') if r],
                 'statuses': [s for s in qp.getlist('statuses') if s],
                 'is_business_expense': qp.get('is_business_expense') or None,
+                'has_transaction': qp.get('has_transaction') or None,
+                'has_folder': qp.get('has_folder') or None,
                 'sort_field': qp.get('sort_field') or 'date',
                 'sort_direction': qp.get('sort_direction') or 'desc',
                 'limit': int(qp.get('limit') or 50),
@@ -162,6 +165,7 @@ class SearchReceiptsView(APIView):
                     'total_count': 0,
                     'limit': 50,
                     'offset': 0,
+                    'error': 'A fatal error occurred while parsing search parameters.'
                 },
                 status=status.HTTP_200_OK
             )
@@ -180,6 +184,7 @@ class SearchReceiptsView(APIView):
                     'limit': int(payload.get('limit', 50)) if isinstance(payload, dict) else 50,
                     'offset': int(payload.get('offset', 0)) if isinstance(payload, dict) else 0,
                     'validation_errors': serializer.errors,
+                    'error': 'Search parameter validation failed.'
                 },
                 status=status.HTTP_200_OK
             )
@@ -212,9 +217,12 @@ class SearchReceiptsView(APIView):
                 amount_min=float(vd.get('amount_min')) if vd.get('amount_min') else None,
                 amount_max=float(vd.get('amount_max')) if vd.get('amount_max') else None,
                 folder_ids=vd.get('folder_ids'),
+                client_ids=vd.get('client_ids'),
                 receipt_types=vd.get('receipt_types'),
                 statuses=vd.get('statuses'),
                 is_business_expense=vd.get('is_business_expense'),
+                has_transaction=vd.get('has_transaction'),
+                has_folder=vd.get('has_folder'),
                 sort_field=vd.get('sort_field', 'date'),
                 sort_direction=vd.get('sort_direction', 'desc'),
                 limit=vd.get('limit', 50),
@@ -236,6 +244,7 @@ class SearchReceiptsView(APIView):
                     'total_count': 0,
                     'limit': int(payload.get('limit', 50)) if isinstance(payload, dict) else 50,
                     'offset': int(payload.get('offset', 0)) if isinstance(payload, dict) else 0,
+                    'error': 'An unexpected error occurred during the search operation.'
                 },
                 status=status.HTTP_200_OK
             )

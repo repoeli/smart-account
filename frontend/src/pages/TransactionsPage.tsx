@@ -35,6 +35,7 @@ const TransactionsPage: React.FC = () => {
   const [totals, setTotals] = useState<{income:{currency:string;sum:string}[];expense:{currency:string;sum:string}[]}>({income:[], expense:[]});
   const [categories, setCategories] = useState<string[]>([]);
   const [clients, setClients] = useState<Array<{ id: string; name: string }>>([]);
+  const [hasClientFeature, setHasClientFeature] = useState(true);
   const [duplicateDraft, setDuplicateDraft] = useState<TxItem | null>(null);
   const [editDraft, setEditDraft] = useState<TxItem | null>(null);
 
@@ -51,29 +52,42 @@ const TransactionsPage: React.FC = () => {
   const pageOffset = Number(searchParams.get('offset') || 0);
 
   useEffect(() => {
+    // this effect should only run once on mount to fetch categories and clients
+    (async () => {
+      const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+      try {
+        const catRes = await fetch(`${apiBase}/categories/`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }});
+        if (catRes.ok) {
+          const cdata = await catRes.json();
+          if (cdata?.success && Array.isArray(cdata.categories)) setCategories(cdata.categories);
+        }
+      } catch (e) {
+        console.warn('Failed to fetch categories', e);
+      }
+      try {
+        const clRes = await fetch(`${apiBase}/clients/`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }});
+        if (clRes.ok) {
+          const c = await clRes.json();
+          if (c?.success && Array.isArray(c.items)) {
+            setClients(c.items.map((it: any) => ({ id: String(it.id), name: String(it.name) })));
+          }
+        } else if (clRes.status === 403) {
+          setHasClientFeature(false);
+        }
+      } catch (clientError) {
+        console.warn('Could not fetch clients, proceeding without them.', clientError);
+        setHasClientFeature(false);
+        setClients([]);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         const apiBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
-        // fetch categories (once per page load) and clients list for filter
-        try {
-          if (!categories.length) {
-            const catRes = await fetch(`${apiBase}/categories/`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }});
-            if (catRes.ok) {
-              const cdata = await catRes.json();
-              if (cdata?.success && Array.isArray(cdata.categories)) setCategories(cdata.categories);
-            }
-          }
-          if (!clients.length) {
-            const clRes = await fetch(`${apiBase}/clients/`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }});
-            if (clRes.ok) {
-              const c = await clRes.json();
-              if (c?.success && Array.isArray(c.items)) {
-                setClients(c.items.map((it: any) => ({ id: String(it.id), name: String(it.name) })));
-              }
-            }
-          }
-        } catch {}
+        
         const url = new URL(`${apiBase}/transactions/`);
         const limit = pageLimit;
         const offset = pageOffset;
@@ -105,7 +119,7 @@ const TransactionsPage: React.FC = () => {
         setLoading(false);
       }
     })();
-  }, [sort, order, dateFrom, dateTo, type, category, searchParams]);
+  }, [sort, order, dateFrom, dateTo, type, category, clientId, pageLimit, pageOffset]);
 
   const setPage = (nextOffset: number) => {
     if (nextOffset < 0) return;
@@ -322,13 +336,17 @@ const TransactionsPage: React.FC = () => {
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1">Client</label>
-            {clients.length > 0 ? (
-              <select value={clientId} onChange={(e)=>{ const v=e.target.value; if (v) searchParams.set('client_id', v); else searchParams.delete('client_id'); searchParams.set('offset','0'); setSearchParams(searchParams, { replace: true }); }} className="input input-bordered w-full">
-                <option value="">All</option>
-                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+            {hasClientFeature ? (
+              clients.length > 0 ? (
+                <select value={clientId} onChange={(e)=>{ const v=e.target.value; if (v) searchParams.set('client_id', v); else searchParams.delete('client_id'); searchParams.set('offset','0'); setSearchParams(searchParams, { replace: true }); }} className="input input-bordered w-full">
+                  <option value="">All</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              ) : (
+                <input type="text" value={clientId} onChange={(e)=>{ const v=e.target.value; if (v) searchParams.set('client_id', v); else searchParams.delete('client_id'); setSearchParams(searchParams, { replace: true }); }} placeholder="optional" className="input input-bordered w-full" />
+              )
             ) : (
-              <input type="text" value={clientId} onChange={(e)=>{ const v=e.target.value; if (v) searchParams.set('client_id', v); else searchParams.delete('client_id'); setSearchParams(searchParams, { replace: true }); }} placeholder="optional" className="input input-bordered w-full" />
+              <div className="text-xs text-gray-500 p-2 rounded bg-gray-50 border">Upgrade to access clients feature</div>
             )}
           </div>
           <div>
@@ -380,7 +398,7 @@ const TransactionsPage: React.FC = () => {
                 <th className="py-2">Type</th>
                 <th className="py-2 text-right">Amount</th>
                 <th className="py-2">Category</th>
-                {clients.length > 0 && <th className="py-2">Client</th>}
+                {hasClientFeature && clients.length > 0 && <th className="py-2">Client</th>}
                 <th className="py-2 text-right">Actions</th>
               </tr>
             </thead>
@@ -423,7 +441,7 @@ const TransactionsPage: React.FC = () => {
                       }}
                     />
                   </td>
-                  {clients.length > 0 && (
+                  {hasClientFeature && clients.length > 0 && (
                     <td className="py-2">
                       <InlineClientEditor
                         value={tx.client_id || ''}

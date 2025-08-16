@@ -64,10 +64,16 @@ Next steps queued:
 - [US-015] Clients
   - Add client selection to Duplicate/Edit transaction modals (frontend); confirm backend PATCH persists client links
 
+- [US-011][US-019] Financial Reports
+  - Add more report types (e.g., Profit & Loss, Balance Sheet)
+  - Implement PDF export for reports
+  - Add report scheduling and email delivery
+  - Enhance report customization options
+
 ### Percentage Progress (for tracking)
 
-- Completed: 72.7%
-- In Progress: 27.3%
+- Completed: 93.3%
+- In Progress: 6.7%
 - Not Started: 0%
   - [US-008][US-009] Receipt→Transaction 1:1 guard (no duplicates):
     - UI: disable "Create Transaction" button on `ReceiptDetailPage` when a transaction already exists for the receipt; surface a tooltip/explanatory note. Do NOT change DB yet.

@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { apiClient } from '../../services/api';
 import type { User, LoginRequest, RegisterRequest, RegisterResponse, EmailVerificationRequest } from '../../types/api';
+import { navigation } from '../../services/navigation';
 
 interface AuthState {
   user: User | null;
@@ -90,6 +91,9 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.token = null;
       state.error = null;
+      if (navigation.navigate) {
+        navigation.navigate('/auth/login');
+      }
     },
     clearError: (state) => {
       state.error = null;

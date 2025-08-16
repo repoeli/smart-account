@@ -506,13 +506,22 @@ class Transaction(models.Model):
 class Client(models.Model):
     """
     Client entity for accounting companies to manage their customers (US-015).
-    Minimal fields for listing and creation.
     """
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('archived', 'Archived'),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='clients')
     name = models.CharField(max_length=255)
     email = models.EmailField(blank=True, null=True)
     company_name = models.CharField(max_length=255, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    vat_number = models.CharField(max_length=50, blank=True, null=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -521,11 +530,85 @@ class Client(models.Model):
         indexes = [
             models.Index(fields=['owner']),
             models.Index(fields=['name']),
+            models.Index(fields=['status']),
         ]
         ordering = ['name', 'created_at']
 
     def __str__(self):
         return f"Client {self.id} {self.name}"
+
+
+class ClientUser(models.Model):
+    """
+    Join table to associate multiple users with a single client (US-016).
+    This allows clients to have multiple contacts or stakeholders.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='client_users')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_clients')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'client_users'
+        unique_together = ('client', 'user')
+        indexes = [
+            models.Index(fields=['client']),
+            models.Index(fields=['user']),
+        ]
+
+class Category(models.Model):
+    """
+    Category model for organizing receipts and transactions (US-006).
+    Supports hierarchical categories.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categories')
+    name = models.CharField(max_length=100)
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'categories'
+        verbose_name_plural = 'Categories'
+        unique_together = ('user', 'name', 'parent')
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['parent']),
+            models.Index(fields=['name']),
+        ]
+        ordering = ['name']
+
+    def __str__(self):
+        return f"Category {self.name} for user {self.user.email}"
+
+
+class Subscription(models.Model):
+    """
+    Subscription model for managing user plans and billing (US-013/US-014).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='subscription')
+    stripe_subscription_id = models.CharField(max_length=255, unique=True)
+    stripe_customer_id = models.CharField(max_length=255, unique=True)
+    plan = models.CharField(max_length=50, choices=User.SUBSCRIPTION_TIER_CHOICES, default='basic')
+    status = models.CharField(max_length=20, default='active')
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'subscriptions'
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['stripe_subscription_id']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Subscription for {self.user.email} - Plan: {self.plan} ({self.status})"
 
 
 class ApplicationSettings(models.Model):

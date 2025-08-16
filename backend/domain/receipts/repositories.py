@@ -83,3 +83,32 @@ class ReceiptRepository(ABC):
     def get_failed_receipts(self) -> List[Receipt]:
         """Get all receipts that failed processing."""
         pass 
+
+
+class CategoryRepository(ABC):
+    """Abstract repository for managing categories."""
+
+    @abstractmethod
+    def save(self, category: 'Category') -> 'Category':
+        """Save or update a category."""
+        pass
+
+    @abstractmethod
+    def find_by_id(self, category_id: str) -> Optional['Category']:
+        """Find a category by its ID."""
+        pass
+
+    @abstractmethod
+    def find_by_user(self, user: User) -> List['Category']:
+        """Find all categories for a specific user."""
+        pass
+
+    @abstractmethod
+    def find_by_name(self, user: User, name: str) -> Optional['Category']:
+        """Find a category by name for a specific user."""
+        pass
+
+    @abstractmethod
+    def delete(self, category_id: str) -> bool:
+        """Delete a category by its ID."""
+        pass 

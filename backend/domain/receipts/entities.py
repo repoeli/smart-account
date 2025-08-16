@@ -272,3 +272,27 @@ class Receipt(AggregateRoot):
     def get_receipt_date(self) -> Optional[datetime]:
         """Get receipt date from OCR data."""
         return self.ocr_data.date if self.ocr_data else None 
+
+
+class Category(Entity):
+    """Category entity for organizing receipts."""
+
+    def __init__(self,
+                 id: str,
+                 user: User,
+                 name: str,
+                 parent_id: Optional[str] = None,
+                 description: Optional[str] = None):
+        super().__init__(id)
+        self.user = user
+        self.name = name
+        self.parent_id = parent_id
+        self.description = description
+
+    def __eq__(self, other):
+        if not isinstance(other, Category):
+            return False
+        return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id) 

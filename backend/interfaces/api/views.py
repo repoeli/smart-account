@@ -3,6 +3,7 @@ API views for the Smart Accounts Management System.
 Defines REST API endpoints for user management and receipt processing.
 """
 
+from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -14,25 +15,33 @@ from django.utils import timezone
 import requests
 import logging
 import uuid
+from django.contrib.auth import get_user_model
 
 from .serializers import (
-    UserRegistrationSerializer, UserLoginSerializer, EmailVerificationSerializer,
-    PasswordResetRequestSerializer, PasswordResetConfirmSerializer, UserProfileSerializer,
-    ReceiptUploadSerializer, ReceiptUploadResponseSerializer, ReceiptParseResponseSerializer,
-    ReceiptReprocessSerializer, ReceiptValidateSerializer, ReceiptCategorizeSerializer,
-    ReceiptUpdateSerializer, ReceiptManualCreateSerializer, ReceiptListResponseSerializer,
-    ReceiptDetailResponseSerializer, ReceiptStatisticsResponseSerializer,
-    ReceiptReprocessResponseSerializer, ReceiptValidateResponseSerializer,
-    ReceiptCategorizeResponseSerializer, CreateFolderSerializer, MoveFolderSerializer,
-    SearchReceiptsSerializer, AddTagsSerializer, BulkOperationSerializer,
-    MoveReceiptsToFolderSerializer, FolderResponseSerializer, SearchResultsSerializer,
-    UserStatisticsResponseSerializer, ReceiptSearchRequestSerializer, ReceiptSearchResponseSerializer,
-    CategorySuggestQuerySerializer, TransactionCreateSerializer, TransactionUpdateSerializer
+    UserRegistrationSerializer, UserLoginSerializer,
+    EmailVerificationSerializer, UserProfileSerializer, PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer, ReceiptUploadSerializer, ReceiptReprocessSerializer,
+    ReceiptValidateSerializer, ReceiptCategorizeSerializer, ReceiptUpdateSerializer,
+    ReceiptManualCreateSerializer, ReceiptSearchRequestSerializer,
+    ReceiptListResponseSerializer, ReceiptDetailResponseSerializer,
+    ReceiptStatisticsResponseSerializer, ReceiptReprocessResponseSerializer,
+    ReceiptValidateResponseSerializer, ReceiptCategorizeResponseSerializer,
+    CreateFolderSerializer, MoveFolderSerializer, SearchReceiptsSerializer,
+    AddTagsSerializer, BulkOperationSerializer, MoveReceiptsToFolderSerializer,
+    FolderResponseSerializer, SearchResultsSerializer, UserStatisticsResponseSerializer,
+    ReceiptSearchItemSerializer, ReceiptSearchPageInfoSerializer,
+    ReceiptUploadResponseSerializer, ReceiptParseResponseSerializer,
+    ClientSerializer,
+    ReportsFinancialOverviewCSVView, ReportsFinancialOverviewPDFView,
+    CategoryCreateSerializer, CategoryListSerializer, HealthCheckSerializer, FileInfoSerializer,
+    CategorySuggestQuerySerializer, TransactionCreateSerializer, TransactionUpdateSerializer,
 )
 from infrastructure.ocr.services import OCRService, OCRMethod
 from domain.receipts.entities import ReceiptType
 from django.conf import settings
 from infrastructure.payment.services import StripePaymentService
+from django.db import models as db_models
+from infrastructure.database.models import Transaction
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +80,10 @@ class FileInfoView(APIView):
             return Response({"success": False, "error": err}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"success": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request):
+        from .serializers import FileInfoSerializer
+        # ...
 
 
 class ReceiptsCountView(APIView):
@@ -891,7 +904,8 @@ class ReceiptReprocessView(APIView):
         try:
             # Get OCR method
             ocr_method_param = serializer.validated_data['ocr_method']
-            
+            fallback_ocr_method_param = serializer.validated_data.get('fallback_ocr_method')
+
             # Initialize dependencies
             try:
                 from infrastructure.database.repositories import DjangoReceiptRepository
@@ -921,72 +935,22 @@ class ReceiptReprocessView(APIView):
             elif ocr_method_param == 'auto':
                 ocr_method_enum = None  # Use default/preferred method
             
+            fallback_ocr_method_enum = None
+            if fallback_ocr_method_param == 'paddle_ocr':
+                fallback_ocr_method_enum = OCRMethod.PADDLE_OCR
+            elif fallback_ocr_method_param == 'openai_vision':
+                fallback_ocr_method_enum = OCRMethod.OPENAI_VISION
+
             if repo_ok:
                 # Execute reprocess use case
                 result = reprocess_use_case.execute(
                     receipt_id=receipt_id,
                     user=request.user,
-                    ocr_method=ocr_method_enum
+                    ocr_method=ocr_method_enum,
+                    fallback_ocr_method=fallback_ocr_method_enum
                 )
             else:
-                # Fallback: reprocess via ORM + OCRService directly (still call OCR APIs)
-                try:
-                    from infrastructure.database.models import Receipt as ReceiptModel
-                    from infrastructure.ocr.services import OCRService
-                    r = ReceiptModel.objects.filter(id=receipt_id, user_id=request.user.id).first()
-                    if not r:
-                        return Response({'success': False, 'error': 'not_found'}, status=404)
-                    # mark processing
-                    try:
-                        r.status = 'processing'
-                        r.save(update_fields=['status', 'updated_at'])
-                    except Exception:
-                        pass
-                    # call OCR by URL first
-                    svc = OCRService()
-                    ok, ocr_data, err = svc.extract_receipt_data_from_url(r.file_url, ocr_method_enum)
-                    if ok and ocr_data:
-                        # persist ocr_data JSON
-                        payload = {
-                            'merchant_name': ocr_data.merchant_name,
-                            'total_amount': str(ocr_data.total_amount) if ocr_data.total_amount is not None else None,
-                            'currency': ocr_data.currency,
-                            'date': ocr_data.date.isoformat() if getattr(ocr_data, 'date', None) else None,
-                            'vat_amount': str(ocr_data.vat_amount) if ocr_data.vat_amount is not None else None,
-                            'vat_number': ocr_data.vat_number,
-                            'receipt_number': ocr_data.receipt_number,
-                            'items': ocr_data.items,
-                            'confidence_score': ocr_data.confidence_score,
-                            'raw_text': ocr_data.raw_text,
-                            'additional_data': getattr(ocr_data, 'additional_data', {})
-                        }
-                        r.ocr_data = payload
-                        # mark processed and add latency telemetry to metadata
-                        r.status = 'processed'
-                        md = r.metadata or {}
-                        cf = (md.get('custom_fields') or {})
-                        try:
-                            latency_ms = payload.get('additional_data', {}).get('latency_ms')
-                            if latency_ms is not None:
-                                cf['latency_ms'] = latency_ms
-                        except Exception:
-                            pass
-                        md['custom_fields'] = cf
-                        r.metadata = md
-                        r.save(update_fields=['ocr_data', 'metadata', 'status', 'updated_at'])
-                        result = {'success': True, 'receipt_id': str(r.id), 'ocr_method': ocr_method_param, 'ocr_data': r.ocr_data}
-                    else:
-                        # set needs_review on failure
-                        md = r.metadata or {}
-                        cf = (md.get('custom_fields') or {})
-                        cf['needs_review'] = True
-                        md['custom_fields'] = cf
-                        r.metadata = md
-                        r.status = 'failed'
-                        r.save(update_fields=['metadata', 'status', 'updated_at'])
-                        result = {'success': False, 'error': err or 'ocr_failed'}
-                except Exception as e2:
-                    result = {'success': False, 'error': f'fallback_reprocess_failed: {str(e2)}'}
+                result = {'success': False, 'error': 'RepositoryInitializationError', 'message': 'Failed to init a repository'}
             
             # Return response
             response_serializer = ReceiptReprocessResponseSerializer(data=result)
@@ -2526,10 +2490,8 @@ class SubscriptionCheckoutView(APIView):
         svc = StripePaymentService()
         price_id = (request.data or {}).get('price_id') if hasattr(request, 'data') else None
         result = svc.create_checkout_session(
-            user_id=str(request.user.id),
+            user=request.user,
             price_id=price_id,
-            customer_id=getattr(request.user, 'stripe_customer_id', None),
-            customer_email=getattr(request.user, 'email', None),
         )
         return Response(result, status=200 if result.get('success') else 400)
 
@@ -2549,9 +2511,41 @@ class StripeWebhookView(APIView):
                 event_type = result.get('event_type')
                 from infrastructure.database.models import User
                 from django.db import transaction as dbtx
-                if user_id and event_type:
+                if (user_id or True) and event_type:
                     with dbtx.atomic():
-                        user = User.objects.filter(id=user_id).first()
+                        user = None
+                        if user_id:
+                            user = User.objects.filter(id=user_id).first()
+                        # Parse payload early to extract cust_id for fallback lookup
+                        cust_id_from_payload = None
+                        sub_id_from_payload = None
+                        try:
+                            import json
+                            payload_json = json.loads(request.body.decode('utf-8'))
+                            data_obj = (payload_json or {}).get('data', {}).get('object', {})
+                            sub_id_from_payload = data_obj.get('subscription') or data_obj.get('id')
+                            cust_id_from_payload = data_obj.get('customer')
+                            # Try to read price_id directly from payload
+                            try:
+                                price_id_from_payload = None
+                                items_obj = getattr(data_obj, 'items', None)
+                                if items_obj is not None and getattr(items_obj, 'data', None):
+                                    first_item = items_obj.data[0] if items_obj.data else None
+                                    price_obj = getattr(first_item, 'price', None) if first_item is not None else None
+                                    price_id_from_payload = getattr(price_obj, 'id', None)
+                                elif isinstance(data_obj, dict):
+                                    items_dict = (data_obj.get('items') or {})
+                                    data_list = items_dict.get('data') or []
+                                    if data_list:
+                                        price_id_from_payload = ((data_list[0] or {}).get('price') or {}).get('id')
+                                if not price_id and price_id_from_payload:
+                                    price_id = price_id_from_payload
+                            except Exception:
+                                pass
+                        except Exception:
+                            pass
+                        if not user and cust_id_from_payload:
+                            user = User.objects.filter(stripe_customer_id=cust_id_from_payload).first()
                         if user:
                             # Map plan to tier by env-configured price ids
                             from django.conf import settings
@@ -2566,36 +2560,88 @@ class StripeWebhookView(APIView):
                                     tier = 'premium'
                                 elif price_id == price_platinum:
                                     tier = 'enterprise'
+                                # Always update the subscription_price_id when we have a price_id
+                                user.subscription_price_id = price_id
+                            
+                            # Fallback: derive tier from plan nickname when env price ids are missing/mismatched
+                            if not tier or tier not in ('basic', 'premium', 'enterprise') or tier == user.subscription_tier:
+                                plan = result.get('plan') or {}
+                                nickname = (plan.get('nickname') or plan.get('name') or '').lower()
+                                if 'platinum' in nickname or 'enterprise' in nickname:
+                                    tier = 'enterprise'
+                                elif 'premium' in nickname:
+                                    tier = 'premium'
+                                elif 'basic' in nickname:
+                                    tier = 'basic'
+                            
                             # Status mapping for subscription events
                             status = user.subscription_status
                             if event_type in ('checkout.session.completed', 'customer.subscription.created', 'customer.subscription.updated'):
                                 status = 'active'
                             elif event_type in ('customer.subscription.deleted', 'customer.subscription.canceled'):
                                 status = 'canceled'
+                            
                             # Opportunistically set subscription ids if present in payload
-                            sub_id = None
-                            try:
-                                import json
-                                payload_json = json.loads(request.body.decode('utf-8'))
-                                data_obj = (payload_json or {}).get('data', {}).get('object', {})
-                                sub_id = data_obj.get('subscription') or data_obj.get('id')
-                                cust_id = data_obj.get('customer')
-                            except Exception:
-                                sub_id = None
-                                cust_id = None
+                            sub_id = sub_id_from_payload
+                            cust_id = cust_id_from_payload
+ 
+                             # If price_id is still missing but we have sub_id, fetch subscription to derive it
+                            if not price_id and sub_id:
+                                 try:
+                                     from django.conf import settings as _s
+                                     import stripe as _stripe
+                                     _stripe.api_key = getattr(_s, 'STRIPE_SECRET_KEY', '')
+                                     _sub = _stripe.Subscription.retrieve(sub_id, expand=['items.data.price'])
+                                     _item = _sub.items.data[0] if getattr(_sub, 'items', None) and getattr(_sub.items, 'data', None) else None
+                                     _price = getattr(_item, 'price', None)
+                                     price_id = getattr(_price, 'id', None) or price_id
+                                     # build nickname fallback
+                                     _nickname = getattr(_price, 'nickname', None)
+                                     if not tier or tier == user.subscription_tier:
+                                         nn = (str(_nickname or '')).lower()
+                                         if 'platinum' in nn or 'enterprise' in nn:
+                                             tier = 'enterprise'
+                                         elif 'premium' in nn:
+                                             tier = 'premium'
+                                         elif 'basic' in nn:
+                                             tier = 'basic'
+                                 except Exception:
+                                     pass
+ 
+                             # Update all subscription-related fields
                             user.subscription_tier = tier
                             user.subscription_status = status
-                            if price_id:
-                                user.subscription_price_id = price_id
-                            if sub_id:
-                                user.stripe_subscription_id = sub_id
                             if cust_id:
-                                user.stripe_customer_id = cust_id
-                            user.save(update_fields=['subscription_tier', 'subscription_status', 'subscription_price_id', 'stripe_subscription_id', 'stripe_customer_id', 'updated_at'])
-            except Exception:
-                # Do not fail the webhook on persistence issues; logs can be added later
-                pass
-            return Response(result, status=200 if result.get('success') else 400)
+                                 user.stripe_customer_id = cust_id
+                            if sub_id:
+                                 user.stripe_subscription_id = sub_id
+                            if price_id:
+                                 user.subscription_price_id = price_id
+ 
+                             # Save changes to the database with specific fields
+                            user.save(update_fields=[
+                                 'subscription_tier', 
+                                 'subscription_status', 
+                                 'subscription_price_id', 
+                                 'stripe_subscription_id', 
+                                 'stripe_customer_id', 
+                                 'updated_at'
+                             ])
+                             # Log the subscription update for debugging
+                            import logging
+                            logger = logging.getLogger(__name__)
+                            logger.info(
+                                f"Updated user subscription: user_id={user_id}, "
+                                f"tier={tier}, status={status}, price_id={price_id}, "
+                                f"event_type={event_type}"
+                            )
+            except Exception as e:
+                # Log the error but don't fail the webhook
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error updating subscription from webhook: {str(e)}")
+            
+            return Response(result, status=200)
         except Exception as e:
             return Response({'success': False, 'message': str(e)}, status=400)
 
@@ -2629,12 +2675,79 @@ class SubscriptionStatusView(APIView):
     def get(self, request):
         try:
             u = request.user
+            tier = getattr(u, 'subscription_tier', None)
+            status_val = getattr(u, 'subscription_status', None)
+            price_id = getattr(u, 'subscription_price_id', None)
+            customer_id = getattr(u, 'stripe_customer_id', None)
+            subscription_id = getattr(u, 'stripe_subscription_id', None)
+
+            # Fallback sync with Stripe when local state is missing or stale
+            svc = StripePaymentService()
+            if svc.enabled and customer_id and (not price_id or not tier or tier == 'basic'):
+                try:
+                    from django.conf import settings as _s
+                    import stripe
+                    stripe.api_key = getattr(_s, 'STRIPE_SECRET_KEY', '')
+                    subs = stripe.Subscription.list(customer=customer_id, status='all', limit=1, expand=['data.items.data.price'])
+                    sub = subs.data[0] if getattr(subs, 'data', None) else None
+                    if sub:
+                        price = sub.items.data[0].price if (getattr(sub, 'items', None) and getattr(sub.items, 'data', None)) else None
+                        price_id_remote = getattr(price, 'id', None)
+                        status_remote = getattr(sub, 'status', None)
+                        tier_remote = None
+                        pb = getattr(_s, 'STRIPE_PRICE_BASIC', '')
+                        pp = getattr(_s, 'STRIPE_PRICE_PREMIUM', '')
+                        pl = getattr(_s, 'STRIPE_PRICE_PLATINUM', '')
+                        if price_id_remote:
+                            if price_id_remote == pb:
+                                tier_remote = 'basic'
+                            elif price_id_remote == pp:
+                                tier_remote = 'premium'
+                            elif price_id_remote == pl:
+                                tier_remote = 'enterprise'
+                            if tier_remote is None:
+                                try:
+                                    pr = stripe.Price.retrieve(price_id_remote, expand=['product'])
+                                    nm = (getattr(pr, 'nickname', None) or getattr(getattr(pr, 'product', None), 'name', None) or '').lower()
+                                    if 'platinum' in nm or 'enterprise' in nm:
+                                        tier_remote = 'enterprise'
+                                    elif 'premium' in nm:
+                                        tier_remote = 'premium'
+                                    elif 'basic' in nm:
+                                        tier_remote = 'basic'
+                                except Exception:
+                                    tier_remote = None
+                        # Persist if changed
+                        to_update = []
+                        if price_id_remote and price_id_remote != price_id:
+                            u.subscription_price_id = price_id_remote
+                            price_id = price_id_remote
+                            to_update.append('subscription_price_id')
+                        if status_remote and status_remote != status_val:
+                            u.subscription_status = status_remote
+                            status_val = status_remote
+                            to_update.append('subscription_status')
+                        if tier_remote and tier_remote != tier:
+                            u.subscription_tier = tier_remote
+                            tier = tier_remote
+                            to_update.append('subscription_tier')
+                        sub_id_remote = getattr(sub, 'id', None)
+                        if sub_id_remote and sub_id_remote != subscription_id:
+                            u.stripe_subscription_id = sub_id_remote
+                            subscription_id = sub_id_remote
+                            to_update.append('stripe_subscription_id')
+                        if to_update:
+                            to_update.append('updated_at')
+                            u.save(update_fields=to_update)
+                except Exception:
+                    pass
+
             data = {
-                'tier': getattr(u, 'subscription_tier', None),
-                'status': getattr(u, 'subscription_status', None),
-                'price_id': getattr(u, 'subscription_price_id', None),
-                'customer_id': getattr(u, 'stripe_customer_id', None),
-                'subscription_id': getattr(u, 'stripe_subscription_id', None),
+                'tier': tier,
+                'status': status_val,
+                'price_id': price_id,
+                'customer_id': customer_id,
+                'subscription_id': subscription_id,
             }
             return Response({'success': True, 'subscription': data}, status=200)
         except Exception as e:
@@ -2659,7 +2772,7 @@ class SubscriptionCurrentView(APIView):
                 try:
                     import stripe
                     stripe.api_key = getattr(settings, 'STRIPE_SECRET_KEY', '')
-                    subs = stripe.Subscription.list(customer=request.user.stripe_customer_id, status='all', limit=1, expand=['data.items.data.price.product'])
+                    subs = stripe.Subscription.list(customer=request.user.stripe_customer_id, status='all', limit=1, expand=['data.items.data.price'])
                     sub = subs.data[0] if getattr(subs, 'data', None) else None
                     if sub:
                         price = sub.items.data[0].price if (getattr(sub, 'items', None) and getattr(sub.items, 'data', None)) else None
@@ -2669,8 +2782,8 @@ class SubscriptionCurrentView(APIView):
                             'current_period_end': getattr(sub, 'current_period_end', None),
                             'price_id': getattr(price, 'id', None),
                             'plan': {
-                                'id': getattr(getattr(price, 'product', None), 'id', None),
-                                'name': getattr(price, 'nickname', None) or getattr(getattr(price, 'product', None), 'name', None),
+                                'id': None,
+                                'name': getattr(price, 'nickname', None),
                                 'unit_amount': getattr(price, 'unit_amount', None),
                                 'currency': getattr(price, 'currency', None),
                                 'interval': getattr(getattr(price, 'recurring', None), 'interval', None),
@@ -3192,11 +3305,50 @@ class ReportsFinancialOverviewPDFView(APIView):
 class ClientsView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def _get_fresh_tier(self, request):
+        try:
+            # Reuse the status sync logic
+            svc = StripePaymentService()
+            if svc.enabled and getattr(request.user, 'stripe_customer_id', None):
+                from django.conf import settings as _s
+                import stripe
+                stripe.api_key = getattr(_s, 'STRIPE_SECRET_KEY', '')
+                subs = stripe.Subscription.list(customer=request.user.stripe_customer_id, status='all', limit=1, expand=['data.items.data.price'])
+                sub = subs.data[0] if getattr(subs, 'data', None) else None
+                if sub:
+                    price = sub.items.data[0].price if (getattr(sub, 'items', None) and getattr(sub.items, 'data', None)) else None
+                    price_id_remote = getattr(price, 'id', None)
+                    pb = getattr(_s, 'STRIPE_PRICE_BASIC', '')
+                    pp = getattr(_s, 'STRIPE_PRICE_PREMIUM', '')
+                    pl = getattr(_s, 'STRIPE_PRICE_PLATINUM', '')
+                    if price_id_remote == pl:
+                        request.user.subscription_tier = 'enterprise'
+                    elif price_id_remote == pp:
+                        request.user.subscription_tier = 'premium'
+                    elif price_id_remote == pb:
+                        request.user.subscription_tier = 'basic'
+                    else:
+                        # try nickname
+                        try:
+                            pr = stripe.Price.retrieve(price_id_remote, expand=['product'])
+                            nm = (getattr(pr, 'nickname', None) or getattr(getattr(pr, 'product', None), 'name', None) or '').lower()
+                            if 'platinum' in nm or 'enterprise' in nm:
+                                request.user.subscription_tier = 'enterprise'
+                            elif 'premium' in nm:
+                                request.user.subscription_tier = 'premium'
+                            elif 'basic' in nm:
+                                request.user.subscription_tier = 'basic'
+                        except Exception:
+                            pass
+                    request.user.save(update_fields=['subscription_tier','updated_at'])
+        except Exception:
+            pass
+        return getattr(request.user, 'subscription_tier', 'basic') or 'basic'
+
     def get(self, request):
         try:
-            # Plan gating: Clients available for Premium and above
             try:
-                tier = getattr(request.user, 'subscription_tier', 'basic') or 'basic'
+                tier = self._get_fresh_tier(request)
                 order = {'basic': 1, 'premium': 2, 'enterprise': 3}
                 if order.get(tier, 1) < order.get('premium', 2):
                     return Response({'success': False, 'error': 'plan_restricted', 'message': 'Clients are available on Premium and above. Upgrade to access this feature.'}, status=403)
@@ -3211,9 +3363,8 @@ class ClientsView(APIView):
 
     def post(self, request):
         try:
-            # Plan gating: Clients available for Premium and above
             try:
-                tier = getattr(request.user, 'subscription_tier', 'basic') or 'basic'
+                tier = self._get_fresh_tier(request)
                 order = {'basic': 1, 'premium': 2, 'enterprise': 3}
                 if order.get(tier, 1) < order.get('premium', 2):
                     return Response({'success': False, 'error': 'plan_restricted', 'message': 'Clients are available on Premium and above. Upgrade to create clients.'}, status=403)
@@ -4083,3 +4234,188 @@ class TransactionCreateView(APIView):
         elif sort_field == 'confidence':
             return receipt.ocr_data.get('confidence_score') if receipt.ocr_data else 0
         return None 
+
+
+class CategoryView(APIView):
+    """API view for managing categories."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Create a new category."""
+        serializer = CategoryCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {'success': False, 'errors': serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from application.receipts.use_cases import CreateCategoryUseCase
+        from domain.receipts.services import CategoryService
+        from infrastructure.database.repositories import DjangoCategoryRepository
+
+        repo = DjangoCategoryRepository()
+        service = CategoryService(repo)
+        use_case = CreateCategoryUseCase(service)
+
+        result = use_case.execute(
+            user=request.user,
+            name=serializer.validated_data['name'],
+            parent_id=serializer.validated_data.get('parent_id'),
+            description=serializer.validated_data.get('description')
+        )
+
+        if result['success']:
+            return Response(result, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        """List all categories for the user."""
+        from infrastructure.database.repositories import DjangoCategoryRepository
+        repo = DjangoCategoryRepository()
+        categories = repo.find_by_user(request.user)
+        serializer = CategoryListSerializer([
+            {
+                'id': c.id,
+                'name': c.name,
+                'parent_id': c.parent_id,
+                'description': c.description
+            } for c in categories
+        ], many=True)
+        return Response({'success': True, 'categories': serializer.data})
+
+
+class CategorySummaryView(APIView):
+    """API view for category summary statistics."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Get a summary of transactions by category."""
+        from django.db.models import Sum, Count
+        from infrastructure.database.models import Transaction
+
+        summary = Transaction.objects.filter(user=request.user) \
+            .values('category') \
+            .annotate(
+                total_amount=Sum('amount'),
+                transaction_count=Count('id')
+            ) \
+            .order_by('-total_amount')
+
+        # Convert to a more friendly format
+        result = [
+            {
+                'category': item['category'],
+                'total_amount': str(item['total_amount']),
+                'transaction_count': item['transaction_count']
+            } for item in summary
+        ]
+
+        return Response({'success': True, 'summary': result})
+
+
+class IncomeExpenseSummaryView(APIView):
+    """API view for income vs. expense summary."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Get a summary of income and expenses."""
+        from django.db.models import Sum
+        from infrastructure.database.models import Transaction
+        from datetime import timedelta
+        from django.utils import timezone
+
+        # Default to last 30 days
+        end_date = timezone.now().date()
+        start_date = end_date - timedelta(days=30)
+
+        # Get start and end dates from query params if provided
+        start_date_param = request.query_params.get('start_date')
+        end_date_param = request.query_params.get('end_date')
+
+        if start_date_param:
+            start_date = timezone.datetime.strptime(start_date_param, '%Y-%m-%d').date()
+        if end_date_param:
+            end_date = timezone.datetime.strptime(end_date_param, '%Y-%m-%d').date()
+        
+        income = Transaction.objects.filter(
+            user=request.user,
+            type='income',
+            transaction_date__range=[start_date, end_date]
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        expense = Transaction.objects.filter(
+            user=request.user,
+            type='expense',
+            transaction_date__range=[start_date, end_date]
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        return Response({
+            'success': True,
+            'summary': {
+                'income': str(income),
+                'expense': str(expense),
+                'start_date': start_date.isoformat(),
+                'end_date': end_date.isoformat()
+            }
+        })
+
+
+class StripeCheckoutView(APIView):
+    """API view for creating a Stripe Checkout session."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Create a Stripe Checkout session for the user."""
+        from infrastructure.payment.services import StripePaymentService
+        price_id = request.data.get('price_id')
+        if not price_id:
+            return Response(
+                {'success': False, 'error': 'price_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            service = StripePaymentService()
+            checkout_session = service.create_checkout_session(request.user, price_id)
+            if checkout_session['success']:
+                return Response({'success': True, 'checkout_url': checkout_session['url']})
+            else:
+                return Response(
+                    {'success': False, 'error': checkout_session.get('message', 'Failed to create checkout session')},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except Exception as e:
+            return Response(
+                {'success': False, 'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class FinancialReportCSVView(APIView):
+    """API view for generating a CSV of all transactions."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Generate and return a CSV of all transactions."""
+        import csv
+        from django.http import HttpResponse
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="financial_report.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Date', 'Description', 'Amount', 'Currency', 'Type', 'Category', 'Client'])
+
+        transactions = Transaction.objects.filter(user=request.user)
+        for tx in transactions:
+            writer.writerow([
+                tx.transaction_date,
+                tx.description,
+                tx.amount,
+                tx.currency,
+                tx.type,
+                tx.category,
+                tx.client.name if tx.client else '',
+            ])
+
+        return response

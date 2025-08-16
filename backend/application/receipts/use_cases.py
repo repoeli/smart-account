@@ -14,7 +14,7 @@ from domain.receipts.entities import (
 from domain.receipts.repositories import ReceiptRepository
 from domain.receipts.services import (
     FileValidationService, ReceiptValidationService, ReceiptBusinessService,
-    ReceiptDataEnrichmentService
+    ReceiptDataEnrichmentService, CategoryService
 )
 from domain.accounts.entities import User
 from infrastructure.storage.services import FileStorageService
@@ -319,7 +319,9 @@ class ReceiptReprocessUseCase:
     def execute(self, 
                 receipt_id: str, 
                 user: User, 
-                ocr_method: OCRMethod) -> Dict[str, Any]:
+                ocr_method: OCRMethod,
+                fallback_ocr_method: Optional[OCRMethod] = None,
+                confidence_threshold: float = 0.80) -> Dict[str, Any]:
         """
         Reprocess receipt with different OCR method.
         
@@ -327,6 +329,8 @@ class ReceiptReprocessUseCase:
             receipt_id: ID of the receipt to reprocess
             user: The user requesting reprocessing
             ocr_method: OCR method to use
+            fallback_ocr_method: OCR method to use if primary fails or confidence is low
+            confidence_threshold: Confidence score below which to trigger fallback
             
         Returns:
             Dictionary with reprocessing result
@@ -359,17 +363,52 @@ class ReceiptReprocessUseCase:
             self._ensure_cloudinary_metadata(receipt)
             self.receipt_repository.save(receipt)
             
-            # Extract OCR data with specified method
+            final_ocr_data = None
+            primary_ocr_success = False
+            primary_ocr_error = "Unknown"
+            
+            # Step 1: Attempt primary OCR
             ocr_success, ocr_data, ocr_error = self.ocr_service.extract_receipt_data_from_url(
                 receipt.file_info.file_url, ocr_method
             )
+            primary_ocr_success = ocr_success
+            primary_ocr_error = ocr_error
+
+            # Log primary attempt
+            self._add_reprocessing_history(receipt, ocr_method, ocr_success, ocr_data)
+
+            # Step 2: Evaluate if fallback is needed
+            use_fallback = False
+            if not ocr_success:
+                use_fallback = True
+            elif ocr_data and ocr_data.confidence_score and ocr_data.confidence_score < confidence_threshold:
+                use_fallback = True
+
+            # Step 3: Execute fallback if needed and configured
+            if use_fallback and fallback_ocr_method and fallback_ocr_method != ocr_method:
+                fb_success, fb_data, fb_error = self.ocr_service.extract_receipt_data_from_url(
+                    receipt.file_info.file_url, fallback_ocr_method
+                )
+                self._add_reprocessing_history(receipt, fallback_ocr_method, fb_success, fb_data, is_fallback=True)
+
+                # Use fallback data only if it is successful and better than primary
+                if fb_success and fb_data:
+                    # Simple comparison: higher confidence score wins
+                    primary_confidence = ocr_data.confidence_score if (ocr_data and ocr_data.confidence_score) else 0.0
+                    fallback_confidence = fb_data.confidence_score if fb_data.confidence_score else 0.0
+                    if fallback_confidence > primary_confidence:
+                        ocr_data = fb_data
+                        ocr_success = True
+                        ocr_error = None
             
-            if ocr_success and ocr_data:
+            final_ocr_data = ocr_data
+
+            if ocr_success and final_ocr_data:
                 # Validate OCR data
-                is_valid, validation_errors = self.receipt_validation_service.validate_ocr_data(ocr_data)
+                is_valid, validation_errors = self.receipt_validation_service.validate_ocr_data(final_ocr_data)
                 
                 # Always persist OCR data; if invalid, flag for review instead of failing
-                receipt.process_ocr_data(ocr_data)
+                receipt.process_ocr_data(final_ocr_data)
                 if not is_valid:
                     try:
                         receipt.metadata.custom_fields['needs_review'] = True
@@ -392,24 +431,24 @@ class ReceiptReprocessUseCase:
                 return {
                     'success': True,
                     'receipt_id': receipt_id,
-                    'ocr_method': ocr_method.value,
+                    'ocr_method': final_ocr_data.ocr_engine if final_ocr_data else ocr_method.value,
                     'ocr_data': {
-                        'merchant_name': ocr_data.merchant_name,
-                        'total_amount': str(ocr_data.total_amount) if ocr_data.total_amount else None,
-                        'currency': ocr_data.currency,
-                        'date': ocr_data.date.isoformat() if ocr_data.date else None,
-                        'confidence_score': ocr_data.confidence_score
+                        'merchant_name': final_ocr_data.merchant_name,
+                        'total_amount': str(final_ocr_data.total_amount) if final_ocr_data.total_amount else None,
+                        'currency': final_ocr_data.currency,
+                        'date': final_ocr_data.date.isoformat() if final_ocr_data.date else None,
+                        'confidence_score': final_ocr_data.confidence_score
                     },
                     'warnings': (validation_errors if not is_valid else [])
                 }
             else:
                 # OCR processing failed
-                receipt.mark_as_failed(f"OCR processing failed: {ocr_error}")
+                receipt.mark_as_failed(f"OCR processing failed: {primary_ocr_error}")
                 self.receipt_repository.save(receipt)
                 
                 return {
                     'success': False,
-                    'error': f"OCR processing failed: {ocr_error}"
+                    'error': f"OCR processing failed: {primary_ocr_error}"
                 }
                 
         except Exception as e:
@@ -417,6 +456,31 @@ class ReceiptReprocessUseCase:
                 'success': False,
                 'error': f'Receipt reprocessing failed: {str(e)}'
             }
+
+    def _add_reprocessing_history(self, 
+                                  receipt: Receipt, 
+                                  method: OCRMethod, 
+                                  success: bool, 
+                                  ocr_data: Optional[OCRData], 
+                                  is_fallback: bool = False):
+        """Adds an entry to the receipt's reprocessing history."""
+        try:
+            if not receipt.metadata.custom_fields:
+                receipt.metadata.custom_fields = {}
+            if 'reprocessing_history' not in receipt.metadata.custom_fields:
+                receipt.metadata.custom_fields['reprocessing_history'] = []
+
+            history_entry = {
+                'timestamp': datetime.utcnow().isoformat(),
+                'method': method.value,
+                'is_fallback': is_fallback,
+                'success': success,
+                'confidence_score': ocr_data.confidence_score if (ocr_data and ocr_data.confidence_score) else None
+            }
+            receipt.metadata.custom_fields['reprocessing_history'].append(history_entry)
+        except Exception:
+            # Avoid failing the whole process if history logging fails
+            pass
 
 
 class ReceiptValidateUseCase:
@@ -966,4 +1030,36 @@ class ReceiptUpdateUseCase:
             return {
                 'success': False,
                 'error': f'Failed to update receipt: {str(e)}'
-            } 
+            }
+
+
+class CreateCategoryUseCase:
+    """Use case for creating a new category."""
+
+    def __init__(self, category_service: CategoryService):
+        self.category_service = category_service
+
+    def execute(self, user: User, name: str, parent_id: Optional[str] = None, description: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Execute the create category use case.
+        """
+        try:
+            category = self.category_service.create_category(
+                user=user,
+                name=name,
+                parent_id=parent_id,
+                description=description
+            )
+            return {
+                'success': True,
+                'category': {
+                    'id': category.id,
+                    'name': category.name,
+                    'parent_id': category.parent_id,
+                    'description': category.description
+                }
+            }
+        except ValueError as e:
+            return {'success': False, 'error': str(e)}
+        except Exception as e:
+            return {'success': False, 'error': f'An unexpected error occurred: {str(e)}'} 
